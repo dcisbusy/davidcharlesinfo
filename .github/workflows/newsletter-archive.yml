@@ -1,10 +1,17 @@
 # Save this in your site repository as:  .github/workflows/newsletter-archive.yml
+# (replacing the previous version)
 #
-# Every evening this checks your Substack for new issues and keeps the page
-# davidcharles.info/newsletter-archive/ up to date: title, date, short excerpt
-# and a link to read each issue on Substack. The first run back-fills every
-# public issue it can find. To run it straight away: Actions tab ->
-# "Update newsletter archive" -> "Run workflow".
+# Every evening this:
+#   - checks Substack for new issues and keeps the newsletter list up to date
+#   - rebuilds the HOMEPAGE: your introduction (edit home-intro.html), a
+#     Subscribe button, a link to the blog archive, then every newsletter issue
+#   - rebuilds /blog-archive/ : every blog post, grouped by category
+#   - points the old /archives-the-motherlode/ page at the new blog archive
+#   - keeps /newsletter-archive/ as a page of its own
+#
+# To change the words at the top of the homepage, edit home-intro.html in the
+# repository on GitHub, then run this workflow (Actions tab -> "Update newsletter
+# archive" -> "Run workflow"), or just wait for tonight's run.
 
 name: Update newsletter archive
 
@@ -12,6 +19,9 @@ on:
   schedule:
     - cron: '17 21 * * *'   # every day at 21:17 UTC
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['home-intro.html']
 
 permissions:
   contents: write
@@ -34,23 +44,28 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Fetch issues and rebuild the page
+      - name: Fetch issues and rebuild the pages
         run: |
           python - <<'PY'
           import html, json, os, re, sys, urllib.request
           import xml.etree.ElementTree as ET
           from email.utils import parsedate_to_datetime
+          from urllib.parse import quote
 
           PUB = os.environ["SUBSTACK_URL"].rstrip("/")
           OUT_DIR = os.environ["OUT_DIR"]
           DATA = os.path.join(OUT_DIR, "posts.json")
-          PAGE = os.path.join(OUT_DIR, "index.html")
+          INTRO = "home-intro.html"
           HEADERS = {
               "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                             "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
               "Accept": "text/html,application/xhtml+xml,application/xml,application/json;q=0.9,*/*;q=0.8",
               "Accept-Language": "en-GB,en;q=0.9",
           }
+          MONTHS = ["January", "February", "March", "April", "May", "June", "July",
+                    "August", "September", "October", "November", "December"]
+          TILE_COLOURS = ["#2f6b4f", "#4a7a8c", "#8a6d3b", "#5b6e3a", "#7a4e5c", "#3f5a7a", "#9a5b34", "#4f6f63"]
+          esc = lambda s: html.escape(s or "", quote=True)
 
           def get(url):
               req = urllib.request.Request(url, headers=HEADERS)
@@ -66,6 +81,23 @@ jobs:
 
           def key(url):
               return url.split("?")[0].split("#")[0].rstrip("/").lower()
+
+          def nice(d):
+              try:
+                  y, m, day = d[:10].split("-")
+                  return f"{int(day)} {MONTHS[int(m) - 1]} {y}"
+              except Exception:
+                  return d or ""
+
+          def write_if_changed(path, text):
+              old = open(path, encoding="utf-8").read() if os.path.exists(path) else None
+              if old != text:
+                  os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+                  with open(path, "w", encoding="utf-8") as f:
+                      f.write(text)
+                  print("Updated", path)
+
+          # ---------- 1. Newsletter issues from Substack ----------
 
           def from_api():
               posts, offset = [], 0
@@ -113,7 +145,6 @@ jobs:
           def from_relay():
               # Backup route: a free feed-reading service fetches the RSS for us,
               # for when Substack blocks requests coming from GitHub's servers.
-              from urllib.parse import quote
               data = json.loads(get("https://api.rss2json.com/v1/api.json?rss_url=" + quote(f"{PUB}/feed", safe="")))
               if data.get("status") != "ok":
                   raise RuntimeError(data.get("message") or "relay error")
@@ -128,7 +159,6 @@ jobs:
                                 "excerpt": clean(it.get("description")), "image": img, "paid": False})
               return posts
 
-          # Load what we already have, so issues are never lost even if the feed drops them
           known = {}
           if os.path.exists(DATA):
               with open(DATA, encoding="utf-8") as f:
@@ -156,117 +186,228 @@ jobs:
               merged.update({k: v for k, v in p.items() if v or k == "paid"})
               known[key(p["url"])] = merged
 
-          posts = sorted(known.values(), key=lambda p: (p.get("date", ""), p["title"]), reverse=True)
-          print(f"{len(posts)} issues in the archive")
+          issues = sorted(known.values(), key=lambda p: (p.get("date", ""), p["title"]), reverse=True)
+          print(f"{len(issues)} newsletter issues")
 
-          esc = lambda s: html.escape(s or "", quote=True)
-          months = ["January","February","March","April","May","June","July",
-                    "August","September","October","November","December"]
-          def nice(d):
-              try:
-                  y, m, day = d.split("-")
-                  return f"{int(day)} {months[int(m) - 1]} {y}"
-              except Exception:
-                  return d
+          # ---------- 2. Blog posts from this site ----------
 
-          TILE_COLOURS = ["#2f6b4f", "#4a7a8c", "#8a6d3b", "#5b6e3a", "#7a4e5c", "#3f5a7a", "#9a5b34", "#4f6f63"]
+          SKIP = {".git", ".github", "wp-content", "wp-includes", "wp-json", "cdn-cgi", OUT_DIR, "blog-archive"}
+          blog = []
+          for root, dirs, files in os.walk("."):
+              dirs[:] = [d for d in dirs if d not in SKIP]
+              if "index.html" not in files:
+                  continue
+              s = open(os.path.join(root, "index.html"), encoding="utf-8", errors="ignore").read()
+              if not re.search(r'<body[^>]*class="[^"]*\bsingle-post\b', s):
+                  continue
+              t = re.search(r'<h1 class="entry-title">(.*?)</h1>', s, re.S)
+              d = re.search(r'<time class="entry-date published[^"]*" datetime="([^"]+)"', s)
+              c = re.search(r'<span class="cat-links"><span class="screen-reader-text">[^<]*</span>(.*?)</span>', s, re.S)
+              cats = []
+              if c:
+                  cats = re.findall(r"<a [^>]*>(.*?)</a>", c.group(1)) or c.group(1).split(",")
+              cats = [html.unescape(re.sub(r"<[^>]+>", "", x)).strip() for x in cats]
+              cats = [x for x in cats if x] or ["Uncategorised"]
+              path = root[1:].replace(os.sep, "/").rstrip("/") + "/"
+              blog.append({
+                  "url": path,
+                  "title": clean(t.group(1), 300) if t else path.strip("/").split("/")[-1].replace("-", " ").capitalize(),
+                  "date": d.group(1)[:10] if d else "",
+                  "cats": cats,
+              })
+          blog.sort(key=lambda p: (p["date"], p["title"]), reverse=True)
+          years = [p["date"][:4] for p in blog if p["date"]]
+          first_year, last_year = (min(years), max(years)) if years else ("", "")
+          print(f"{len(blog)} blog posts ({first_year}-{last_year})")
 
-          parts, year = [], None
-          for p in posts:
-              y = (p.get("date") or "")[:4] or "Undated"
-              if y != year:
-                  if year is not None:
-                      parts.append("</ol>")
-                  parts.append(f'<h2>{esc(y)}</h2>\n<ol class="issues">')
-                  year = y
-              if p.get("image"):
-                  img = f'<img src="{esc(p["image"])}" alt="" loading="lazy" width="120" height="80">'
-              else:
-                  # No cover picture: a coloured date tile instead of a grey box
-                  colour = TILE_COLOURS[sum(map(ord, p["title"])) % len(TILE_COLOURS)]
-                  d = p.get("date") or ""
-                  day = str(int(d[8:10])) if len(d) >= 10 else ""
-                  mon = months[int(d[5:7]) - 1][:3] if len(d) >= 7 else ""
-                  img = (f'<span class="tile" style="background:{colour}" aria-hidden="true">'
-                         f'<b>{esc(day)}</b><small>{esc(mon)}</small></span>')
-              paid = ' <span class="paid">Paid</span>' if p.get("paid") else ""
-              excerpt = f'<p>{esc(p["excerpt"])}</p>' if p.get("excerpt") else ""
-              parts.append(
-                  f'<li><a href="{esc(p["url"])}">{img}<div>'
-                  f'<time datetime="{esc(p.get("date"))}">{esc(nice(p.get("date", "")))}</time>'
-                  f'<h3>{esc(p["title"])}{paid}</h3>{excerpt}</div></a></li>')
-          if year is not None:
-              parts.append("</ol>")
+          # ---------- 3. Shared page layout ----------
 
-          page = f"""<!DOCTYPE html>
-          <html lang="en-GB">
-          <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1">
-          <title>Newsletter archive | David Charles</title>
-          <meta name="description" content="Every issue of David Charles's newsletter, with links to read them on Substack.">
-          <link rel="canonical" href="https://davidcharles.info/{OUT_DIR}/">
-          <style>
-          :root {{ --ink:#222; --muted:#666; --line:#e6e6e6; --accent:#2f6b4f; }}
-          * {{ box-sizing:border-box; }}
-          body {{ margin:0; font:17px/1.6 Georgia, "Times New Roman", serif; color:var(--ink); background:#fff; }}
-          main {{ max-width:760px; margin:0 auto; padding:32px 20px 64px; }}
-          .home {{ font:15px/1.4 system-ui, sans-serif; color:var(--muted); text-decoration:none; }}
-          .home:hover {{ color:var(--accent); }}
-          h1 {{ font-size:2.1em; line-height:1.2; margin:24px 0 8px; }}
-          .intro {{ color:var(--muted); margin:0 0 20px; }}
-          .subscribe {{ display:inline-block; font:600 15px/1 system-ui, sans-serif; background:var(--accent); color:#fff;
-                       padding:12px 18px; border-radius:6px; text-decoration:none; }}
-          h2 {{ font:600 14px/1 system-ui, sans-serif; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);
-                margin:40px 0 4px; padding-bottom:8px; border-bottom:1px solid var(--line); }}
-          ol.issues {{ list-style:none; margin:0; padding:0; }}
-          ol.issues li {{ border-bottom:1px solid var(--line); }}
-          ol.issues a {{ display:flex; gap:16px; padding:16px 0; color:inherit; text-decoration:none; }}
-          ol.issues a:hover h3 {{ color:var(--accent); }}
-          ol.issues img, .tile {{ flex:0 0 120px; width:120px; height:80px; object-fit:cover; border-radius:4px; background:#f2f2f2; }}
-          .tile {{ display:flex; flex-direction:column; align-items:center; justify-content:center; color:#fff;
-                  font-family:system-ui, sans-serif; line-height:1; }}
-          .tile b {{ font-size:28px; font-weight:600; }}
-          .tile small {{ font-size:12px; letter-spacing:.12em; text-transform:uppercase; margin-top:4px; opacity:.85; }}
-          time {{ font:13px/1.4 system-ui, sans-serif; color:var(--muted); }}
-          h3 {{ font-size:1.15em; line-height:1.3; margin:2px 0 4px; }}
-          ol.issues p {{ margin:0; color:var(--muted); font-size:.95em; }}
-          .paid {{ font:600 11px/1 system-ui, sans-serif; text-transform:uppercase; letter-spacing:.06em; color:var(--accent);
-                  border:1px solid var(--accent); border-radius:3px; padding:2px 5px; vertical-align:middle; }}
-          @media (max-width:520px) {{ ol.issues img, .tile {{ flex-basis:84px; width:84px; height:64px; }} .tile b {{ font-size:22px; }} }}
-          </style>
-          </head>
-          <body>
-          <main>
-          <a class="home" href="/">&larr; davidcharles.info</a>
-          <h1>Newsletter archive</h1>
-          <p class="intro">Every issue of my newsletter, newest first. Click any issue to read it on Substack.</p>
-          <a class="subscribe" href="{esc(PUB)}/subscribe">Subscribe on Substack</a>
-          {chr(10).join(parts)}
-          </main>
-          </body>
-          </html>
+          CSS = """
+          :root { --ink:#222; --muted:#666; --line:#e6e6e6; --accent:#2f6b4f; }
+          * { box-sizing:border-box; }
+          body { margin:0; font:17px/1.6 Georgia, "Times New Roman", serif; color:var(--ink); background:#fff; }
+          main { max-width:760px; margin:0 auto; padding:24px 20px 64px; }
+          nav.top { display:flex; flex-wrap:wrap; gap:6px 18px; align-items:baseline; padding-bottom:12px;
+                    border-bottom:1px solid var(--line); font:15px/1.4 system-ui, sans-serif; }
+          nav.top .name { font-weight:700; color:var(--ink); text-decoration:none; margin-right:auto; font-size:17px; }
+          nav.top a { color:var(--muted); text-decoration:none; }
+          nav.top a:hover, nav.top a[aria-current] { color:var(--accent); }
+          h1 { font-size:2.1em; line-height:1.2; margin:28px 0 10px; }
+          .intro { margin:0 0 20px; }
+          .intro p { margin:0 0 14px; }
+          .intro a { color:var(--accent); }
+          .muted { color:var(--muted); }
+          .buttons { display:flex; flex-wrap:wrap; gap:10px; margin:22px 0 8px; }
+          .button { display:inline-block; font:600 15px/1 system-ui, sans-serif; padding:12px 18px; border-radius:6px;
+                    text-decoration:none; border:2px solid var(--accent); }
+          .button.primary { background:var(--accent); color:#fff; }
+          .button.secondary { color:var(--accent); background:#fff; }
+          h2 { font:600 14px/1 system-ui, sans-serif; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);
+               margin:40px 0 4px; padding-bottom:8px; border-bottom:1px solid var(--line); }
+          h2.section { font:700 1.5em/1.2 Georgia, serif; letter-spacing:0; text-transform:none; color:var(--ink);
+                       border:0; margin:48px 0 0; }
+          ol.issues { list-style:none; margin:0; padding:0; }
+          ol.issues li { border-bottom:1px solid var(--line); }
+          ol.issues a { display:flex; gap:16px; padding:16px 0; color:inherit; text-decoration:none; }
+          ol.issues a:hover h3 { color:var(--accent); }
+          ol.issues img, .tile { flex:0 0 120px; width:120px; height:80px; object-fit:cover; border-radius:4px; background:#f2f2f2; }
+          .tile { display:flex; flex-direction:column; align-items:center; justify-content:center; color:#fff;
+                  font-family:system-ui, sans-serif; line-height:1; }
+          .tile b { font-size:28px; font-weight:600; }
+          .tile small { font-size:12px; letter-spacing:.12em; text-transform:uppercase; margin-top:4px; opacity:.85; }
+          time { font:13px/1.4 system-ui, sans-serif; color:var(--muted); }
+          h3 { font-size:1.15em; line-height:1.3; margin:2px 0 4px; }
+          ol.issues p { margin:0; color:var(--muted); font-size:.95em; }
+          .paid { font:600 11px/1 system-ui, sans-serif; text-transform:uppercase; letter-spacing:.06em; color:var(--accent);
+                  border:1px solid var(--accent); border-radius:3px; padding:2px 5px; vertical-align:middle; }
+          .cats { display:flex; flex-wrap:wrap; gap:8px; margin:20px 0 0; padding:0; list-style:none; }
+          .cats a { display:inline-block; font:14px/1 system-ui, sans-serif; color:var(--accent); text-decoration:none;
+                    border:1px solid var(--line); border-radius:999px; padding:8px 12px; }
+          .cats a:hover { border-color:var(--accent); }
+          .cats span { color:var(--muted); }
+          ul.posts { list-style:none; margin:0; padding:0; }
+          ul.posts li { display:flex; gap:16px; padding:8px 0; border-bottom:1px solid var(--line); }
+          ul.posts time { flex:0 0 140px; padding-top:3px; white-space:nowrap; }
+          ul.posts a { color:var(--ink); text-decoration:none; }
+          ul.posts a:hover { color:var(--accent); }
+          .back { font:14px/1 system-ui, sans-serif; margin:10px 0 0; }
+          .back a { color:var(--muted); }
+          @media (max-width:520px) {
+            ol.issues img, .tile { flex-basis:84px; width:84px; height:64px; } .tile b { font-size:22px; }
+            ul.posts li { flex-direction:column; gap:0; } ul.posts time { flex-basis:auto; }
+          }
           """
+
+          def page(title, description, path, body, current):
+              links = [("/", "Home"), ("/newsletter-archive/", "Newsletter"), ("/blog-archive/", "Blog archive")]
+              cur = ' aria-current="page"'
+              nav = "".join(
+                  f'<a href="{u}"{cur if u == current else ""}>{esc(t)}</a>' for u, t in links)
+              return (
+                  '<!DOCTYPE html>\n<html lang="en-GB">\n<head>\n<meta charset="utf-8">\n'
+                  '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
+                  f"<title>{esc(title)}</title>\n"
+                  f'<meta name="description" content="{esc(description)}">\n'
+                  f'<link rel="canonical" href="https://davidcharles.info{path}">\n'
+                  f"<style>{CSS}</style>\n</head>\n<body>\n<main>\n"
+                  f'<nav class="top"><a class="name" href="/">David Charles</a>{nav}</nav>\n'
+                  f"{body}\n</main>\n</body>\n</html>\n")
+
+          def issue_list(items):
+              parts, year = [], None
+              for p in items:
+                  y = (p.get("date") or "")[:4] or "Undated"
+                  if y != year:
+                      if year is not None:
+                          parts.append("</ol>")
+                      parts.append(f'<h2>{esc(y)}</h2>\n<ol class="issues">')
+                      year = y
+                  if p.get("image"):
+                      img = f'<img src="{esc(p["image"])}" alt="" loading="lazy" width="120" height="80">'
+                  else:
+                      colour = TILE_COLOURS[sum(map(ord, p["title"])) % len(TILE_COLOURS)]
+                      d = p.get("date") or ""
+                      day = str(int(d[8:10])) if len(d) >= 10 else ""
+                      mon = MONTHS[int(d[5:7]) - 1][:3] if len(d) >= 7 else ""
+                      img = (f'<span class="tile" style="background:{colour}" aria-hidden="true">'
+                             f'<b>{esc(day)}</b><small>{esc(mon)}</small></span>')
+                  paid = ' <span class="paid">Paid</span>' if p.get("paid") else ""
+                  excerpt = f'<p>{esc(p["excerpt"])}</p>' if p.get("excerpt") else ""
+                  parts.append(
+                      f'<li><a href="{esc(p["url"])}">{img}<div>'
+                      f'<time datetime="{esc(p.get("date"))}">{esc(nice(p.get("date", "")))}</time>'
+                      f'<h3>{esc(p["title"])}{paid}</h3>{excerpt}</div></a></li>')
+              if year is not None:
+                  parts.append("</ol>")
+              return "\n".join(parts)
+
+          subscribe = f'<a class="button primary" href="{esc(PUB)}/subscribe">Subscribe on Substack</a>'
+
+          # ---------- 4. Homepage ----------
+
+          if not os.path.exists(INTRO):
+              with open(INTRO, "w", encoding="utf-8") as f:
+                  f.write(
+                      "<!-- Edit the words below. This becomes the top of the homepage. Ordinary HTML: -->\n"
+                      "<!-- <p> starts a paragraph, </p> ends it; <a href=\"...\">link text</a> makes a link. -->\n"
+                      "<h1>Hello, I'm David Charles</h1>\n"
+                      "<p>I'm a writer and outdoor instructor. These days I write a newsletter on Substack about "
+                      "adventure, nature and how to be human. It's free, and every issue is listed below.</p>\n"
+                      f"<p class=\"muted\">This site is also the home of my old blog: {len(blog)} posts written between "
+                      f"{first_year} and {last_year}, from cycle tours to short stories.</p>\n")
+                  print("Created", INTRO)
+          intro = open(INTRO, encoding="utf-8").read()
+          intro = re.sub(r"<!--.*?-->\s*", "", intro, flags=re.S).strip()
+
+          home_body = (
+              f'<div class="intro">\n{intro}\n</div>\n'
+              f'<div class="buttons">{subscribe}'
+              f'<a class="button secondary" href="/blog-archive/">Browse the blog archive</a></div>\n'
+              f'<h2 class="section" id="newsletter">The newsletter</h2>\n'
+              f"{issue_list(issues)}")
+          write_if_changed("index.html", page(
+              "David Charles", "Writer and outdoor instructor. Read every issue of my newsletter, and the archive of my blog.",
+              "/", home_body, "/"))
+
+          # ---------- 5. Newsletter archive page ----------
+
+          nl_body = (
+              "<h1>Newsletter archive</h1>\n"
+              '<p class="intro muted">Every issue of my newsletter, newest first. Click any issue to read it on Substack.</p>\n'
+              f'<div class="buttons">{subscribe}</div>\n'
+              f"{issue_list(issues)}")
+          write_if_changed(os.path.join(OUT_DIR, "index.html"), page(
+              "Newsletter archive | David Charles",
+              "Every issue of David Charles's newsletter, with links to read them on Substack.",
+              f"/{OUT_DIR}/", nl_body, "/newsletter-archive/"))
           os.makedirs(OUT_DIR, exist_ok=True)
-          old_page = open(PAGE, encoding="utf-8").read() if os.path.exists(PAGE) else ""
-          if page != old_page:
-              with open(PAGE, "w", encoding="utf-8") as f:
-                  f.write(page)
-              with open(DATA, "w", encoding="utf-8") as f:
-                  json.dump(posts, f, ensure_ascii=False, indent=1)
-              print("Page updated")
-          else:
-              print("No new issues")
+          new_data = json.dumps(issues, ensure_ascii=False, indent=1)
+          write_if_changed(DATA, new_data)
+
+          # ---------- 6. Blog archive page, by category ----------
+
+          by_cat = {}
+          for p in blog:
+              for c in p["cats"]:
+                  by_cat.setdefault(c, []).append(p)
+          order = sorted(by_cat, key=lambda c: (c == "Uncategorised", c.lower()))
+          slug = lambda c: "cat-" + re.sub(r"[^a-z0-9]+", "-", c.lower()).strip("-")
+          chips = "".join(f'<li><a href="#{slug(c)}">{esc(c)} <span>{len(by_cat[c])}</span></a></li>' for c in order)
+          sections = []
+          for c in order:
+              rows = "".join(
+                  f'<li><time datetime="{esc(p["date"])}">{esc(nice(p["date"]))}</time>'
+                  f'<a href="{esc(p["url"])}">{esc(p["title"])}</a></li>' for p in by_cat[c])
+              sections.append(f'<h2 id="{slug(c)}">{esc(c)} ({len(by_cat[c])})</h2>\n<ul class="posts">{rows}</ul>\n'
+                              '<p class="back"><a href="#top">Back to categories</a></p>')
+          blog_body = (
+              '<h1 id="top">Blog archive</h1>\n'
+              f'<p class="intro muted">{len(blog)} posts written between {first_year} and {last_year}, grouped by '
+              "category. Some posts appear in more than one. For new writing, see the "
+              '<a href="/newsletter-archive/">newsletter</a>.</p>\n'
+              f'<ul class="cats">{chips}</ul>\n' + "\n".join(sections))
+          write_if_changed(os.path.join("blog-archive", "index.html"), page(
+              "Blog archive | David Charles", f"All {len(blog)} posts from David Charles's blog, by category.",
+              "/blog-archive/", blog_body, "/blog-archive/"))
+
+          # ---------- 7. Old "Motherlode" page now points to the blog archive ----------
+
+          redirect = ('<!DOCTYPE html>\n<html lang="en-GB"><head><meta charset="utf-8">'
+                      '<title>Blog archive | David Charles</title>'
+                      '<link rel="canonical" href="https://davidcharles.info/blog-archive/">'
+                      '<meta http-equiv="refresh" content="0; url=/blog-archive/"></head>'
+                      '<body><p><a href="/blog-archive/">The blog archive has moved here.</a></p></body></html>\n')
+          write_if_changed(os.path.join("archives-the-motherlode", "index.html"), redirect)
           PY
 
       - name: Commit changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-          git add "$OUT_DIR"
+          git add -A
           if git diff --cached --quiet; then
             echo "Nothing to commit."
           else
-            git commit -m "Update newsletter archive"
+            git commit -m "Update homepage, newsletter and blog archives"
             git push
           fi
