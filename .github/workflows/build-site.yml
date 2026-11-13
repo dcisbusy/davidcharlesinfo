@@ -2,7 +2,8 @@
 #
 # Runs every evening (to pick up new newsletter issues), and straight away
 # whenever you change home-intro.html, a post, the list of posts
-# (blog-archive/index.json), the stylesheet or the build script.
+# (blog-archive/index.json), the stylesheet, the build script, or the map's
+# places and corrections (data/places.json, data/story-overrides.json).
 # To run it by hand: Actions tab -> "Build site" -> "Run workflow".
 
 name: Build site
@@ -18,6 +19,7 @@ on:
       - 'blog-archive/index.json'
       - 'scripts/**'
       - 'assets/**'
+      - 'data/**'
       - '**/index.html'
 
 permissions:

@@ -6,7 +6,7 @@
 <title>David Charles</title>
 <meta name="description" content="Writer and outdoor instructor. Read every issue of my newsletter, and the archive of my blog.">
 <link rel="canonical" href="https://davidcharles.info/">
-<link rel="stylesheet" href="/assets/site.css?v=1">
+<link rel="stylesheet" href="/assets/site.css?v=2">
 <meta property="og:type" content="website">
 <meta property="og:title" content="David Charles">
 <meta property="og:description" content="Writer and outdoor instructor. Read every issue of my newsletter, and the archive of my blog.">
@@ -16,7 +16,7 @@
 </head>
 <body>
 <main>
-<nav class="top"><a class="name" href="/">David Charles</a><a href="/" aria-current="page">Home</a><a href="/newsletter-archive/">Newsletter</a><a href="/blog-archive/">Blog archive</a><a href="/random-story/">Random story</a></nav>
+<nav class="top"><a class="name" href="/">David Charles</a><a href="/" aria-current="page">Home</a><a href="/newsletter-archive/">Newsletter</a><a href="/blog-archive/">Blog archive</a><a href="/map/">Map</a><a href="/photos/">Photos</a><a href="/random-story/">Random story</a></nav>
 <div class="intro">
 <h1>Hello, I'm David Charles</h1>
 <p>I'm an outdoor instructor and Expeditions Manager at British Exploring Society, and I'm training as an Advanced Wilderness Therapeutic Guide. Before that, I wrote comedy for BBC Radio (<a href="https://davidcharles.substack.com/s/foiled">here's the Foiled archive</a>).</p>
@@ -25,7 +25,34 @@
 <p class="muted">This site is also the home of my old blog: 933 posts written between 2005 and 2025, from cycle tours to short stories.</p>
 </div>
 <div class="buttons"><a class="button primary" href="https://davidcharles.substack.com/subscribe">Subscribe on Substack</a><a class="button secondary" href="/blog-archive/">Browse the blog archive</a></div>
-<h2 class="section" id="newsletter">The newsletter</h2>
+<section class="on-this-day" id="on-this-day" hidden>
+<h2 class="section" id="otd-title">On this day</h2>
+<ul class="posts" id="otd-list"></ul>
+</section>
+<script>
+(function(){
+  fetch('/assets/on-this-day.json').then(function(r){return r.json();}).then(function(D){
+    var now=new Date(), year=now.getFullYear(), pad=function(n){return (n<10?'0':'')+n;};
+    function key(d){return pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+    var items=(D[key(now)]||[]).filter(function(x){return x[0]<year;}), title='On this day';
+    if(!items.length){
+      for(var i=1;i<=3;i++){[-i,i].forEach(function(o){var d=new Date(now);d.setDate(d.getDate()+o);
+        (D[key(d)]||[]).forEach(function(x){if(x[0]<year)items.push(x);});});}
+      title='This week in years gone by';
+    }
+    if(!items.length) return;
+    items.sort(function(a,b){return b[0]-a[0];});
+    var ul=document.getElementById('otd-list');
+    items.slice(0,6).forEach(function(x){
+      var li=document.createElement('li'), t=document.createElement('time'), a=document.createElement('a');
+      t.textContent=(year-x[0])+(year-x[0]===1?' year ago':' years ago'); a.href=x[2]; a.textContent=x[1];
+      li.appendChild(t); li.appendChild(a); ul.appendChild(li);
+    });
+    document.getElementById('otd-title').textContent=title;
+    document.getElementById('on-this-day').hidden=false;
+  }).catch(function(){});
+})();
+</script><h2 class="section" id="newsletter">The newsletter</h2>
 <h2>2026</h2>
 <ol class="issues">
 <li><a href="https://davidcharles.substack.com/p/this-tree-aint-budging"><img src="https://substackcdn.com/image/fetch/$s_!G6sF!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fbbf7e0fa-de3b-4254-97e6-976329ec837e_1880x940.jpeg" alt="" loading="lazy" decoding="async" width="120" height="80"><div><time datetime="2026-11-03">3 November 2026</time><h3>This Tree Ain’t Budging</h3><p>Lunchtime Sublime Solstice Festival 17-21 December</p></div></a></li>

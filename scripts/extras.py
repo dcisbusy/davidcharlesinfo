@@ -1,0 +1,506 @@
+"""
+The fun pages: adventure map, On this day, 20 years in numbers, photo wall.
+
+They all work from one list of "stories": every newsletter issue, plus every
+blog post that isn't a copy of a newsletter issue. Where a blog post copies a
+newsletter issue, the story links to Substack and borrows the blog copy's text
+and photos (Substack blocks us from reading issues directly).
+
+Corrections go in data/story-overrides.json; places in data/places.json.
+"""
+
+import collections
+import datetime
+import html
+import json
+import os
+import re
+from urllib.parse import quote
+
+from build import (MONTHS, SITE, SUBSTACK, chips, esc, file_for, nice, page, read, write_if_changed)
+
+STOP = set("""
+a about above after again against all am an and any are aren't as at be because been before being below between both
+but by can can't cannot could couldn't did didn't do does doesn't doing don't down during each few for from further had
+hadn't has hasn't have haven't having he he'd he'll he's her here here's hers herself him himself his how how's i i'd
+i'll i'm i've if in into is isn't it it's its itself let's me more most mustn't my myself no nor not of off on once
+only or other ought our ours ourselves out over own same shan't she she'd she'll she's should shouldn't so some such
+than that that's the their theirs them themselves then there there's these they they'd they'll they're they've this
+those through to too under until up very was wasn't we we'd we'll we're we've were weren't what what's when when's
+where where's which while who who's whom why why's with won't would wouldn't you you'd you'll you're you've your yours
+yourself yourselves just like also get got one two even much really still back way well can will make made going go
+know think things thing something lot little bit day days time new now first last see said say says many every
+another around us yes oh ok okay might must may though although via actually maybe perhaps quite rather enough
+""".split())
+
+NEWSLETTER_GREEN = "#1f7a52"     # validated pair (colour-blind safe, 3:1 on white)
+BLOG_OCHRE = "#b7791f"
+
+
+# ---------------------------------------------------------------- stories
+
+def norm_words(t):
+    return {w for w in re.findall(r"[a-z0-9]+", t.lower().replace("’", "'")) if w not in STOP and len(w) > 2}
+
+
+def plain(h):
+    return html.unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", h or ""))).strip()
+
+
+def load_stories(issues, entries):
+    over = json.load(open("data/story-overrides.json", encoding="utf-8"))
+    blog = [e for e in entries if e["type"] == "post"]
+    content = {}
+    for e in blog:
+        s = read(file_for(e["url"])) or ""
+        m = re.search(r"<!--content:start-->(.*?)<!--content:end-->", s, re.S)
+        content[e["url"]] = m.group(1) if m else ""
+    text = {u: plain(h) for u, h in content.items()}
+    low = {u: t.lower() for u, t in text.items()}
+
+    # Newsletter issues listed twice (same title and date) count once
+    seen, nl = set(), []
+    for i in issues:
+        k = (re.sub(r"\W+", "", i["title"].lower()), i.get("date", ""))
+        if k not in seen:
+            seen.add(k)
+            nl.append(i)
+
+    def day(d):
+        try:
+            return datetime.date.fromisoformat(d[:10])
+        except Exception:
+            return None
+
+    # Match each newsletter issue to the blog post that copies it (if any)
+    candidates = []
+    by_url = {e["url"]: e for e in blog}
+    for i, n in enumerate(nl):
+        nd = day(n.get("date", ""))
+        if not nd:
+            continue
+        tw = norm_words(n["title"])
+        ex = re.sub(r"\s+", " ", n.get("excerpt", "").lower())
+        for e in blog:
+            bd = day(e["date"])
+            if not bd or abs((bd - nd).days) > 3:
+                continue
+            if e["url"] in over["not_duplicates"]:
+                continue
+            tov = len(tw & norm_words(e["title"])) / max(1, len(tw))
+            exhit = len(ex) > 25 and ex[:40] in low[e["url"]]
+            intext = sum(1 for w in tw if w in low[e["url"]]) / max(1, len(tw))
+            score = tov * 2 + exhit * 2 + intext
+            if score >= 2 or (tov >= 0.5 and abs((bd - nd).days) <= 1):
+                candidates.append((score, i, e["url"]))
+    pair_issue, pair_blog = {}, {}
+    for score, i, u in sorted(candidates, reverse=True):
+        if i not in pair_issue and u not in pair_blog:
+            pair_issue[i], pair_blog[u] = u, i
+    nl_index = {n["url"]: i for i, n in enumerate(nl)}
+    for u, nurl in over["duplicates"].items():
+        if u in by_url and nurl in nl_index:
+            i = nl_index[nurl]
+            pair_blog.pop(pair_issue.get(i), None)
+            pair_issue[i], pair_blog[u] = u, i
+
+    stories = []
+    for i, n in enumerate(nl):
+        b = pair_issue.get(i)
+        stories.append({
+            "title": n["title"], "date": n.get("date", ""), "url": n["url"], "source": "newsletter",
+            "blog_url": b, "image": n.get("image") or (by_url[b].get("image") if b else None),
+            "excerpt": n.get("excerpt", ""),
+            "text": text[b] if b else f'{n["title"]}. {n.get("excerpt", "")}',
+            "html": content[b] if b else "", "comments": 0, "has_text": bool(b),
+        })
+    for e in blog:
+        if e["url"] in pair_blog:
+            continue
+        s = read(file_for(e["url"])) or ""
+        stories.append({
+            "title": e["title"], "date": e["date"], "url": e["url"], "source": "blog", "blog_url": e["url"],
+            "image": e.get("image"), "excerpt": e.get("excerpt", ""), "text": text[e["url"]],
+            "html": content[e["url"]], "comments": len(re.findall(r'<li id="comment-', s)), "has_text": True,
+        })
+    stories.sort(key=lambda s: (s["date"], s["title"]), reverse=True)
+    print(f"{len(stories)} stories ({len(nl)} newsletter issues, {len(pair_blog)} blog copies matched, "
+          f"{len(blog) - len(pair_blog)} blog-only)")
+    return stories, over
+
+
+# ---------------------------------------------------------------- places and the map
+
+def find_places(stories, over):
+    gaz = json.load(open("data/places.json", encoding="utf-8"))
+    places, broad, skip = gaz["places"], set(gaz["broad"]) | {"London"}, set(gaz["skip_words"])
+    names = sorted(places, key=len, reverse=True)
+    plain_names = [n for n in names if n not in skip]
+    any_re = re.compile(r"(?<![\w-])(" + "|".join(re.escape(n) for n in names) + r")(?![\w-])")
+    body_re = re.compile(r"(?<![\w-])(" + "|".join(re.escape(n) for n in plain_names) + r")(?![\w-])")
+    ctx_re = re.compile(r"\b(?:in|to|at|from|near|around|across|of|via|on)\s+(" +
+                        "|".join(re.escape(n) for n in skip) + r")(?![\w-])")
+    mentions = collections.Counter()
+    for s in stories:
+        if s["url"] in over["places"]:
+            s["place"] = over["places"][s["url"]] or None
+            continue
+        score = collections.Counter()
+        for n in any_re.findall(s["title"]):
+            score[n] += 6
+        lead = s["text"][:700]
+        for n in body_re.findall(lead) + ctx_re.findall(lead):
+            score[n] += 2
+        for n in body_re.findall(s["text"]) + ctx_re.findall(s["text"]):
+            score[n] += 1
+        for n, c in score.items():
+            mentions[n] += 1
+        specific = [(c, n) for n, c in score.items() if n not in broad]
+        general = [(c, n) for n, c in score.items() if n in broad]
+        best = max(specific) if specific else None
+        if best and best[0] >= 3:
+            s["place"] = best[1]
+        elif general and max(general)[0] >= 6:
+            s["place"] = max(general)[1]
+        else:
+            s["place"] = None
+    for s in stories:
+        if s.get("place") and s["place"] in places:
+            s["coords"] = places[s["place"]]
+        else:
+            s["place"] = None
+    return mentions
+
+
+def build_map(stories):
+    pins = [[round(s["coords"][0], 4), round(s["coords"][1], 4), s["title"], s["url"], s["date"], s["place"],
+             s["source"]] for s in stories if s.get("place")]
+    counts = collections.Counter(s["place"] for s in stories if s.get("place"))
+    years = sorted({p[4][:4] for p in pins if p[4]}, reverse=True)
+    top = "".join(f'<li><a href="#" data-place="{esc(n)}">{esc(n)} <span>{c}</span></a></li>'
+                  for n, c in counts.most_common(40))
+    body = f"""<h1>Adventure map</h1>
+<p class="intro muted">{len(pins)} stories from {len(counts)} places, from the newsletter and the blog. Click a pin
+(or a numbered cluster to zoom in), or pick a place below. Newsletter issues open on Substack.</p>
+<div class="map-controls"><label for="year">Year</label> <select id="year"><option value="">All years</option>
+{"".join(f'<option>{y}</option>' for y in years)}</select> <span id="count" class="muted"></span></div>
+<div id="map" role="region" aria-label="Map of stories"></div>
+<h2>Most-visited places</h2>
+<ul class="chips" id="places">{top}</ul>
+<p class="back"><a href="/numbers/">More in 20 years in numbers</a></p>
+<link rel="stylesheet" href="/assets/leaflet/leaflet.css">
+<link rel="stylesheet" href="/assets/leaflet/MarkerCluster.css">
+<link rel="stylesheet" href="/assets/leaflet/MarkerCluster.Default.css">
+<script src="/assets/leaflet/leaflet.js"></script>
+<script src="/assets/leaflet/leaflet.markercluster.js"></script>
+<script>
+var PINS={json.dumps(pins, ensure_ascii=False)};
+var MONTHS={json.dumps(MONTHS)};
+function nice(d){{var p=d.split('-');return p.length<3?d:(+p[2])+' '+MONTHS[+p[1]-1]+' '+p[0];}}
+function escHtml(s){{return s.replace(/[&<>"]/g,function(c){{return {{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}}[c];}});}}
+var map=L.map('map',{{scrollWheelZoom:false}}).setView([48,8],4);
+L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png',{{maxZoom:18,
+  attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}}).addTo(map);
+var layer=L.markerClusterGroup({{showCoverageOnHover:false,maxClusterRadius:40}});
+map.addLayer(layer);
+var dot={{radius:7,weight:2,color:'#fff',fillOpacity:1}};
+function draw(){{
+  var y=document.getElementById('year').value, n=0;
+  layer.clearLayers();
+  PINS.forEach(function(p){{
+    if(y && p[4].slice(0,4)!==y) return; n++;
+    var m=L.circleMarker([p[0]+(Math.random()-.5)*0.002,p[1]+(Math.random()-.5)*0.002],
+      Object.assign({{fillColor:p[6]==='newsletter'?'{NEWSLETTER_GREEN}':'{BLOG_OCHRE}'}},dot));
+    m.bindPopup('<strong><a href="'+p[3]+'">'+escHtml(p[2])+'</a></strong><br><small>'+escHtml(p[5])+' &middot; '+nice(p[4])+
+      (p[6]==='newsletter'?' &middot; newsletter':' &middot; blog')+'</small>');
+    layer.addLayer(m);
+  }});
+  document.getElementById('count').textContent=n+' stories';
+}}
+document.getElementById('year').addEventListener('change',draw);
+document.querySelectorAll('#places a').forEach(function(a){{a.addEventListener('click',function(e){{
+  e.preventDefault(); var name=a.getAttribute('data-place');
+  var p=PINS.filter(function(x){{return x[5]===name;}})[0]; if(p){{map.setView([p[0],p[1]],10);
+  document.getElementById('map').scrollIntoView({{behavior:'smooth',block:'center'}});}}
+}});}});
+draw();
+</script>
+<p class="muted small">Pins: <span class="key" style="background:{NEWSLETTER_GREEN}"></span> newsletter
+<span class="key" style="background:{BLOG_OCHRE}"></span> blog. Places are found automatically from each story's
+words, so the odd pin may be in the wrong place.</p>"""
+    write_if_changed("map/index.html", page("Adventure map | David Charles",
+                                            f"{len(pins)} stories by David Charles, on a map.", "/map/", body, "/map/"))
+
+
+# ---------------------------------------------------------------- On this day
+
+def build_on_this_day(stories):
+    days = collections.defaultdict(list)
+    for s in stories:
+        if len(s["date"]) >= 10:
+            days[s["date"][5:10]].append([int(s["date"][:4]), s["title"], s["url"]])
+    for k in days:
+        days[k].sort()
+    write_if_changed("assets/on-this-day.json", json.dumps(days, ensure_ascii=False, separators=(",", ":"), sort_keys=True))
+    return """<section class="on-this-day" id="on-this-day" hidden>
+<h2 class="section" id="otd-title">On this day</h2>
+<ul class="posts" id="otd-list"></ul>
+</section>
+<script>
+(function(){
+  fetch('/assets/on-this-day.json').then(function(r){return r.json();}).then(function(D){
+    var now=new Date(), year=now.getFullYear(), pad=function(n){return (n<10?'0':'')+n;};
+    function key(d){return pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+    var items=(D[key(now)]||[]).filter(function(x){return x[0]<year;}), title='On this day';
+    if(!items.length){
+      for(var i=1;i<=3;i++){[-i,i].forEach(function(o){var d=new Date(now);d.setDate(d.getDate()+o);
+        (D[key(d)]||[]).forEach(function(x){if(x[0]<year)items.push(x);});});}
+      title='This week in years gone by';
+    }
+    if(!items.length) return;
+    items.sort(function(a,b){return b[0]-a[0];});
+    var ul=document.getElementById('otd-list');
+    items.slice(0,6).forEach(function(x){
+      var li=document.createElement('li'), t=document.createElement('time'), a=document.createElement('a');
+      t.textContent=(year-x[0])+(year-x[0]===1?' year ago':' years ago'); a.href=x[2]; a.textContent=x[1];
+      li.appendChild(t); li.appendChild(a); ul.appendChild(li);
+    });
+    document.getElementById('otd-title').textContent=title;
+    document.getElementById('on-this-day').hidden=false;
+  }).catch(function(){});
+})();
+</script>"""
+
+
+# ---------------------------------------------------------------- 20 years in numbers
+
+def svg_bars(data, series, height=220, width=720, unit="", label_every=1):
+    """Vertical (optionally stacked) bar chart. data: [(label, [v1, v2..])], series: [(name, colour)]."""
+    pad_l, pad_b, pad_t = 44, 26, 10
+    mx = max(sum(v) for _, v in data) or 1
+    step = 10 ** max(0, len(str(int(mx))) - 1)
+    top = ((int(mx) // step) + 1) * step
+    plot_w, plot_h = width - pad_l - 6, height - pad_b - pad_t
+    bw = plot_w / len(data)
+    g = []
+    for k in range(0, 5):
+        v = top * k / 4
+        y = pad_t + plot_h - plot_h * v / top
+        g.append(f'<line x1="{pad_l}" x2="{width - 6}" y1="{y:.1f}" y2="{y:.1f}" class="grid"/>'
+                 f'<text x="{pad_l - 6}" y="{y + 4:.1f}" class="tick" text-anchor="end">{int(v):,}</text>')
+    for idx, (label, vals) in enumerate(data):
+        x = pad_l + idx * bw + 2
+        w = max(2, bw - 4)
+        y0 = pad_t + plot_h
+        last = max((i for i, v in enumerate(vals) if v), default=-1)
+        for i, v in enumerate(vals):
+            if not v:
+                continue
+            h = plot_h * v / top
+            y = y0 - h
+            name, colour = series[i]
+            tip = f"{label}: {v:,}{unit}" + (f" ({name})" if len(series) > 1 else "")
+            r = min(4, w / 2, h)
+            if i == last:   # rounded top, square base
+                d = (f"M{x:.1f},{y0:.1f} V{y + r:.1f} Q{x:.1f},{y:.1f} {x + r:.1f},{y:.1f} H{x + w - r:.1f} "
+                     f"Q{x + w:.1f},{y:.1f} {x + w:.1f},{y + r:.1f} V{y0:.1f} Z")
+                g.append(f'<path d="{d}" fill="{colour}"><title>{esc(tip)}</title></path>')
+            else:
+                g.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{max(0, h - 2):.1f}" '
+                         f'fill="{colour}"><title>{esc(tip)}</title></rect>')
+            y0 = y
+        if idx % label_every == 0:
+            g.append(f'<text x="{x + w / 2:.1f}" y="{height - 8}" class="tick" text-anchor="middle">{esc(label)}</text>')
+    legend = ""
+    if len(series) > 1:
+        legend = '<p class="legend">' + "".join(
+            f'<span><i style="background:{c}"></i>{esc(n)}</span>' for n, c in series) + "</p>"
+    return (legend + f'<svg class="chart" viewBox="0 0 {width} {height}" role="img">' + "".join(g) + "</svg>")
+
+
+def svg_hbars(data, colour=NEWSLETTER_GREEN, width=460, unit=""):
+    row, pad_l = 26, 110
+    height = row * len(data) + 6
+    mx = max(v for _, v in data) or 1
+    g = []
+    for i, (label, v) in enumerate(data):
+        y = 4 + i * row
+        w = (width - pad_l - 60) * v / mx
+        r = min(4, w / 2)
+        d = (f"M{pad_l},{y + 3} H{pad_l + w - r:.1f} Q{pad_l + w:.1f},{y + 3} {pad_l + w:.1f},{y + 3 + r:.1f} "
+             f"V{y + row - 7 - r:.1f} Q{pad_l + w:.1f},{y + row - 7} {pad_l + w - r:.1f},{y + row - 7} H{pad_l} Z")
+        g.append(f'<text x="{pad_l - 8}" y="{y + row / 2 + 2:.1f}" class="label" text-anchor="end">{esc(label)}</text>'
+                 f'<path d="{d}" fill="{colour}"><title>{esc(label)}: {v:,}{unit}</title></path>'
+                 f'<text x="{pad_l + w + 6:.1f}" y="{y + row / 2 + 2:.1f}" class="value">{v:,}{unit}</text>')
+    return f'<svg class="chart hbars" viewBox="0 0 {width} {height}" role="img">' + "".join(g) + "</svg>"
+
+
+def table(headers, rows):
+    return ("<details class=\"data\"><summary>Show the numbers</summary><table><thead><tr>"
+            + "".join(f"<th>{esc(h)}</th>" for h in headers) + "</tr></thead><tbody>"
+            + "".join("<tr>" + "".join(f"<td>{esc(str(c))}</td>" for c in r) + "</tr>" for r in rows)
+            + "</tbody></table></details>")
+
+
+def build_numbers(stories, mentions):
+    for s in stories:
+        s["words"] = len(re.findall(r"[A-Za-zÀ-ɏ'’-]+", s["text"])) if s["has_text"] else 0
+    years = sorted({s["date"][:4] for s in stories if s["date"]})
+    nl = [s for s in stories if s["source"] == "newsletter"]
+    bl = [s for s in stories if s["source"] == "blog"]
+    total_words = sum(s["words"] for s in stories)
+    per_year = [(y, [sum(1 for s in nl if s["date"].startswith(y)), sum(1 for s in bl if s["date"].startswith(y))])
+                for y in years]
+    words_year = [(y, [sum(s["words"] for s in stories if s["date"].startswith(y))]) for y in years]
+    wd = collections.Counter(datetime.date.fromisoformat(s["date"][:10]).strftime("%A") for s in stories if s["date"])
+    weekdays = [(d, wd[d]) for d in ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]]
+    places = collections.Counter(s["place"] for s in stories if s.get("place"))
+    with_text = [s for s in stories if s["has_text"] and s["words"] > 50]
+    longest = max(with_text, key=lambda s: s["words"])
+    shortest = min(with_text, key=lambda s: s["words"])
+    chatty = max(stories, key=lambda s: s["comments"])
+    dated = sorted(datetime.date.fromisoformat(s["date"][:10]) for s in stories if s["date"])
+    gap = max(((b - a).days, a, b) for a, b in zip(dated, dated[1:]))
+    busiest_year = max(per_year, key=lambda r: sum(r[1]))
+    month = collections.Counter(s["date"][:7] for s in stories if s["date"]).most_common(1)[0]
+    vocab = collections.Counter()
+    for s in stories:
+        if s["has_text"]:
+            for w in re.findall(r"[a-z][a-z'’]+", s["text"].lower()):
+                w = w.replace("’", "'")
+                if w not in STOP and len(w) > 3 and not w.endswith("'s") and not w.endswith("'t"):
+                    vocab[w] += 1
+    def tile(v, label):
+        return f'<div class="tile-stat"><b>{v}</b><span>{label}</span></div>'
+
+    def link(s):
+        return f'<a href="{esc(s["url"])}">{esc(s["title"])}</a> ({nice(s["date"])})'
+
+    top_words = vocab.most_common(60)
+    mxw = top_words[0][1] if top_words else 1
+    cloud = " ".join(f'<span style="font-size:{0.85 + 1.4 * (c / mxw) ** 0.6:.2f}em" title="{c:,} times">{esc(w)}</span>'
+                     for w, c in sorted(top_words, key=lambda x: x[0]))
+    body = f"""<h1>20 years in numbers</h1>
+<p class="intro muted">Every blog post and newsletter issue since {years[0]}, counted. Where a blog post is a copy of
+a newsletter issue, it's counted once.</p>
+<div class="stat-tiles">
+{tile(f"{len(stories):,}", "stories")}
+{tile(f"{total_words:,}", "words")}
+{tile(len(years), "years of writing")}
+{tile(len(places), "places on the map")}
+</div>
+
+<h2 class="section">Stories per year</h2>
+{svg_bars(per_year, [("Newsletter", NEWSLETTER_GREEN), ("Blog only", BLOG_OCHRE)], label_every=2 if len(years) > 14 else 1)}
+{table(["Year", "Newsletter", "Blog only"], [(y, a, b) for y, (a, b) in per_year])}
+
+<h2 class="section">Words per year</h2>
+{svg_bars(words_year, [("Words", NEWSLETTER_GREEN)], label_every=2 if len(years) > 14 else 1)}
+<p class="muted small">Newsletter issues only count here when a copy is on the blog; Substack doesn't let this site
+read the rest.</p>
+{table(["Year", "Words"], [(y, f"{v[0]:,}") for y, v in words_year])}
+
+<h2 class="section">Favourite day to publish</h2>
+{svg_hbars(weekdays)}
+
+<h2 class="section">Most-written-about places</h2>
+{svg_hbars(places.most_common(12))}
+<p class="back"><a href="/map/">See them all on the map</a></p>
+
+<h2 class="section">Records</h2>
+<ul class="records">
+<li><strong>Busiest year:</strong> {busiest_year[0]}, with {sum(busiest_year[1])} stories.</li>
+<li><strong>Busiest month:</strong> {MONTHS[int(month[0][5:7]) - 1]} {month[0][:4]}, with {month[1]} stories.</li>
+<li><strong>Longest story:</strong> {link(longest)}, {longest["words"]:,} words.</li>
+<li><strong>Shortest story:</strong> {link(shortest)}, {shortest["words"]:,} words.</li>
+<li><strong>Most comments:</strong> {link(chatty)}, {chatty["comments"]} comments.</li>
+<li><strong>Longest silence:</strong> {gap[0]} days, from {nice(gap[1].isoformat())} to {nice(gap[2].isoformat())}.</li>
+<li><strong>Average story:</strong> {int(sum(s["words"] for s in with_text) / len(with_text)):,} words, about {max(1, round(sum(s["words"] for s in with_text) / len(with_text) / 230))} minutes' reading.</li>
+</ul>
+
+<h2 class="section">Most-used words</h2>
+<p class="cloud">{cloud}</p>
+<p class="muted small">The 60 words used most often, leaving out little words like "the" and "really". Bigger means
+more often; hover for the count.</p>"""
+    write_if_changed("numbers/index.html", page("20 years in numbers | David Charles",
+                                                f"{len(stories):,} stories and {total_words:,} words, counted.",
+                                                "/numbers/", body))
+
+
+# ---------------------------------------------------------------- Photo wall
+
+def thumb(src, srcset):
+    """Pick a ~500px version of an image for the grid."""
+    if src.startswith("http"):
+        return src     # Substack image addresses are signed, so they can't be resized here
+    best = None
+    for part in (srcset or "").split(","):
+        bits = part.strip().split()
+        if len(bits) == 2 and bits[1].endswith("w") and bits[0].startswith("/"):
+            w = int(bits[1][:-1])
+            if 400 <= w <= 800 and (best is None or abs(w - 500) < abs(best[0] - 500)):
+                best = (w, bits[0])
+    return best[1] if best else src
+
+
+def build_photos(stories):
+    usage = collections.Counter()
+    picks = []
+    for s in stories:
+        cands = []
+        for t in re.findall(r"<img\b[^>]*>", s["html"]):
+            src = re.search(r'\ssrc="([^"]+)"', t)
+            if not src or re.search(r"(logo|avatar|icon|emoji|smiley|button|banner|header|\.gif$|\.svg$)",
+                                    src.group(1), re.I):
+                continue
+            w = re.search(r'\swidth="(\d+)"', t)
+            h = re.search(r'\sheight="(\d+)"', t)
+            w, h = (int(w.group(1)) if w else 0), (int(h.group(1)) if h else 0)
+            if w and w < 400:
+                srcset = re.search(r'\ssrcset="([^"]+)"', t)
+                if not srcset or not re.search(r"\s(?:[5-9]\d\d|\d{4})w", srcset.group(1)):
+                    continue
+            ss = re.search(r'\ssrcset="([^"]+)"', t)
+            cands.append((src.group(1), ss.group(1) if ss else ""))
+        if s["source"] == "newsletter" and s.get("image"):
+            cands.insert(0, (s["image"], ""))
+        elif not cands and s.get("image") and s["image"].startswith("/"):
+            cands.append((s["image"], ""))
+        if cands:
+            usage[re.sub(r"-\d+x\d+(?=\.\w+$)", "", cands[0][0])] += 1
+            picks.append((s, cands[0]))
+    photos = [(s, c) for s, c in picks if usage[re.sub(r"-\d+x\d+(?=\.\w+$)", "", c[0])] <= 2]
+    parts, year = [], None
+    for s, (src, srcset) in photos:
+        y = s["date"][:4]
+        if y != year:
+            if year is not None:
+                parts.append("</div>")
+            parts.append(f'<h2 id="y{y}">{y}</h2><div class="photo-grid">')
+            year = y
+        parts.append(f'<a href="{esc(s["url"])}" aria-label="{esc(s["title"])}">'
+                     f'<img src="{esc(thumb(src, srcset))}" alt="" loading="lazy" decoding="async">'
+                     f'<span>{esc(s["title"])}</span></a>')
+    if year is not None:
+        parts.append("</div>")
+    years = sorted({s["date"][:4] for s, _ in photos}, reverse=True)
+    jump = chips([(f"#y{y}", y, sum(1 for s, _ in photos if s["date"].startswith(y))) for y in years])
+    body = (f'<h1>Photo wall</h1>\n<p class="intro muted">One photo from each of {len(photos):,} stories. Click a '
+            f'photo to read the story.</p>\n{jump}\n' + "\n".join(parts))
+    write_if_changed("photos/index.html", page("Photo wall | David Charles",
+                                               f"{len(photos):,} photos from David Charles's stories.",
+                                               "/photos/", body, "/photos/"))
+    return len(photos)
+
+
+# ---------------------------------------------------------------- run all
+
+def build_extras(issues, entries):
+    stories, over = load_stories(issues, entries)
+    mentions = find_places(stories, over)
+    build_map(stories)
+    otd = build_on_this_day(stories)
+    build_numbers(stories, mentions)
+    n = build_photos(stories)
+    print(f"Map: {sum(1 for s in stories if s.get('place'))} stories placed; photo wall: {n} photos")
+    return otd

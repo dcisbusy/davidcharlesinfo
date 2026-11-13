@@ -1,0 +1,6 @@
+{
+ "_note": "Corrections for the map, photo wall, On this day and numbers pages. 'not_duplicates': blog post addresses that are NOT copies of a newsletter issue. 'duplicates': blog post address -> newsletter issue address, for pairs the automatic matching missed. 'places': story address -> place name from data/places.json, or \"\" to keep a story off the map.",
+ "not_duplicates": [],
+ "duplicates": {},
+ "places": {}
+}

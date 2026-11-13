@@ -35,7 +35,7 @@ os.chdir(ROOT)
 SITE = "https://davidcharles.info"
 SUBSTACK = "https://davidcharles.substack.com"
 GA_ID = "G-07CXWP795E"          # Google Analytics. Set to "" to switch it off.
-CSS_VERSION = "1"               # Bump when assets/site.css changes, so browsers fetch the new one.
+CSS_VERSION = "2"               # Bump when assets/site.css changes, so browsers fetch the new one.
 
 NEWSLETTER_DATA = "newsletter-archive/posts.json"
 BLOG_DATA = "blog-archive/index.json"
@@ -99,7 +99,7 @@ def slugify(s):
 # ---------------------------------------------------------------- page template
 
 NAV = [("/", "Home"), ("/newsletter-archive/", "Newsletter"), ("/blog-archive/", "Blog archive"),
-       ("/random-story/", "Random story")]
+       ("/map/", "Map"), ("/photos/", "Photos"), ("/random-story/", "Random story")]
 
 
 def page(title, description, path, body, current=None, image=None, kind="website", noindex=False):
@@ -409,7 +409,8 @@ def build_blog(entries):
     body = (
         "<h1>Blog archive</h1>\n"
         f'<p class="intro muted">{len(posts)} posts written between {first} and {last}. For new writing, see the '
-        '<a href="/newsletter-archive/">newsletter</a>.</p>\n'
+        '<a href="/newsletter-archive/">newsletter</a>. Or explore it on the <a href="/map/">map</a>, the '
+        '<a href="/photos/">photo wall</a> or in <a href="/numbers/">20 years in numbers</a>.</p>\n'
         '<h2 class="section">Pages</h2>\n<ul class="pages">'
         + "".join(f'<li><a href="{esc(e["url"])}">{esc(e["title"])}</a></li>' for e in pages) + "</ul>\n"
         '<h2 class="section">Categories</h2>\n'
@@ -432,7 +433,7 @@ def build_blog(entries):
 
 # ---------------------------------------------------------------- 3. homepage, newsletter page, extras
 
-def build_home(issues, posts):
+def build_home(issues, posts, extra=""):
     if not os.path.exists(INTRO):
         with open(INTRO, "w", encoding="utf-8") as f:
             f.write("<!-- Edit the words below. This becomes the top of the homepage. -->\n"
@@ -441,6 +442,7 @@ def build_home(issues, posts):
     body = (f'<div class="intro">\n{intro}\n</div>\n'
             f'<div class="buttons">{SUBSCRIBE}'
             '<a class="button secondary" href="/blog-archive/">Browse the blog archive</a></div>\n'
+            + extra +
             '<h2 class="section" id="newsletter">The newsletter</h2>\n' + issue_list(issues))
     write_if_changed("index.html", page(
         "David Charles", "Writer and outdoor instructor. Read every issue of my newsletter, and the archive of my blog.",
@@ -461,7 +463,8 @@ def build_extras(posts, pages, cats, years):
             '<a class="button secondary" href="/">Go to the homepage</a></div>')
     write_if_changed("404.html", page("Page not found | David Charles", "Page not found.", "/404.html", body,
                                       noindex=True))
-    urls = [("/", ""), ("/newsletter-archive/", ""), ("/blog-archive/", "")]
+    urls = [("/", ""), ("/newsletter-archive/", ""), ("/blog-archive/", ""), ("/map/", ""), ("/photos/", ""),
+            ("/numbers/", "")]
     urls += [(p["url"], p["date"]) for p in posts] + [(p["url"], "") for p in pages]
     urls += [(u, "") for u in cats] + [(f"/{y}/", "") for y in years]
     xml = ['<?xml version="1.0" encoding="UTF-8"?>',
@@ -480,7 +483,11 @@ if __name__ == "__main__":
     issues = update_newsletter(offline)
     entries = json.load(open(BLOG_DATA, encoding="utf-8"))
     posts, pages, cats, years = build_blog(entries)
-    build_home(issues, posts)
+    sys.modules["build"] = sys.modules[__name__]      # let extras.py share these helpers
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import extras
+    on_this_day = extras.build_extras(issues, entries)
+    build_home(issues, posts, on_this_day)
     build_extras(posts, pages, cats, years)
     print(f"{len(posts)} blog posts, {len(pages)} pages, {len(cats)} categories")
     print(f"{len(changed_files)} files updated")
