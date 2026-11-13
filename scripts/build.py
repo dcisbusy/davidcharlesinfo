@@ -35,7 +35,7 @@ os.chdir(ROOT)
 SITE = "https://davidcharles.info"
 SUBSTACK = "https://davidcharles.substack.com"
 GA_ID = "G-07CXWP795E"          # Google Analytics. Set to "" to switch it off.
-CSS_VERSION = "2"               # Bump when assets/site.css changes, so browsers fetch the new one.
+CSS_VERSION = "4"               # Bump when assets/site.css changes, so browsers fetch the new one.
 
 NEWSLETTER_DATA = "newsletter-archive/posts.json"
 BLOG_DATA = "blog-archive/index.json"
@@ -98,8 +98,8 @@ def slugify(s):
 
 # ---------------------------------------------------------------- page template
 
-NAV = [("/", "Home"), ("/newsletter-archive/", "Newsletter"), ("/blog-archive/", "Blog archive"),
-       ("/map/", "Map"), ("/photos/", "Photos"), ("/random-story/", "Random story")]
+NAV = [("/start-here/", "Start here"), ("/newsletter-archive/", "Newsletter"), ("/blog-archive/", "Archive"),
+       ("/series/", "Series"), ("/map/", "Map"), ("/photos/", "Photos"), ("/search/", "Search")]
 
 
 def page(title, description, path, body, current=None, image=None, kind="website", noindex=False):
@@ -293,7 +293,8 @@ CONTENT_RE = re.compile(r"<!--content:start-->(.*?)<!--content:end-->", re.S)
 COMMENTS_RE = re.compile(r"<!--comments:start-->(.*?)<!--comments:end-->", re.S)
 
 
-def wrap_entry(e, older, newer):
+def wrap_entry(e, older, newer, extra=None):
+    extra = extra or {}
     path = file_for(e["url"])
     s = read(path)
     if s is None:
@@ -312,8 +313,13 @@ def wrap_entry(e, older, newer):
         cats = ", ".join(f'<a href="{esc(x["url"])}">{esc(x["name"])}</a>' for x in e.get("cats", []))
         meta = (f'<p class="meta"><time datetime="{esc(e["date"])}">{esc(nice(e["date"]))}</time>'
                 + (f" &middot; {cats}" if cats else "") + "</p>")
-    body = [f'<article class="entry">\n<header class="entry-head"><h1>{esc(e["title"])}</h1>{meta}</header>',
-            f'<div class="entry-content">\n<!--content:start-->{content}<!--content:end-->\n</div>']
+    body = [f'<article class="entry">\n<header class="entry-head"><h1>{esc(e["title"])}</h1>{meta}</header>']
+    if extra.get("newsletter"):
+        body.append(f'<p class="first-appeared">This story first appeared in my newsletter. '
+                    f'<a href="{esc(extra["newsletter"])}">Read it on Substack</a></p>')
+    body.append(f'<div class="entry-content">\n<!--content:start-->{content}<!--content:end-->\n</div>')
+    if extra.get("series"):
+        body.append(extra["series"])
     if e["type"] == "post":
         body.append(
             '<aside class="newsletter-box"><p><strong>Enjoyed this?</strong> These days I write a free newsletter '
@@ -323,6 +329,11 @@ def wrap_entry(e, older, newer):
         if e.get("tags"):
             body.append('<p class="tags">Tagged: ' + ", ".join(
                 f'<a href="{esc(t["url"])}">{esc(t["name"])}</a>' for t in e["tags"]) + "</p>")
+        if extra.get("related"):
+            body.append('<section class="related"><h2>Related reading</h2><ul class="posts">' + "".join(
+                f'<li><time datetime="{esc(r["date"])}">{esc(nice(r["date"]))}</time><a href="{esc(r["url"])}">'
+                f'{esc(r["title"])}</a>{" <span class=" + chr(34) + "via" + chr(34) + ">newsletter</span>" if r["source"] == "newsletter" else ""}</li>'
+                for r in extra["related"]) + "</ul></section>")
     if comments.strip():
         n = len(re.findall(r'<li id="comment-', comments))
         body.append(f'<section class="comments"><h2 class="section">{n} comment{"s" if n != 1 else ""}</h2>\n'
@@ -342,10 +353,12 @@ def wrap_entry(e, older, newer):
                                 image=e.get("image"), kind="article" if e["type"] == "post" else "website"))
 
 
-def build_blog(entries):
+def build_blog(entries, ctx=None):
+    per_post = (ctx or {}).get("per_post", {})
     posts = sorted([e for e in entries if e["type"] == "post"], key=lambda p: (p["date"], p["title"]))
     for i, e in enumerate(posts):
-        wrap_entry(e, posts[i - 1] if i > 0 else None, posts[i + 1] if i + 1 < len(posts) else None)
+        wrap_entry(e, posts[i - 1] if i > 0 else None, posts[i + 1] if i + 1 < len(posts) else None,
+                   per_post.get(e["url"]))
     for e in entries:
         if e["type"] == "page":
             wrap_entry(e, None, None)
@@ -410,7 +423,8 @@ def build_blog(entries):
         "<h1>Blog archive</h1>\n"
         f'<p class="intro muted">{len(posts)} posts written between {first} and {last}. For new writing, see the '
         '<a href="/newsletter-archive/">newsletter</a>. Or explore it on the <a href="/map/">map</a>, the '
-        '<a href="/photos/">photo wall</a> or in <a href="/numbers/">20 years in numbers</a>.</p>\n'
+        '<a href="/photos/">photo wall</a> or in <a href="/numbers/">20 years in numbers</a>, follow a '
+        '<a href="/series/">series</a>, or try a <a href="/random-story/">random story</a>.</p>\n'
         '<h2 class="section">Pages</h2>\n<ul class="pages">'
         + "".join(f'<li><a href="{esc(e["url"])}">{esc(e["title"])}</a></li>' for e in pages) + "</ul>\n"
         '<h2 class="section">Categories</h2>\n'
@@ -441,7 +455,8 @@ def build_home(issues, posts, extra=""):
     intro = re.sub(r"<!--.*?-->\s*", "", read(INTRO), flags=re.S).strip()
     body = (f'<div class="intro">\n{intro}\n</div>\n'
             f'<div class="buttons">{SUBSCRIBE}'
-            '<a class="button secondary" href="/blog-archive/">Browse the blog archive</a></div>\n'
+            '<a class="button secondary" href="/start-here/">Start here</a>'
+            '<a class="button secondary" href="/search/">Search</a></div>\n'
             + extra +
             '<h2 class="section" id="newsletter">The newsletter</h2>\n' + issue_list(issues))
     write_if_changed("index.html", page(
@@ -463,8 +478,10 @@ def build_extras(posts, pages, cats, years):
             '<a class="button secondary" href="/">Go to the homepage</a></div>')
     write_if_changed("404.html", page("Page not found | David Charles", "Page not found.", "/404.html", body,
                                       noindex=True))
-    urls = [("/", ""), ("/newsletter-archive/", ""), ("/blog-archive/", ""), ("/map/", ""), ("/photos/", ""),
-            ("/numbers/", "")]
+    urls = [("/", ""), ("/start-here/", ""), ("/newsletter-archive/", ""), ("/blog-archive/", ""), ("/series/", ""),
+            ("/map/", ""), ("/photos/", ""), ("/numbers/", ""), ("/search/", "")]
+    urls += [(u, "") for u in sorted("/" + os.path.dirname(f).replace(os.sep, "/") + "/"
+                                     for f in __import__("glob").glob("series/*/index.html"))]
     urls += [(p["url"], p["date"]) for p in posts] + [(p["url"], "") for p in pages]
     urls += [(u, "") for u in cats] + [(f"/{y}/", "") for y in years]
     xml = ['<?xml version="1.0" encoding="UTF-8"?>',
@@ -473,7 +490,8 @@ def build_extras(posts, pages, cats, years):
         xml.append(f"<url><loc>{SITE}{esc(u)}</loc>" + (f"<lastmod>{d[:10]}</lastmod>" if d else "") + "</url>")
     xml.append("</urlset>")
     write_if_changed("sitemap.xml", "\n".join(xml) + "\n")
-    write_if_changed("robots.txt", f"User-agent: *\nAllow: /\nSitemap: {SITE}/sitemap.xml\n")
+    exports = "".join(f"Disallow: /{d}/\n" for d in sorted(os.listdir(".")) if d.startswith("substackpostsexport"))
+    write_if_changed("robots.txt", f"User-agent: *\nAllow: /\n{exports}Sitemap: {SITE}/sitemap.xml\n")
 
 
 # ---------------------------------------------------------------- run
@@ -482,12 +500,13 @@ if __name__ == "__main__":
     offline = "--offline" in sys.argv          # skip Substack (for testing)
     issues = update_newsletter(offline)
     entries = json.load(open(BLOG_DATA, encoding="utf-8"))
-    posts, pages, cats, years = build_blog(entries)
     sys.modules["build"] = sys.modules[__name__]      # let extras.py share these helpers
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import extras
-    on_this_day = extras.build_extras(issues, entries)
-    build_home(issues, posts, on_this_day)
+    ctx = extras.prepare(issues, entries)
+    posts, pages, cats, years = build_blog(entries, ctx)
+    home_extra = extras.build_pages(ctx, entries)
+    build_home(issues, posts, home_extra)
     build_extras(posts, pages, cats, years)
     print(f"{len(posts)} blog posts, {len(pages)} pages, {len(cats)} categories")
     print(f"{len(changed_files)} files updated")

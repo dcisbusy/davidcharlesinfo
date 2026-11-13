@@ -1,0 +1,29 @@
+{
+ "_note": "Series trails. Each series collects posts by blog category ('category') or by a pattern in the title ('title'), oldest first. 'from'/'to' limit the dates. Edit the descriptions freely.",
+ "series": [
+  {"slug": "cycling-to-the-sahara", "name": "Cycling to the Sahara", "category": "/category/adventure/cycle-touring/cycling-to-the-sahara/", "to": "2012-12-31",
+   "description": "Spring 2012: 1,279 miles by bike from London to the Sahara, through France and post-revolution Tunisia."},
+  {"slug": "cycling-towards-syria", "name": "Cycling towards Syria", "category": "/category/adventure/cycle-touring/cycling-towards-syria/",
+   "description": "2016: a 3,000-mile bike ride from London following the routes of migration, reporting from the saddle."},
+  {"slug": "cycling-round-britain", "name": "Cycling Round Britain (Twice)", "category": "/category/adventure/cycle-touring/bike-around-britain/",
+   "description": "Two rides round the coast of Britain: 4,110 miles in 2011, and again in 2022 and 2023."},
+  {"slug": "thighs-of-steel", "name": "Thighs of Steel", "category": "/category/adventure/cycle-touring/thighs-of-steel/",
+   "description": "Riding to Athens with Thighs of Steel, the fundraising bike ride for refugee solidarity, in 2022 and 2023."},
+  {"slug": "sea-cycles", "name": "Sea Cycles", "category": "/category/adventure/cycle-touring/seacycles/",
+   "description": "Group rides from London to the seaside, 2016 and 2017."},
+  {"slug": "hitchhiking", "name": "Hitchhiking", "category": "/category/adventure/hitchhiking/",
+   "description": "Thumbing lifts around Britain, from London to Scotland and back."},
+  {"slug": "walking-home-for-christmas", "name": "Walking Home for Christmas", "category": "/category/adventure/walking/walking-home-for-christmas/",
+   "description": "Christmas 2010: walking 38 snowy miles from Heathrow to Cholsey."},
+  {"slug": "polyphasic-sleep", "name": "The Polyphasic Sleep Experiment", "category": "/category/how-to-be-human/polyphasing/",
+   "description": "March 2009: swapping a night's sleep for a day of short naps, and seeing what happens."},
+  {"slug": "no-supermarket", "name": "No Supermarket January", "title": "No Supermarket",
+   "description": "January 2011: a whole month of shopping without supermarkets."},
+  {"slug": "vipassana", "name": "Ten Days at Dhamma Dipa", "title": "Dhamma Dipa",
+   "description": "2010: a ten-day Vipassana meditation course in Herefordshire, what I did, what I didn't, and what I made of it."},
+  {"slug": "meditations-on-meditations", "name": "Meditations on Meditations", "title": "Meditations on Meditations",
+   "description": "2017: one passage at a time from Marcus Aurelius's Meditations."},
+  {"slug": "viktor-frankl-book-cult", "name": "The Viktor Frankl 5-a-Day Book Cult", "title": "(Viktor|Victor) Frankl 5-a-Day",
+   "description": "2018: reading Viktor Frankl's Man's Search for Meaning five pages a day, over 28 days."}
+ ]
+}

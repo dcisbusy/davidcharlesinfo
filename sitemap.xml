@@ -1,11 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url><loc>https://davidcharles.info/</loc></url>
+<url><loc>https://davidcharles.info/start-here/</loc></url>
 <url><loc>https://davidcharles.info/newsletter-archive/</loc></url>
 <url><loc>https://davidcharles.info/blog-archive/</loc></url>
+<url><loc>https://davidcharles.info/series/</loc></url>
 <url><loc>https://davidcharles.info/map/</loc></url>
 <url><loc>https://davidcharles.info/photos/</loc></url>
 <url><loc>https://davidcharles.info/numbers/</loc></url>
+<url><loc>https://davidcharles.info/search/</loc></url>
+<url><loc>https://davidcharles.info/series/cycling-round-britain/</loc></url>
+<url><loc>https://davidcharles.info/series/cycling-to-the-sahara/</loc></url>
+<url><loc>https://davidcharles.info/series/cycling-towards-syria/</loc></url>
+<url><loc>https://davidcharles.info/series/hitchhiking/</loc></url>
+<url><loc>https://davidcharles.info/series/meditations-on-meditations/</loc></url>
+<url><loc>https://davidcharles.info/series/no-supermarket/</loc></url>
+<url><loc>https://davidcharles.info/series/polyphasic-sleep/</loc></url>
+<url><loc>https://davidcharles.info/series/sea-cycles/</loc></url>
+<url><loc>https://davidcharles.info/series/thighs-of-steel/</loc></url>
+<url><loc>https://davidcharles.info/series/viktor-frankl-book-cult/</loc></url>
+<url><loc>https://davidcharles.info/series/vipassana/</loc></url>
+<url><loc>https://davidcharles.info/series/walking-home-for-christmas/</loc></url>
 <url><loc>https://davidcharles.info/uncategorised/happy-friday/</loc><lastmod>2025-06-28</lastmod></url>
 <url><loc>https://davidcharles.info/uncategorised/join-me-on-night-shift-2/</loc><lastmod>2025-06-20</lastmod></url>
 <url><loc>https://davidcharles.info/uncategorised/i-see-the-future-in-my-dreams-and-so-do-you-in-yours-2/</loc><lastmod>2025-06-13</lastmod></url>

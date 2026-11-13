@@ -1,0 +1,42 @@
+{
+ "_note": "The Start here page. Each item is a blog post or newsletter address and a line about it. Newsletter copies link to Substack automatically. Edit, add or remove freely.",
+ "intro": "Twenty years of writing is a lot to wade into, so here are some good places to begin.",
+ "themes": [
+  {"name": "Adventure", "items": [
+   {"url": "/adventure/cycle-touring/bike-around-britain/10-things-you-learn-when-you-cycle-4110-miles-around-britain/",
+    "note": "What 4,110 miles round the coast of Britain taught me, from the ride I called the most rewarding thing I'd ever done."},
+   {"url": "/series/cycling-to-the-sahara/",
+    "note": "It's 1,279 miles from my house in London to the Saharan desert. The start of a ride through France and Tunisia."},
+   {"url": "/adventure/cycle-touring/remember-that-time-we-cycled-2200km-across-britain-on-a-route-that-spelled-out-refugees-welcome-oh-yeah/",
+    "note": "The time we cycled a 2,200km route across Britain that spelled out REFUGEES WELCOME."},
+   {"url": "/adventure/5-incredible-things-ive-learned-from-340-days-of-adventure/",
+    "note": "Five lessons from a year of counting days of adventure."}
+  ]},
+  {"name": "How to be human", "items": [
+   {"url": "/how-to-be-human/man-sloth-mode/",
+    "note": "From November 2016 to October 2017 I was in what I've learned to call man sloth mode. My longest story."},
+   {"url": "/how-to-be-human/the-end-of-doomspreading/",
+    "note": "On meeting a young man who lived in a world of confusion, threat and mistrust, and why we spread doom."},
+   {"url": "/how-to-be-human/you-are-what-you-dont/dhamma-dipa-vipassana-my-experience/",
+    "note": "All the fears and joys of a ten-day silent meditation course, in 3,000 words."},
+   {"url": "/how-to-be-human/hypnagogia-how-to-dream-like-thomas-html/",
+    "note": "How Thomas Edison used the edge of sleep for ideas, and how you can too."}
+  ]},
+  {"name": "Borders and solidarity", "items": [
+   {"url": "/activism/supporting-calais-migrants/",
+    "note": "New Year 2015: taking 200kg of supplies to the people camped in Calais. Humanity is easy."},
+   {"url": "/activism/calais-thank-you-letter-daily-mail/",
+    "note": "A thank-you letter to the Daily Mail, which we then delivered in person."},
+   {"url": "/activism/trespassers-welcome/",
+    "note": "Most of the English countryside is out of bounds to most of the people who live here. Why trespass matters."},
+   {"url": "/activism/no-borders/10-years-of-no-borders/",
+    "note": "Looking back on ten years of writing about the crisis of borders."}
+  ]},
+  {"name": "Words and writing", "items": [
+   {"url": "/creative-writing/writing-about-writing/bob-dylan-and-william-shakespeare-html/",
+    "note": "Every time Bob Dylan borrowed from Shakespeare. My most-commented post."},
+   {"url": "/creative-writing/bbc-radio-foiled-2017-2021/",
+    "note": "The story of Foiled, the hair-salon sitcom I co-wrote with Beth Granville for BBC Radio."}
+  ]}
+ ]
+}

@@ -47,8 +47,26 @@ def plain(h):
     return html.unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", h or ""))).strip()
 
 
+EXPORT_DIRS = sorted(d for d in os.listdir(".") if d.startswith("substackpostsexport") and os.path.isdir(d))
+
+
+def load_export():
+    """Full text of newsletter issues from Substack export folders, by slug (newest export wins)."""
+    out = {}
+    for d in EXPORT_DIRS:
+        for f in os.listdir(d):
+            if f.endswith(".html") and "." in f[:-5]:
+                out[f[:-5].split(".", 1)[1]] = os.path.join(d, f)
+    return out
+
+
+def issue_slug(url):
+    return url.rstrip("/").split("/p/")[-1] if "/p/" in url else None
+
+
 def load_stories(issues, entries):
     over = json.load(open("data/story-overrides.json", encoding="utf-8"))
+    export = load_export()
     blog = [e for e in entries if e["type"] == "post"]
     content = {}
     for e in blog:
@@ -105,14 +123,25 @@ def load_stories(issues, entries):
             pair_issue[i], pair_blog[u] = u, i
 
     stories = []
+    from_export = 0
     for i, n in enumerate(nl):
         b = pair_issue.get(i)
+        ex_html = ""
+        f = export.get(issue_slug(n["url"]) or "")
+        if f and not n.get("paid"):
+            ex_html = re.sub(r"^\s*<h1>.*?</h1>", "", read(f) or "", flags=re.S)
+            from_export += 1
+        if ex_html:
+            body_text, body_html = plain(ex_html), ex_html
+        elif b:
+            body_text, body_html = text[b], content[b]
+        else:
+            body_text, body_html = f'{n["title"]}. {n.get("excerpt", "")}', ""
         stories.append({
             "title": n["title"], "date": n.get("date", ""), "url": n["url"], "source": "newsletter",
             "blog_url": b, "image": n.get("image") or (by_url[b].get("image") if b else None),
-            "excerpt": n.get("excerpt", ""),
-            "text": text[b] if b else f'{n["title"]}. {n.get("excerpt", "")}',
-            "html": content[b] if b else "", "comments": 0, "has_text": bool(b),
+            "excerpt": n.get("excerpt", ""), "text": body_text, "html": body_html, "paid": bool(n.get("paid")),
+            "comments": 0, "has_text": bool(ex_html or b),
         })
     for e in blog:
         if e["url"] in pair_blog:
@@ -122,10 +151,11 @@ def load_stories(issues, entries):
             "title": e["title"], "date": e["date"], "url": e["url"], "source": "blog", "blog_url": e["url"],
             "image": e.get("image"), "excerpt": e.get("excerpt", ""), "text": text[e["url"]],
             "html": content[e["url"]], "comments": len(re.findall(r'<li id="comment-', s)), "has_text": True,
+            "paid": False,
         })
     stories.sort(key=lambda s: (s["date"], s["title"]), reverse=True)
-    print(f"{len(stories)} stories ({len(nl)} newsletter issues, {len(pair_blog)} blog copies matched, "
-          f"{len(blog) - len(pair_blog)} blog-only)")
+    print(f"{len(stories)} stories ({len(nl)} newsletter issues, {from_export} with full text from the Substack export, "
+          f"{len(pair_blog)} blog copies matched, {len(blog) - len(pair_blog)} blog-only)")
     return stories, over
 
 
@@ -136,22 +166,27 @@ def find_places(stories, over):
     places, broad, skip = gaz["places"], set(gaz["broad"]) | {"London"}, set(gaz["skip_words"])
     names = sorted(places, key=len, reverse=True)
     plain_names = [n for n in names if n not in skip]
-    any_re = re.compile(r"(?<![\w-])(" + "|".join(re.escape(n) for n in names) + r")(?![\w-])")
+    any_re = re.compile(r"(?<![\w-])(" + "|".join(re.escape(n) for n in plain_names) + r")(?![\w-])")
     body_re = re.compile(r"(?<![\w-])(" + "|".join(re.escape(n) for n in plain_names) + r")(?![\w-])")
     ctx_re = re.compile(r"\b(?:in|to|at|from|near|around|across|of|via|on)\s+(" +
                         "|".join(re.escape(n) for n in skip) + r")(?![\w-])")
+    not_re = re.compile("|".join(re.escape(p) for p in sorted(gaz.get("not_places", []), key=len, reverse=True)) or "(?!)")
     mentions = collections.Counter()
     for s in stories:
         if s["url"] in over["places"]:
             s["place"] = over["places"][s["url"]] or None
             continue
         score = collections.Counter()
-        for n in any_re.findall(s["title"]):
+        title, body = not_re.sub(" ", s["title"]), not_re.sub(" ", s["text"])
+        for n in any_re.findall(title) + ctx_re.findall(title):
             score[n] += 6
-        lead = s["text"][:700]
+        if re.search(r"(?:^|[\s:,–-])(" + "|".join(re.escape(n) for n in skip) + r")\s*[–:,-]", title + ":"):
+            for n in re.findall(r"(?:^|[\s:,–-])(" + "|".join(re.escape(n) for n in skip) + r")(?=\s*[–:,-])", title + ":"):
+                score[n] += 6
+        lead = body[:700]
         for n in body_re.findall(lead) + ctx_re.findall(lead):
             score[n] += 2
-        for n in body_re.findall(s["text"]) + ctx_re.findall(s["text"]):
+        for n in body_re.findall(body) + ctx_re.findall(body):
             score[n] += 1
         for n, c in score.items():
             mentions[n] += 1
@@ -425,6 +460,10 @@ more often; hover for the count.</p>"""
     write_if_changed("numbers/index.html", page("20 years in numbers | David Charles",
                                                 f"{len(stories):,} stories and {total_words:,} words, counted.",
                                                 "/numbers/", body))
+    return (f'<a class="stat-tiles home-figures" href="/numbers/" aria-label="20 years in numbers">'
+            f'{tile(f"{len(stories):,}", "stories")}{tile(f"{total_words:,}", "words")}'
+            f'{tile(len(years), "years of writing")}{tile(len(places), "places on the map")}'
+            f'<span class="more">See 20 years in numbers &rarr;</span></a>')
 
 
 # ---------------------------------------------------------------- Photo wall
@@ -493,14 +532,204 @@ def build_photos(stories):
     return len(photos)
 
 
+# ---------------------------------------------------------------- related reading
+
+def compute_related(stories, n=3):
+    """Three most similar stories for each story (TF-IDF over the words, cosine similarity)."""
+    docs = []
+    for st in stories:
+        words = [w for w in re.findall(r"[a-z][a-z'’]+", (st["title"] + " ") * 3 + st["text"].lower())
+                 if len(w) > 3 and w.replace("’", "'") not in STOP]
+        docs.append(collections.Counter(words))
+    df = collections.Counter()
+    for d in docs:
+        df.update(d.keys())
+    N = len(docs)
+    vecs = []
+    for d in docs:
+        total = sum(d.values()) or 1
+        v = {w: (c / total) * __import__("math").log(N / df[w]) for w, c in d.items() if 1 < df[w] < N * 0.25}
+        top = dict(sorted(v.items(), key=lambda x: -x[1])[:80])
+        norm = sum(x * x for x in top.values()) ** 0.5 or 1
+        vecs.append({w: x / norm for w, x in top.items()})
+    inv = collections.defaultdict(list)
+    for i, v in enumerate(vecs):
+        for w, x in v.items():
+            inv[w].append((i, x))
+    for i, v in enumerate(vecs):
+        score = collections.Counter()
+        for w, x in v.items():
+            for j, y in inv[w]:
+                if j != i:
+                    score[j] += x * y
+        title = re.sub(r"\W+", "", stories[i]["title"].lower())
+        picks = []
+        for j, sc in score.most_common(12):
+            if sc < 0.08 or re.sub(r"\W+", "", stories[j]["title"].lower()) == title:
+                continue
+            picks.append(j)
+            if len(picks) == n:
+                break
+        stories[i]["related"] = picks
+
+
+# ---------------------------------------------------------------- series
+
+def build_series_data(stories, entries):
+    conf = json.load(open("data/series.json", encoding="utf-8"))["series"]
+    story_of_blog = {s["blog_url"]: s for s in stories if s.get("blog_url")}
+    posts = [e for e in entries if e["type"] == "post"]
+    out = []
+    for sr in conf:
+        parts = [e for e in posts
+                 if (sr.get("category") and any(c["url"] == sr["category"] for c in e.get("cats", [])))
+                 or (sr.get("title") and re.search(sr["title"], e["title"], re.I))]
+        parts = [e for e in parts if (not sr.get("from") or e["date"] >= sr["from"]) and
+                 (not sr.get("to") or e["date"] <= sr["to"])]
+        seen, uniq = set(), []
+        for e in sorted(parts, key=lambda e: (e["date"], e["url"])):
+            k = re.sub(r"\W+", "", e["title"].lower())
+            if k not in seen:
+                seen.add(k)
+                uniq.append(e)
+        items = [{"title": e["title"], "date": e["date"], "blog_url": e["url"],
+                  "url": story_of_blog[e["url"]]["url"] if e["url"] in story_of_blog else e["url"],
+                  "source": story_of_blog[e["url"]]["source"] if e["url"] in story_of_blog else "blog"} for e in uniq]
+        if len(items) >= 2:
+            out.append(dict(sr, items=items))
+    return out
+
+
+def series_box(series_list, blog_url):
+    for sr in series_list:
+        for i, it in enumerate(sr["items"]):
+            if it["blog_url"] == blog_url:
+                prev = sr["items"][i - 1] if i > 0 else None
+                nxt = sr["items"][i + 1] if i + 1 < len(sr["items"]) else None
+                links = ""
+                if prev:
+                    links += f'<a href="{esc(prev["url"])}">&larr; {esc(prev["title"])}</a>'
+                if nxt:
+                    links += f'<a class="next" href="{esc(nxt["url"])}">{esc(nxt["title"])} &rarr;</a>'
+                return (f'<aside class="series-box"><p><a href="/series/{esc(sr["slug"])}/">{esc(sr["name"])}</a>: '
+                        f'part {i + 1} of {len(sr["items"])}</p><div class="series-links">{links}</div></aside>')
+    return ""
+
+
+def build_series_pages(series_list):
+    for sr in series_list:
+        rows = "".join(
+            f'<li><span class="num">{i + 1}</span><a href="{esc(it["url"])}">{esc(it["title"])}</a>'
+            f'<time datetime="{esc(it["date"])}">{esc(nice(it["date"]))}'
+            f'{" &middot; newsletter" if it["source"] == "newsletter" else ""}</time></li>'
+            for i, it in enumerate(sr["items"]))
+        first = sr["items"][0]
+        body = (f'<p class="meta crumbs"><a href="/series/">Series</a></p><h1>{esc(sr["name"])}</h1>\n'
+                f'<p class="intro">{esc(sr["description"])}</p>\n<p class="intro muted">{len(sr["items"])} parts, '
+                f'in order.</p>\n<div class="buttons"><a class="button primary" href="{esc(first["url"])}">Start at part 1</a>'
+                f'</div>\n<ol class="series-list">{rows}</ol>')
+        write_if_changed(f'series/{sr["slug"]}/index.html', page(f'{sr["name"]} | David Charles', sr["description"],
+                                                                 f'/series/{sr["slug"]}/', body))
+    cards = "".join(
+        f'<li><a href="/series/{esc(sr["slug"])}/"><h3>{esc(sr["name"])}</h3><p>{esc(sr["description"])}</p>'
+        f'<span class="muted">{len(sr["items"])} parts &middot; {sr["items"][0]["date"][:4]}</span></a></li>'
+        for sr in series_list)
+    body = ('<h1>Series</h1>\n<p class="intro muted">Stories told in several parts, from bike rides to book '
+            f'clubs. Each one reads like a short book.</p>\n<ul class="cards">{cards}</ul>')
+    write_if_changed("series/index.html", page("Series | David Charles", "Stories by David Charles told in parts.",
+                                               "/series/", body, "/series/"))
+
+
+# ---------------------------------------------------------------- Start here
+
+def build_start_here(stories, entries, series_list):
+    conf = json.load(open("data/start-here.json", encoding="utf-8"))
+    by_blog = {s["blog_url"]: s for s in stories if s.get("blog_url")}
+    by_url = {s["url"]: s for s in stories}
+    entry = {e["url"]: e for e in entries}
+    slugs = {f'/series/{sr["slug"]}/': sr for sr in series_list}
+    parts = []
+    for th in conf["themes"]:
+        lis = []
+        for it in th["items"]:
+            u = it["url"]
+            st = by_blog.get(u) or by_url.get(u)
+            if u in slugs:
+                title, url, date, kind = slugs[u]["name"], u, slugs[u]["items"][0]["date"], f'series of {len(slugs[u]["items"])}'
+            elif st:
+                title, url, date, kind = st["title"], st["url"], st["date"], st["source"]
+            elif u in entry:
+                title, url, date, kind = entry[u]["title"], u, entry[u]["date"], "page"
+            else:
+                print("Start here: can't find", u)
+                continue
+            lis.append(f'<li><a href="{esc(url)}">{esc(title)}</a><p>{esc(it["note"])}</p>'
+                       f'<time datetime="{esc(date)}">{esc(nice(date))}'
+                       f'{" &middot; " + esc(kind) if kind in ("newsletter",) or kind.startswith("series") else ""}</time></li>')
+        parts.append(f'<h2 class="section">{esc(th["name"])}</h2>\n<ul class="picks">{"".join(lis)}</ul>')
+    body = (f'<h1>Start here</h1>\n<p class="intro">{esc(conf["intro"])}</p>\n' + "\n".join(parts) +
+            '\n<h2 class="section">Then&hellip;</h2>\n<p>Follow one of the <a href="/series/">series</a>, wander the '
+            '<a href="/map/">map</a>, <a href="/search/">search</a> for anything, or let me pick a '
+            '<a href="/random-story/">random story</a>.</p>\n'
+            f'<div class="buttons"><a class="button primary" href="{SUBSTACK}/subscribe">Subscribe on Substack</a></div>')
+    write_if_changed("start-here/index.html", page("Start here | David Charles",
+                                                   "The best places to begin reading David Charles.", "/start-here/",
+                                                   body, "/start-here/"))
+
+
+# ---------------------------------------------------------------- search
+
+def search_records(stories, entries):
+    recs = []
+    for s in stories:
+        content = s["text"] if not s.get("paid") else f'{s["title"]}. {s.get("excerpt", "")}'
+        recs.append({"url": s["url"], "title": s["title"], "date": s["date"], "content": content,
+                     "type": "Newsletter" if s["source"] == "newsletter" else "Blog"})
+    for e in entries:
+        if e["type"] == "page" and e.get("listed", True):
+            h = read(file_for(e["url"])) or ""
+            m = re.search(r"<!--content:start-->(.*?)<!--content:end-->", h, re.S)
+            recs.append({"url": e["url"], "title": e["title"], "date": "", "content": plain(m.group(1) if m else ""),
+                         "type": "Page"})
+    with open("_search_records.json", "w", encoding="utf-8") as f:
+        json.dump(recs, f, ensure_ascii=False)
+    body = ('<h1>Search</h1>\n<p class="intro muted">Search every newsletter issue, blog post and page.</p>\n'
+            '<div id="search"></div>\n<link rel="stylesheet" href="/pagefind/pagefind-ui.css">\n'
+            '<script src="/pagefind/pagefind-ui.js"></script>\n'
+            '<script>window.addEventListener("DOMContentLoaded",function(){var ui=new PagefindUI({element:"#search",'
+            'showSubResults:false,showImages:false,translations:{placeholder:"Search 20 years of '
+            'writing"}});var q=new URLSearchParams(location.search).get("q");if(q){ui.triggerSearch(q);}});</script>')
+    write_if_changed("search/index.html", page("Search | David Charles", "Search David Charles's writing.", "/search/",
+                                               body, "/search/"))
+
+
 # ---------------------------------------------------------------- run all
 
-def build_extras(issues, entries):
+def prepare(issues, entries):
     stories, over = load_stories(issues, entries)
     mentions = find_places(stories, over)
+    compute_related(stories)
+    series_list = build_series_data(stories, entries)
+    by_blog = {s["blog_url"]: s for s in stories if s.get("blog_url")}
+    per_post = {}
+    for s in stories:
+        if s.get("blog_url"):
+            rel = [{"title": stories[j]["title"], "url": stories[j]["url"], "date": stories[j]["date"],
+                    "source": stories[j]["source"]} for j in s.get("related", [])]
+            per_post[s["blog_url"]] = {"related": rel, "series": series_box(series_list, s["blog_url"]),
+                                       "newsletter": s["url"] if s["source"] == "newsletter" else None}
+    return {"stories": stories, "mentions": mentions, "series": series_list, "per_post": per_post, "by_blog": by_blog}
+
+
+def build_pages(ctx, entries):
+    stories = ctx["stories"]
     build_map(stories)
     otd = build_on_this_day(stories)
-    build_numbers(stories, mentions)
+    figures = build_numbers(stories, ctx["mentions"])
     n = build_photos(stories)
-    print(f"Map: {sum(1 for s in stories if s.get('place'))} stories placed; photo wall: {n} photos")
-    return otd
+    build_series_pages(ctx["series"])
+    build_start_here(stories, entries, ctx["series"])
+    search_records(stories, entries)
+    print(f"Map: {sum(1 for s in stories if s.get('place'))} stories placed; photo wall: {n} photos; "
+          f"{len(ctx['series'])} series")
+    return figures + otd

@@ -42,6 +42,15 @@ jobs:
       - name: Build the site
         run: python scripts/build.py
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build the search index
+        run: |
+          npm install --no-save --no-audit --no-fund pagefind@1
+          node scripts/search.mjs
+
       - name: Save any changes
         run: |
           git config user.name "github-actions[bot]"

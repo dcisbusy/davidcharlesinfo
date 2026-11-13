@@ -221,3 +221,50 @@ ul.records li { margin: 0 0 .6em; }
   font: 600 12px/30px var(--ui); }
 .marker-cluster span { line-height: 30px; }
 svg.chart.hbars { max-width: 560px; }
+
+/* ---------- Homepage figures ---------- */
+a.home-figures { text-decoration: none; color: inherit; margin: 28px 0 0; }
+a.home-figures .tile-stat b { font-size: 24px; }
+a.home-figures .more { grid-column: 1 / -1; font: 600 14px/1 var(--ui); color: var(--accent); }
+a.home-figures:hover .tile-stat { background: #eeece6; }
+
+/* ---------- Post extras ---------- */
+.first-appeared { font: 14px/1.5 var(--ui); color: var(--muted); background: var(--soft); border-radius: 6px;
+                  padding: 10px 14px; margin: 0 0 24px; }
+.series-box { margin: 32px 0 0; padding: 16px 18px; border: 1px solid var(--line); border-radius: 8px; font: 14px/1.5 var(--ui); }
+.series-box p { margin: 0 0 8px; color: var(--muted); }
+.series-box p a { font-weight: 600; }
+.series-links { display: flex; justify-content: space-between; gap: 16px; }
+.series-links a { color: var(--ink); text-decoration: none; }
+.series-links a:hover { color: var(--accent); }
+.series-links .next { margin-left: auto; text-align: right; }
+.related { margin: 32px 0 0; }
+.related h2 { margin-top: 0; }
+.via { font: 600 11px/1 var(--ui); text-transform: uppercase; letter-spacing: .06em; color: var(--accent); margin-left: 6px; }
+
+/* ---------- Series and Start here ---------- */
+ul.cards { list-style: none; margin: 20px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+ul.cards a { display: block; height: 100%; padding: 16px; border: 1px solid var(--line); border-radius: 8px; color: inherit; text-decoration: none; }
+ul.cards a:hover { border-color: var(--accent); }
+ul.cards h3 { margin: 0 0 6px; font-size: 1.1em; line-height: 1.3; }
+ul.cards p { margin: 0 0 8px; font-size: .95em; }
+ul.cards .muted { font: 13px/1.4 var(--ui); }
+ol.series-list { list-style: none; margin: 20px 0 0; padding: 0; }
+ol.series-list li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+ol.series-list .num { font: 600 13px/1 var(--ui); color: var(--muted); width: 24px; }
+ol.series-list a { color: var(--ink); text-decoration: none; flex: 1 1 300px; }
+ol.series-list a:hover { color: var(--accent); }
+ul.picks { list-style: none; margin: 12px 0 0; padding: 0; }
+ul.picks li { padding: 14px 0; border-bottom: 1px solid var(--line); }
+ul.picks a { font-size: 1.15em; font-weight: 700; color: var(--ink); text-decoration: none; }
+ul.picks a:hover { color: var(--accent); }
+ul.picks p { margin: 4px 0 2px; }
+
+/* ---------- Search (Pagefind) ---------- */
+#search { --pagefind-ui-primary: #2f6b4f; --pagefind-ui-text: #222; --pagefind-ui-border: #e6e6e6;
+          --pagefind-ui-border-radius: 6px; --pagefind-ui-font: Georgia, "Times New Roman", serif; margin: 20px 0 0; }
+
+/* Old photo-with-caption tables (from the Blogger days) */
+.entry-content table[cellpadding="0"] { width: auto; margin: 1.4em auto; font-size: 1em; }
+.entry-content table[cellpadding="0"] td { border: 0; padding: 0; }
+.entry-content table[cellpadding="0"] tr + tr td { font: 14px/1.45 var(--ui); color: var(--muted); padding-top: 6px; text-align: center; }

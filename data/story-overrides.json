@@ -2,5 +2,23 @@
  "_note": "Corrections for the map, photo wall, On this day and numbers pages. 'not_duplicates': blog post addresses that are NOT copies of a newsletter issue. 'duplicates': blog post address -> newsletter issue address, for pairs the automatic matching missed. 'places': story address -> place name from data/places.json, or \"\" to keep a story off the map.",
  "not_duplicates": [],
  "duplicates": {},
- "places": {}
+ "places": {
+  "/how-to-be-human/what-would-salah-do/": "",
+  "https://davidcharles.substack.com/p/what-would-salah-do": "",
+  "/activism/shankly-football-food-banks-liverpool/": "",
+  "https://davidcharles.substack.com/p/foodball": "",
+  "https://davidcharles.substack.com/p/3342961_-99-to-do-list-bankruptcy-copy-01-": "",
+  "https://davidcharles.substack.com/p/3340689_-99-to-do-list-bankruptcy": "",
+  "/how-to-be-human/to-do-list-bankruptcy/": "",
+  "https://davidcharles.substack.com/p/the-3-or-4-species-of-happiness": "",
+  "/how-to-be-human/catching-up-on-good-news/": "",
+  "/talk-lecture-reviews/the-making-of-modern-english-anti-semitism/": "Oxford",
+  "/talk-lecture-reviews/think-hope-think-crisis/": "",
+  "/how-to-be-human/andy-murrays-nice/": "",
+  "/how-to-be-human/the-art-of-skateboarding/": "",
+  "/creative-writing/writing-about-writing/my-reading-summer-autumn-edition/": "",
+  "/adventure/wikipedia-egypt-and-the-mystery-of-the-stoke-poges-naked-bicycle-angel/": "",
+  "https://davidcharles.substack.com/p/andy-murrays-nice": "",
+  "https://davidcharles.substack.com/p/no-one-forgets-a-bruise": ""
+ }
 }
