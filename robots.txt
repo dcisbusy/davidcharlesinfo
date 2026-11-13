@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
+Disallow: /substackpostsexport10october2026/
 Sitemap: https://davidcharles.info/sitemap.xml
