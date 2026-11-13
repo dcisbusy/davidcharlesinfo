@@ -169,6 +169,8 @@ jobs:
               except Exception:
                   return d
 
+          TILE_COLOURS = ["#2f6b4f", "#4a7a8c", "#8a6d3b", "#5b6e3a", "#7a4e5c", "#3f5a7a", "#9a5b34", "#4f6f63"]
+
           parts, year = [], None
           for p in posts:
               y = (p.get("date") or "")[:4] or "Undated"
@@ -177,8 +179,16 @@ jobs:
                       parts.append("</ol>")
                   parts.append(f'<h2>{esc(y)}</h2>\n<ol class="issues">')
                   year = y
-              img = (f'<img src="{esc(p["image"])}" alt="" loading="lazy" width="120" height="80">'
-                     if p.get("image") else '<span class="noimg"></span>')
+              if p.get("image"):
+                  img = f'<img src="{esc(p["image"])}" alt="" loading="lazy" width="120" height="80">'
+              else:
+                  # No cover picture: a coloured date tile instead of a grey box
+                  colour = TILE_COLOURS[sum(map(ord, p["title"])) % len(TILE_COLOURS)]
+                  d = p.get("date") or ""
+                  day = str(int(d[8:10])) if len(d) >= 10 else ""
+                  mon = months[int(d[5:7]) - 1][:3] if len(d) >= 7 else ""
+                  img = (f'<span class="tile" style="background:{colour}" aria-hidden="true">'
+                         f'<b>{esc(day)}</b><small>{esc(mon)}</small></span>')
               paid = ' <span class="paid">Paid</span>' if p.get("paid") else ""
               excerpt = f'<p>{esc(p["excerpt"])}</p>' if p.get("excerpt") else ""
               parts.append(
@@ -213,13 +223,17 @@ jobs:
           ol.issues li {{ border-bottom:1px solid var(--line); }}
           ol.issues a {{ display:flex; gap:16px; padding:16px 0; color:inherit; text-decoration:none; }}
           ol.issues a:hover h3 {{ color:var(--accent); }}
-          ol.issues img, .noimg {{ flex:0 0 120px; width:120px; height:80px; object-fit:cover; border-radius:4px; background:#f2f2f2; }}
+          ol.issues img, .tile {{ flex:0 0 120px; width:120px; height:80px; object-fit:cover; border-radius:4px; background:#f2f2f2; }}
+          .tile {{ display:flex; flex-direction:column; align-items:center; justify-content:center; color:#fff;
+                  font-family:system-ui, sans-serif; line-height:1; }}
+          .tile b {{ font-size:28px; font-weight:600; }}
+          .tile small {{ font-size:12px; letter-spacing:.12em; text-transform:uppercase; margin-top:4px; opacity:.85; }}
           time {{ font:13px/1.4 system-ui, sans-serif; color:var(--muted); }}
           h3 {{ font-size:1.15em; line-height:1.3; margin:2px 0 4px; }}
           ol.issues p {{ margin:0; color:var(--muted); font-size:.95em; }}
           .paid {{ font:600 11px/1 system-ui, sans-serif; text-transform:uppercase; letter-spacing:.06em; color:var(--accent);
                   border:1px solid var(--accent); border-radius:3px; padding:2px 5px; vertical-align:middle; }}
-          @media (max-width:520px) {{ ol.issues img, .noimg {{ flex-basis:84px; width:84px; height:64px; }} }}
+          @media (max-width:520px) {{ ol.issues img, .tile {{ flex-basis:84px; width:84px; height:64px; }} .tile b {{ font-size:22px; }} }}
           </style>
           </head>
           <body>
