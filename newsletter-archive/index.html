@@ -4,21 +4,32 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Newsletter archive | David Charles</title>
-<meta name="description" content="Every issue of David Charles's newsletter, with links to read them on Substack.">
+<meta name="description" content="Every issue of David Charles&#x27;s newsletter, with links to read them on Substack.">
 <link rel="canonical" href="https://davidcharles.info/newsletter-archive/">
 <style>
 :root { --ink:#222; --muted:#666; --line:#e6e6e6; --accent:#2f6b4f; }
 * { box-sizing:border-box; }
 body { margin:0; font:17px/1.6 Georgia, "Times New Roman", serif; color:var(--ink); background:#fff; }
-main { max-width:760px; margin:0 auto; padding:32px 20px 64px; }
-.home { font:15px/1.4 system-ui, sans-serif; color:var(--muted); text-decoration:none; }
-.home:hover { color:var(--accent); }
-h1 { font-size:2.1em; line-height:1.2; margin:24px 0 8px; }
-.intro { color:var(--muted); margin:0 0 20px; }
-.subscribe { display:inline-block; font:600 15px/1 system-ui, sans-serif; background:var(--accent); color:#fff;
-             padding:12px 18px; border-radius:6px; text-decoration:none; }
+main { max-width:760px; margin:0 auto; padding:24px 20px 64px; }
+nav.top { display:flex; flex-wrap:wrap; gap:6px 18px; align-items:baseline; padding-bottom:12px;
+          border-bottom:1px solid var(--line); font:15px/1.4 system-ui, sans-serif; }
+nav.top .name { font-weight:700; color:var(--ink); text-decoration:none; margin-right:auto; font-size:17px; }
+nav.top a { color:var(--muted); text-decoration:none; }
+nav.top a:hover, nav.top a[aria-current] { color:var(--accent); }
+h1 { font-size:2.1em; line-height:1.2; margin:28px 0 10px; }
+.intro { margin:0 0 20px; }
+.intro p { margin:0 0 14px; }
+.intro a { color:var(--accent); }
+.muted { color:var(--muted); }
+.buttons { display:flex; flex-wrap:wrap; gap:10px; margin:22px 0 8px; }
+.button { display:inline-block; font:600 15px/1 system-ui, sans-serif; padding:12px 18px; border-radius:6px;
+          text-decoration:none; border:2px solid var(--accent); }
+.button.primary { background:var(--accent); color:#fff; }
+.button.secondary { color:var(--accent); background:#fff; }
 h2 { font:600 14px/1 system-ui, sans-serif; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);
-      margin:40px 0 4px; padding-bottom:8px; border-bottom:1px solid var(--line); }
+     margin:40px 0 4px; padding-bottom:8px; border-bottom:1px solid var(--line); }
+h2.section { font:700 1.5em/1.2 Georgia, serif; letter-spacing:0; text-transform:none; color:var(--ink);
+             border:0; margin:48px 0 0; }
 ol.issues { list-style:none; margin:0; padding:0; }
 ol.issues li { border-bottom:1px solid var(--line); }
 ol.issues a { display:flex; gap:16px; padding:16px 0; color:inherit; text-decoration:none; }
@@ -33,15 +44,30 @@ h3 { font-size:1.15em; line-height:1.3; margin:2px 0 4px; }
 ol.issues p { margin:0; color:var(--muted); font-size:.95em; }
 .paid { font:600 11px/1 system-ui, sans-serif; text-transform:uppercase; letter-spacing:.06em; color:var(--accent);
         border:1px solid var(--accent); border-radius:3px; padding:2px 5px; vertical-align:middle; }
-@media (max-width:520px) { ol.issues img, .tile { flex-basis:84px; width:84px; height:64px; } .tile b { font-size:22px; } }
+.cats { display:flex; flex-wrap:wrap; gap:8px; margin:20px 0 0; padding:0; list-style:none; }
+.cats a { display:inline-block; font:14px/1 system-ui, sans-serif; color:var(--accent); text-decoration:none;
+          border:1px solid var(--line); border-radius:999px; padding:8px 12px; }
+.cats a:hover { border-color:var(--accent); }
+.cats span { color:var(--muted); }
+ul.posts { list-style:none; margin:0; padding:0; }
+ul.posts li { display:flex; gap:16px; padding:8px 0; border-bottom:1px solid var(--line); }
+ul.posts time { flex:0 0 140px; padding-top:3px; white-space:nowrap; }
+ul.posts a { color:var(--ink); text-decoration:none; }
+ul.posts a:hover { color:var(--accent); }
+.back { font:14px/1 system-ui, sans-serif; margin:10px 0 0; }
+.back a { color:var(--muted); }
+@media (max-width:520px) {
+  ol.issues img, .tile { flex-basis:84px; width:84px; height:64px; } .tile b { font-size:22px; }
+  ul.posts li { flex-direction:column; gap:0; } ul.posts time { flex-basis:auto; }
+}
 </style>
 </head>
 <body>
 <main>
-<a class="home" href="/">&larr; davidcharles.info</a>
+<nav class="top"><a class="name" href="/">David Charles</a><a href="/">Home</a><a href="/newsletter-archive/" aria-current="page">Newsletter</a><a href="/blog-archive/">Blog archive</a></nav>
 <h1>Newsletter archive</h1>
-<p class="intro">Every issue of my newsletter, newest first. Click any issue to read it on Substack.</p>
-<a class="subscribe" href="https://davidcharles.substack.com/subscribe">Subscribe on Substack</a>
+<p class="intro muted">Every issue of my newsletter, newest first. Click any issue to read it on Substack.</p>
+<div class="buttons"><a class="button primary" href="https://davidcharles.substack.com/subscribe">Subscribe on Substack</a></div>
 <h2>2026</h2>
 <ol class="issues">
 <li><a href="https://davidcharles.substack.com/p/this-tree-aint-budging"><img src="https://substackcdn.com/image/fetch/$s_!G6sF!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fbbf7e0fa-de3b-4254-97e6-976329ec837e_1880x940.jpeg" alt="" loading="lazy" width="120" height="80"><div><time datetime="2026-11-03">3 November 2026</time><h3>This Tree Ain’t Budging</h3><p>Lunchtime Sublime Solstice Festival 17-21 December</p></div></a></li>
