@@ -1,0 +1,488 @@
+#!/usr/bin/env python3
+"""
+Builds davidcharles.info.
+
+GitHub runs this every evening, and whenever home-intro.html, a post, or
+anything in scripts/ or assets/ changes (see .github/workflows/build-site.yml).
+
+What it does:
+  1. Checks Substack for new newsletter issues  -> newsletter-archive/posts.json
+  2. Rebuilds the homepage, the newsletter archive and the blog archive
+  3. Re-wraps every old blog post and page in the site design. Each post keeps
+     its own words between <!--content:start--> and <!--content:end-->; you can
+     edit those on GitHub and the page is rebuilt around them.
+  4. Rebuilds the category, tag and year pages, Random story, the 404 page and
+     sitemap.xml
+
+The list of blog posts and pages (titles, dates, categories, tags) lives in
+blog-archive/index.json. The look of every page comes from assets/site.css.
+"""
+
+import html
+import json
+import os
+import random
+import re
+import sys
+import urllib.request
+import xml.etree.ElementTree as ET
+from email.utils import parsedate_to_datetime
+from urllib.parse import quote
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+os.chdir(ROOT)
+
+SITE = "https://davidcharles.info"
+SUBSTACK = "https://davidcharles.substack.com"
+GA_ID = "G-07CXWP795E"          # Google Analytics. Set to "" to switch it off.
+CSS_VERSION = "1"               # Bump when assets/site.css changes, so browsers fetch the new one.
+
+NEWSLETTER_DATA = "newsletter-archive/posts.json"
+BLOG_DATA = "blog-archive/index.json"
+INTRO = "home-intro.html"
+
+MONTHS = ["January", "February", "March", "April", "May", "June", "July",
+          "August", "September", "October", "November", "December"]
+TILE_COLOURS = ["#2f6b4f", "#4a7a8c", "#8a6d3b", "#5b6e3a", "#7a4e5c", "#3f5a7a", "#9a5b34", "#4f6f63"]
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                  "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml,application/json;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-GB,en;q=0.9",
+}
+
+changed_files = []
+
+
+# ---------------------------------------------------------------- helpers
+
+def esc(s):
+    return html.escape(s or "", quote=True)
+
+
+def clean(text, limit=220):
+    text = re.sub(r"<[^>]+>", " ", text or "")
+    text = html.unescape(re.sub(r"\s+", " ", text)).strip()
+    if len(text) > limit:
+        text = text[:limit].rsplit(" ", 1)[0].rstrip(",.;:-") + "…"
+    return text
+
+
+def nice(d):
+    try:
+        y, m, day = d[:10].split("-")
+        return f"{int(day)} {MONTHS[int(m) - 1]} {y}"
+    except Exception:
+        return d or ""
+
+
+def file_for(url_path):
+    return os.path.join(url_path.strip("/"), "index.html") if url_path.strip("/") else "index.html"
+
+
+def read(path):
+    return open(path, encoding="utf-8", errors="ignore").read() if os.path.exists(path) else None
+
+
+def write_if_changed(path, text):
+    if read(path) != text:
+        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(text)
+        changed_files.append(path)
+
+
+def slugify(s):
+    return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
+
+
+# ---------------------------------------------------------------- page template
+
+NAV = [("/", "Home"), ("/newsletter-archive/", "Newsletter"), ("/blog-archive/", "Blog archive"),
+       ("/random-story/", "Random story")]
+
+
+def page(title, description, path, body, current=None, image=None, kind="website", noindex=False):
+    nav = "".join(
+        f'<a href="{u}"{" aria-current=" + chr(34) + "page" + chr(34) if u == current else ""}>{esc(t)}</a>'
+        for u, t in NAV)
+    head = [
+        '<!DOCTYPE html>',
+        '<html lang="en-GB">',
+        '<head>',
+        '<meta charset="utf-8">',
+        '<meta name="viewport" content="width=device-width, initial-scale=1">',
+        f'<title>{esc(title)}</title>',
+        f'<meta name="description" content="{esc(description)}">',
+        f'<link rel="canonical" href="{SITE}{esc(path)}">',
+        f'<link rel="stylesheet" href="/assets/site.css?v={CSS_VERSION}">',
+        f'<meta property="og:type" content="{kind}">',
+        f'<meta property="og:title" content="{esc(title)}">',
+        f'<meta property="og:description" content="{esc(description)}">',
+        f'<meta property="og:url" content="{SITE}{esc(path)}">',
+        '<meta property="og:site_name" content="David Charles">',
+    ]
+    if image:
+        img = image if image.startswith("http") else SITE + image
+        head += [f'<meta property="og:image" content="{esc(img)}">',
+                 '<meta name="twitter:card" content="summary_large_image">']
+    if noindex:
+        head.append('<meta name="robots" content="noindex">')
+    if GA_ID:
+        head.append(f'<script async src="https://www.googletagmanager.com/gtag/js?id={GA_ID}"></script>'
+                    "<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}"
+                    f"gtag('js',new Date());gtag('config','{GA_ID}');</script>")
+    return ("\n".join(head) + "\n</head>\n<body>\n<main>\n"
+            f'<nav class="top"><a class="name" href="/">David Charles</a>{nav}</nav>\n'
+            f"{body}\n</main>\n</body>\n</html>\n")
+
+
+def redirect_page(to):
+    return ('<!DOCTYPE html>\n<html lang="en-GB"><head><meta charset="utf-8"><title>Moved</title>'
+            f'<link rel="canonical" href="{SITE if to.startswith("/") else ""}{esc(to)}">'
+            f'<meta http-equiv="refresh" content="0; url={esc(to)}"></head>'
+            f'<body><p><a href="{esc(to)}">This page has moved here.</a></p></body></html>\n')
+
+
+SUBSCRIBE = f'<a class="button primary" href="{SUBSTACK}/subscribe">Subscribe on Substack</a>'
+
+
+# ---------------------------------------------------------------- 1. newsletter
+
+def get(url):
+    req = urllib.request.Request(url, headers=HEADERS)
+    with urllib.request.urlopen(req, timeout=30) as r:
+        return r.read()
+
+
+def from_api():
+    posts, offset = [], 0
+    while offset < 5000:
+        batch = json.loads(get(f"{SUBSTACK}/api/v1/archive?sort=new&offset={offset}&limit=50"))
+        if not isinstance(batch, list) or not batch:
+            break
+        for p in batch:
+            if p.get("type") not in (None, "newsletter", "podcast"):
+                continue
+            title = (p.get("title") or "").strip()
+            if title:
+                posts.append({
+                    "url": p.get("canonical_url") or f"{SUBSTACK}/p/{p.get('slug')}",
+                    "title": title,
+                    "date": (p.get("post_date") or "")[:10],
+                    "excerpt": clean(p.get("subtitle") or p.get("description") or ""),
+                    "image": p.get("cover_image") or "",
+                    "paid": p.get("audience") == "only_paid",
+                })
+        if len(batch) < 50:
+            break
+        offset += 50
+    return posts
+
+
+def from_rss():
+    root = ET.fromstring(get(f"{SUBSTACK}/feed"))
+    posts = []
+    for it in root.iter("item"):
+        title, link = (it.findtext("title") or "").strip(), (it.findtext("link") or "").strip()
+        if not title or not link:
+            continue
+        try:
+            date = parsedate_to_datetime(it.findtext("pubDate")).date().isoformat()
+        except Exception:
+            date = ""
+        enc = it.find("enclosure")
+        img = enc.get("url", "") if enc is not None and (enc.get("type") or "").startswith("image") else ""
+        posts.append({"url": link, "title": title, "date": date,
+                      "excerpt": clean(it.findtext("description")), "image": img, "paid": False})
+    return posts
+
+
+def from_relay():
+    # Substack blocks requests from GitHub's servers, so a free feed-reading
+    # service fetches the RSS for us. It only carries the latest ~10 issues.
+    data = json.loads(get("https://api.rss2json.com/v1/api.json?rss_url=" + quote(f"{SUBSTACK}/feed", safe="")))
+    if data.get("status") != "ok":
+        raise RuntimeError(data.get("message") or "relay error")
+    posts = []
+    for it in data.get("items", []):
+        title, link = (it.get("title") or "").strip(), (it.get("link") or "").strip()
+        if not title or not link:
+            continue
+        enc = it.get("enclosure") or {}
+        img = it.get("thumbnail") or (enc.get("link", "") if str(enc.get("type", "")).startswith("image") else "")
+        posts.append({"url": link, "title": title, "date": (it.get("pubDate") or "")[:10],
+                      "excerpt": clean(it.get("description")), "image": img, "paid": False})
+    return posts
+
+
+def update_newsletter(offline=False):
+    key = lambda u: u.split("?")[0].split("#")[0].rstrip("/").lower()
+    known = {}
+    if os.path.exists(NEWSLETTER_DATA):
+        for p in json.load(open(NEWSLETTER_DATA, encoding="utf-8")):
+            known[key(p["url"])] = p
+    fetched, errors = [], []
+    if not offline:
+        for source in (from_api, from_rss, from_relay):
+            if source is from_relay and fetched:
+                break
+            try:
+                got = source()
+                print(f"{source.__name__}: {len(got)} issues")
+                fetched += got
+            except Exception as e:
+                errors.append(f"{source.__name__}: {e}")
+    if not fetched and not known:
+        sys.exit("Could not read Substack: " + "; ".join(errors))
+    for e in errors:
+        print("Note:", e)
+    for p in fetched:
+        merged = dict(known.get(key(p["url"]), {}))
+        merged.update({k: v for k, v in p.items() if v or k == "paid"})
+        known[key(p["url"])] = merged
+    issues = sorted(known.values(), key=lambda p: (p.get("date", ""), p["title"]), reverse=True)
+    write_if_changed(NEWSLETTER_DATA, json.dumps(issues, ensure_ascii=False, indent=1))
+    print(f"{len(issues)} newsletter issues")
+    return issues
+
+
+def issue_list(items):
+    parts, year = [], None
+    for p in items:
+        y = (p.get("date") or "")[:4] or "Undated"
+        if y != year:
+            if year is not None:
+                parts.append("</ol>")
+            parts.append(f'<h2>{esc(y)}</h2>\n<ol class="issues">')
+            year = y
+        if p.get("image"):
+            img = f'<img src="{esc(p["image"])}" alt="" loading="lazy" decoding="async" width="120" height="80">'
+        else:
+            colour = TILE_COLOURS[sum(map(ord, p["title"])) % len(TILE_COLOURS)]
+            d = p.get("date") or ""
+            day = str(int(d[8:10])) if len(d) >= 10 else ""
+            mon = MONTHS[int(d[5:7]) - 1][:3] if len(d) >= 7 else ""
+            img = (f'<span class="tile" style="background:{colour}" aria-hidden="true">'
+                   f'<b>{esc(day)}</b><small>{esc(mon)}</small></span>')
+        paid = ' <span class="paid">Paid</span>' if p.get("paid") else ""
+        excerpt = f'<p>{esc(p["excerpt"])}</p>' if p.get("excerpt") else ""
+        parts.append(
+            f'<li><a href="{esc(p["url"])}">{img}<div>'
+            f'<time datetime="{esc(p.get("date"))}">{esc(nice(p.get("date", "")))}</time>'
+            f'<h3>{esc(p["title"])}{paid}</h3>{excerpt}</div></a></li>')
+    if year is not None:
+        parts.append("</ol>")
+    return "\n".join(parts)
+
+
+# ---------------------------------------------------------------- 2. blog posts and pages
+
+def post_rows(items):
+    return '<ul class="posts">' + "".join(
+        f'<li><time datetime="{esc(p["date"])}">{esc(nice(p["date"]))}</time>'
+        f'<a href="{esc(p["url"])}">{esc(p["title"])}</a></li>' for p in items) + "</ul>"
+
+
+def chips(items):
+    return '<ul class="chips">' + "".join(
+        f'<li><a href="{esc(u)}">{esc(n)} <span>{c}</span></a></li>' for u, n, c in items) + "</ul>"
+
+
+CONTENT_RE = re.compile(r"<!--content:start-->(.*?)<!--content:end-->", re.S)
+COMMENTS_RE = re.compile(r"<!--comments:start-->(.*?)<!--comments:end-->", re.S)
+
+
+def wrap_entry(e, older, newer):
+    path = file_for(e["url"])
+    s = read(path)
+    if s is None:
+        print("Missing file for", e["url"])
+        return
+    m = CONTENT_RE.search(s)
+    if not m:
+        print("No <!--content:start--> marker in", path, "- left as it is")
+        return
+    content = m.group(1)
+    c = COMMENTS_RE.search(s)
+    comments = c.group(1) if c else ""
+
+    meta = ""
+    if e["type"] == "post":
+        cats = ", ".join(f'<a href="{esc(x["url"])}">{esc(x["name"])}</a>' for x in e.get("cats", []))
+        meta = (f'<p class="meta"><time datetime="{esc(e["date"])}">{esc(nice(e["date"]))}</time>'
+                + (f" &middot; {cats}" if cats else "") + "</p>")
+    body = [f'<article class="entry">\n<header class="entry-head"><h1>{esc(e["title"])}</h1>{meta}</header>',
+            f'<div class="entry-content">\n<!--content:start-->{content}<!--content:end-->\n</div>']
+    if e["type"] == "post":
+        body.append(
+            '<aside class="newsletter-box"><p><strong>Enjoyed this?</strong> These days I write a free newsletter '
+            'on Substack about adventure, nature and how to be human.</p>'
+            f'<div class="buttons">{SUBSCRIBE}'
+            '<a class="button secondary" href="/newsletter-archive/">Read past issues</a></div></aside>')
+        if e.get("tags"):
+            body.append('<p class="tags">Tagged: ' + ", ".join(
+                f'<a href="{esc(t["url"])}">{esc(t["name"])}</a>' for t in e["tags"]) + "</p>")
+    if comments.strip():
+        n = len(re.findall(r'<li id="comment-', comments))
+        body.append(f'<section class="comments"><h2 class="section">{n} comment{"s" if n != 1 else ""}</h2>\n'
+                    f"<!--comments:start-->{comments}<!--comments:end-->\n</section>")
+    if e["type"] == "post" and (older or newer):
+        links = ""
+        if older:
+            links += f'<a class="prev" href="{esc(older["url"])}"><small>&larr; Older</small>{esc(older["title"])}</a>'
+        else:
+            links += "<span></span>"
+        if newer:
+            links += f'<a class="next" href="{esc(newer["url"])}"><small>Newer &rarr;</small>{esc(newer["title"])}</a>'
+        body.append(f'<nav class="post-nav">{links}</nav>')
+    body.append("</article>")
+    description = e.get("excerpt") or e["title"]
+    write_if_changed(path, page(f'{e["title"]} | David Charles', description, e["url"], "\n".join(body),
+                                image=e.get("image"), kind="article" if e["type"] == "post" else "website"))
+
+
+def build_blog(entries):
+    posts = sorted([e for e in entries if e["type"] == "post"], key=lambda p: (p["date"], p["title"]))
+    for i, e in enumerate(posts):
+        wrap_entry(e, posts[i - 1] if i > 0 else None, posts[i + 1] if i + 1 < len(posts) else None)
+    for e in entries:
+        if e["type"] == "page":
+            wrap_entry(e, None, None)
+    posts.reverse()                                   # newest first from here on
+    years = sorted({p["date"][:4] for p in posts if p["date"]}, reverse=True)
+
+    # Categories (including sub-categories)
+    cats = {}
+    for p in posts:
+        for c in p.get("cats", []):
+            cats.setdefault(c["url"], {"name": c["name"], "posts": []})["posts"].append(p)
+    top_cats = sorted([u for u in cats if u.count("/") == 3], key=lambda u: (cats[u]["name"] == "Uncategorised",
+                                                                              cats[u]["name"].lower()))
+    for u, c in cats.items():
+        subs = sorted([s for s in cats if s.startswith(u) and s != u and s.count("/") == u.count("/") + 1],
+                      key=lambda s: cats[s]["name"].lower())
+        parent = u.rsplit("/", 2)[0] + "/"
+        crumbs = (f'<p class="meta crumbs"><a href="/blog-archive/">Blog archive</a>'
+                  + (f' &rsaquo; <a href="{esc(parent)}">{esc(cats[parent]["name"])}</a>' if parent in cats else "")
+                  + "</p>")
+        body = (f'{crumbs}<h1>{esc(c["name"])}</h1>\n'
+                f'<p class="intro muted">{len(c["posts"])} posts, newest first.</p>\n'
+                + (chips([(s, cats[s]["name"], len(cats[s]["posts"])) for s in subs]) if subs else "")
+                + "<h2>All posts</h2>\n" + post_rows(c["posts"]))
+        write_if_changed(file_for(u), page(f'{c["name"]} | David Charles',
+                                           f'{len(c["posts"])} posts from David Charles\'s blog about {c["name"]}.',
+                                           u, body))
+
+    # Tags
+    tags = {}
+    for p in posts:
+        for t in p.get("tags", []):
+            tags.setdefault(t["url"], {"name": t["name"], "posts": []})["posts"].append(p)
+    for u, t in tags.items():
+        n = len(t["posts"])
+        body = (f'<p class="meta crumbs"><a href="/blog-archive/">Blog archive</a> &rsaquo; Tagged</p>'
+                f'<h1>{esc(t["name"])}</h1>\n<p class="intro muted">{n} post{"s" if n != 1 else ""} tagged '
+                f'&ldquo;{esc(t["name"])}&rdquo;.</p>\n' + post_rows(t["posts"]))
+        write_if_changed(file_for(u), page(f'Posts tagged {t["name"]} | David Charles',
+                                           f'Posts by David Charles tagged {t["name"]}.', u, body,
+                                           noindex=n < 3))
+
+    # Years
+    year_chips = chips([(f"/{y}/", y, sum(1 for p in posts if p["date"].startswith(y))) for y in years])
+    for y in years:
+        ps = [p for p in posts if p["date"].startswith(y)]
+        body = (f'<p class="meta crumbs"><a href="/blog-archive/">Blog archive</a></p><h1>{y}</h1>\n'
+                f'<p class="intro muted">{len(ps)} posts from {y}.</p>\n{year_chips}\n<h2>All posts</h2>\n'
+                + post_rows(ps))
+        write_if_changed(file_for(f"/{y}/"), page(f"{y} | David Charles", f"Blog posts by David Charles from {y}.",
+                                                  f"/{y}/", body))
+
+    # Blog archive
+    pages = sorted([e for e in entries if e["type"] == "page" and e.get("listed", True)],
+                   key=lambda e: e["title"].lower())
+    by_year = []
+    for y in years:
+        by_year.append(f'<h2 id="y{y}"><a href="/{y}/">{y}</a></h2>\n'
+                       + post_rows([p for p in posts if p["date"].startswith(y)]))
+    first, last = (years[-1], years[0]) if years else ("", "")
+    body = (
+        "<h1>Blog archive</h1>\n"
+        f'<p class="intro muted">{len(posts)} posts written between {first} and {last}. For new writing, see the '
+        '<a href="/newsletter-archive/">newsletter</a>.</p>\n'
+        '<h2 class="section">Pages</h2>\n<ul class="pages">'
+        + "".join(f'<li><a href="{esc(e["url"])}">{esc(e["title"])}</a></li>' for e in pages) + "</ul>\n"
+        '<h2 class="section">Categories</h2>\n'
+        + chips([(u, cats[u]["name"], len(cats[u]["posts"])) for u in top_cats]) + "\n"
+        '<h2 class="section">Years</h2>\n' + year_chips + "\n"
+        '<h2 class="section">Every post</h2>\n' + "\n".join(by_year))
+    write_if_changed("blog-archive/index.html",
+                     page("Blog archive | David Charles", f"All {len(posts)} posts from David Charles's blog.",
+                          "/blog-archive/", body, "/blog-archive/"))
+
+    # Random story
+    urls = json.dumps([p["url"] for p in posts])
+    write_if_changed("random-story/index.html", page(
+        "Random story | David Charles", "A random story from David Charles's blog.", "/random-story/",
+        '<p class="intro"><a href="/blog-archive/">Finding you a random story&hellip;</a></p>'
+        f"<script>var u={urls};location.replace(u[Math.floor(Math.random()*u.length)]);</script>",
+        "/random-story/", noindex=True))
+    return posts, pages, cats, years
+
+
+# ---------------------------------------------------------------- 3. homepage, newsletter page, extras
+
+def build_home(issues, posts):
+    if not os.path.exists(INTRO):
+        with open(INTRO, "w", encoding="utf-8") as f:
+            f.write("<!-- Edit the words below. This becomes the top of the homepage. -->\n"
+                    "<h1>Hello, I'm David Charles</h1>\n<p>Write something here.</p>\n")
+    intro = re.sub(r"<!--.*?-->\s*", "", read(INTRO), flags=re.S).strip()
+    body = (f'<div class="intro">\n{intro}\n</div>\n'
+            f'<div class="buttons">{SUBSCRIBE}'
+            '<a class="button secondary" href="/blog-archive/">Browse the blog archive</a></div>\n'
+            '<h2 class="section" id="newsletter">The newsletter</h2>\n' + issue_list(issues))
+    write_if_changed("index.html", page(
+        "David Charles", "Writer and outdoor instructor. Read every issue of my newsletter, and the archive of my blog.",
+        "/", body, "/"))
+    body = ("<h1>Newsletter archive</h1>\n"
+            '<p class="intro muted">Every issue of my newsletter, newest first. Click any issue to read it on '
+            f'Substack.</p>\n<div class="buttons">{SUBSCRIBE}</div>\n' + issue_list(issues))
+    write_if_changed("newsletter-archive/index.html", page(
+        "Newsletter archive | David Charles",
+        "Every issue of David Charles's newsletter, with links to read them on Substack.",
+        "/newsletter-archive/", body, "/newsletter-archive/"))
+
+
+def build_extras(posts, pages, cats, years):
+    body = ('<h1>Page not found</h1>\n<p class="intro">Sorry, there\'s nothing at this address. '
+            'It may have moved when this site stopped using WordPress.</p>\n'
+            '<div class="buttons"><a class="button primary" href="/blog-archive/">Browse the blog archive</a>'
+            '<a class="button secondary" href="/">Go to the homepage</a></div>')
+    write_if_changed("404.html", page("Page not found | David Charles", "Page not found.", "/404.html", body,
+                                      noindex=True))
+    urls = [("/", ""), ("/newsletter-archive/", ""), ("/blog-archive/", "")]
+    urls += [(p["url"], p["date"]) for p in posts] + [(p["url"], "") for p in pages]
+    urls += [(u, "") for u in cats] + [(f"/{y}/", "") for y in years]
+    xml = ['<?xml version="1.0" encoding="UTF-8"?>',
+           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    for u, d in urls:
+        xml.append(f"<url><loc>{SITE}{esc(u)}</loc>" + (f"<lastmod>{d[:10]}</lastmod>" if d else "") + "</url>")
+    xml.append("</urlset>")
+    write_if_changed("sitemap.xml", "\n".join(xml) + "\n")
+    write_if_changed("robots.txt", f"User-agent: *\nAllow: /\nSitemap: {SITE}/sitemap.xml\n")
+
+
+# ---------------------------------------------------------------- run
+
+if __name__ == "__main__":
+    offline = "--offline" in sys.argv          # skip Substack (for testing)
+    issues = update_newsletter(offline)
+    entries = json.load(open(BLOG_DATA, encoding="utf-8"))
+    posts, pages, cats, years = build_blog(entries)
+    build_home(issues, posts)
+    build_extras(posts, pages, cats, years)
+    print(f"{len(posts)} blog posts, {len(pages)} pages, {len(cats)} categories")
+    print(f"{len(changed_files)} files updated")
+    for f in changed_files[:20]:
+        print("  ", f)

@@ -1,0 +1,174 @@
+/* davidcharles.info: one stylesheet for every page */
+
+:root {
+  --ink: #222;
+  --muted: #666;
+  --line: #e6e6e6;
+  --soft: #f6f5f2;
+  --accent: #2f6b4f;
+  --ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --serif: Georgia, "Times New Roman", serif;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; font: 17px/1.6 var(--serif); color: var(--ink); background: #fff; }
+main { max-width: 760px; margin: 0 auto; padding: 24px 20px 64px; }
+a { color: var(--accent); }
+img, video, iframe, embed, object { max-width: 100%; }
+img { height: auto; }
+
+/* ---------- Top menu ---------- */
+nav.top { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: baseline; padding-bottom: 12px;
+          border-bottom: 1px solid var(--line); font: 15px/1.4 var(--ui); }
+nav.top .name { font-weight: 700; color: var(--ink); text-decoration: none; margin-right: auto; font-size: 17px; }
+nav.top a { color: var(--muted); text-decoration: none; }
+nav.top a:hover, nav.top a[aria-current] { color: var(--accent); }
+
+/* ---------- Headings and general text ---------- */
+h1 { font-size: 2.1em; line-height: 1.2; margin: 28px 0 10px; }
+.intro { margin: 0 0 20px; }
+.intro p { margin: 0 0 14px; }
+.muted { color: var(--muted); }
+h2 { font: 600 14px/1 var(--ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+     margin: 40px 0 4px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+h2.section { font: 700 1.5em/1.2 var(--serif); letter-spacing: 0; text-transform: none; color: var(--ink);
+             border: 0; margin: 48px 0 0; }
+h2 a { color: inherit; text-decoration: none; }
+time { font: 13px/1.4 var(--ui); color: var(--muted); }
+
+/* ---------- Buttons ---------- */
+.buttons { display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0 8px; }
+.button { display: inline-block; font: 600 15px/1 var(--ui); padding: 12px 18px; border-radius: 6px;
+          text-decoration: none; border: 2px solid var(--accent); }
+.button.primary { background: var(--accent); color: #fff; }
+.button.secondary { color: var(--accent); background: #fff; }
+
+/* ---------- Newsletter issue list ---------- */
+ol.issues { list-style: none; margin: 0; padding: 0; }
+ol.issues li { border-bottom: 1px solid var(--line); }
+ol.issues a { display: flex; gap: 16px; padding: 16px 0; color: inherit; text-decoration: none; }
+ol.issues a:hover h3 { color: var(--accent); }
+ol.issues img, .tile { flex: 0 0 120px; width: 120px; height: 80px; object-fit: cover; border-radius: 4px; background: #f2f2f2; }
+.tile { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff;
+        font-family: var(--ui); line-height: 1; }
+.tile b { font-size: 28px; font-weight: 600; }
+.tile small { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; margin-top: 4px; opacity: .85; }
+ol.issues h3 { font-size: 1.15em; line-height: 1.3; margin: 2px 0 4px; }
+ol.issues p { margin: 0; color: var(--muted); font-size: .95em; }
+.paid { font: 600 11px/1 var(--ui); text-transform: uppercase; letter-spacing: .06em; color: var(--accent);
+        border: 1px solid var(--accent); border-radius: 3px; padding: 2px 5px; vertical-align: middle; }
+
+/* ---------- Blog post lists (archive, categories, tags, years) ---------- */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 0; padding: 0; list-style: none; }
+.chips a { display: inline-block; font: 14px/1 var(--ui); color: var(--accent); text-decoration: none;
+           border: 1px solid var(--line); border-radius: 999px; padding: 8px 12px; background: #fff; }
+.chips a:hover { border-color: var(--accent); }
+.chips span { color: var(--muted); }
+ul.posts { list-style: none; margin: 0; padding: 0; }
+ul.posts li { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+ul.posts time { flex: 0 0 140px; padding-top: 3px; white-space: nowrap; }
+ul.posts a { color: var(--ink); text-decoration: none; }
+ul.posts a:hover { color: var(--accent); }
+ul.pages { columns: 2 240px; column-gap: 32px; list-style: none; margin: 12px 0 0; padding: 0; }
+ul.pages li { break-inside: avoid; padding: 6px 0; border-bottom: 1px solid var(--line); }
+ul.pages a { color: var(--ink); text-decoration: none; }
+ul.pages a:hover { color: var(--accent); }
+.back { font: 14px/1 var(--ui); margin: 10px 0 0; }
+.back a { color: var(--muted); }
+
+/* ---------- A single post or page ---------- */
+.entry-head h1 { margin-bottom: 6px; }
+.meta { font: 14px/1.5 var(--ui); color: var(--muted); margin: 0 0 24px; }
+.meta a { color: var(--muted); }
+.crumbs { margin: 20px 0 0; }
+.meta a:hover { color: var(--accent); }
+.entry-content { overflow-wrap: break-word; }
+.entry-content::after { content: ""; display: block; clear: both; }
+.entry-content p { margin: 0 0 1.1em; }
+.entry-content h1, .entry-content h2, .entry-content h3, .entry-content h4, .entry-content h5, .entry-content h6 {
+  font-family: var(--serif); color: var(--ink); text-transform: none; letter-spacing: 0; border: 0; padding: 0;
+  line-height: 1.25; margin: 1.6em 0 .5em; }
+.entry-content h1 { font-size: 1.7em; }
+.entry-content h2 { font-size: 1.45em; font-weight: 700; }
+.entry-content h3 { font-size: 1.25em; }
+.entry-content h4 { font-size: 1.1em; }
+.entry-content h5, .entry-content h6 { font-size: 1em; }
+.entry-content ul, .entry-content ol { padding-left: 1.4em; margin: 0 0 1.1em; }
+.entry-content li { margin: 0 0 .3em; }
+.entry-content blockquote, .entry-content .wp-block-quote { margin: 1.4em 0; padding: .2em 0 .2em 1.1em;
+  border-left: 3px solid var(--accent); color: #444; font-style: italic; }
+.entry-content blockquote p:last-child { margin-bottom: 0; }
+.entry-content .pullquote { font-size: 1.25em; text-align: center; border: 0; margin: 1.6em 0; }
+.entry-content hr, .entry-content .wp-block-separator { border: 0; border-top: 1px solid var(--line); margin: 2em 0; }
+.entry-content table { border-collapse: collapse; width: 100%; margin: 0 0 1.4em; font-size: .95em; }
+.entry-content td, .entry-content th { border: 1px solid var(--line); padding: 6px 8px; vertical-align: top; }
+.entry-content pre { overflow-x: auto; background: var(--soft); padding: 12px; font-size: .9em; }
+.entry-content figure { margin: 1.4em 0; }
+.entry-content figure img, .entry-content p > img:only-child { display: block; }
+.entry-content figcaption, .entry-content .wp-caption-text, .entry-content .image-caption, .entry-content .gallery-caption {
+  font: 14px/1.45 var(--ui); color: var(--muted); margin: 6px 0 0; text-align: left; }
+.entry-content .wp-caption { max-width: 100% !important; margin: 1.4em 0; }
+.entry-content .featured { margin: 0 0 1.6em; }
+.entry-content .featured img { width: 100%; border-radius: 4px; }
+.entry-content iframe { display: block; margin: 1.4em 0; border: 0; }
+.entry-content iframe[src*="youtube"], .entry-content iframe[src*="vimeo"] { width: 100%; aspect-ratio: 16 / 9; height: auto; }
+.entry-content .youtube-wrap, .entry-content .youtube-inner { max-width: 100%; }
+
+/* WordPress image alignment */
+.alignleft { float: left; margin: .3em 1.4em 1em 0; }
+.alignright { float: right; margin: .3em 0 1em 1.4em; }
+.aligncenter { display: block; margin-left: auto; margin-right: auto; }
+img.alignleft.size-full, img.alignright.size-full, img.alignleft.size-large, img.alignright.size-large,
+.wp-caption.alignleft, .wp-caption.alignright { float: none; margin: 1.4em 0; }
+
+/* WordPress galleries */
+.gallery, .wp-block-gallery, .blocks-gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px; margin: 1.4em 0; padding: 0; list-style: none; }
+.gallery-item, .blocks-gallery-item { margin: 0; }
+.gallery-item img, .blocks-gallery-item img { width: 100%; height: 150px; object-fit: cover; border-radius: 3px; }
+.gallery br { display: none; }
+
+/* Footnotes copied over from Substack */
+.footnote { font-size: .9em; color: var(--muted); }
+.footnote-anchor, .footnote-number { font: 600 12px/1 var(--ui); text-decoration: none; vertical-align: super; }
+
+/* Newsletter box at the end of posts */
+.newsletter-box { margin: 40px 0 0; padding: 20px 22px; background: var(--soft); border-radius: 8px; }
+.newsletter-box p { margin: 0 0 12px; }
+.newsletter-box .buttons { margin: 0; }
+
+.tags { font: 14px/1.6 var(--ui); color: var(--muted); margin: 20px 0 0; }
+.tags a { color: var(--muted); }
+
+/* Old comments (read-only) */
+.comments ol { list-style: none; margin: 0; padding: 0; }
+.comments ol ol { margin-left: 24px; }
+.comments li > article { padding: 16px 0; border-bottom: 1px solid var(--line); }
+.comments .comment-meta { font: 14px/1.4 var(--ui); color: var(--muted); margin-bottom: 6px; }
+.comments .comment-author b { color: var(--ink); }
+.comments .comment-metadata, .comments .comment-metadata a { color: var(--muted); text-decoration: none; }
+.comments .comment-content p { margin: 0 0 .7em; }
+.comments .says { display: none; }
+
+/* Older / newer post links */
+.post-nav { display: flex; gap: 16px; justify-content: space-between; margin: 48px 0 0; padding-top: 16px;
+            border-top: 1px solid var(--line); }
+.post-nav a { flex: 1 1 0; color: var(--ink); text-decoration: none; }
+.post-nav a:hover { color: var(--accent); }
+.post-nav small { display: block; font: 13px/1.4 var(--ui); color: var(--muted); }
+.post-nav .next { text-align: right; }
+
+.screen-reader-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+@media (max-width: 600px) {
+  body { font-size: 16.5px; }
+  nav.top .name { flex-basis: 100%; }
+  h1 { font-size: 1.75em; }
+  ol.issues img, .tile { flex-basis: 84px; width: 84px; height: 64px; }
+  .tile b { font-size: 22px; }
+  ul.posts li { flex-direction: column; gap: 0; }
+  ul.posts time { flex-basis: auto; }
+  .alignleft, .alignright { float: none; margin: 1.2em 0; }
+  .post-nav { flex-direction: column; }
+  .post-nav .next { text-align: left; }
+}
