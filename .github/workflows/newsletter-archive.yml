@@ -1,0 +1,231 @@
+# Save this in your site repository as:  .github/workflows/newsletter-archive.yml
+#
+# Every evening this checks your Substack for new issues and keeps the page
+# davidcharles.info/newsletter-archive/ up to date: title, date, short excerpt
+# and a link to read each issue on Substack. The first run back-fills every
+# public issue it can find. To run it straight away: Actions tab ->
+# "Update newsletter archive" -> "Run workflow".
+
+name: Update newsletter archive
+
+on:
+  schedule:
+    - cron: '17 21 * * *'   # every day at 21:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: newsletter-archive
+  cancel-in-progress: false
+
+env:
+  SUBSTACK_URL: https://davidcharles.substack.com
+  OUT_DIR: newsletter-archive
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Fetch issues and rebuild the page
+        run: |
+          python - <<'PY'
+          import html, json, os, re, sys, urllib.request
+          import xml.etree.ElementTree as ET
+          from email.utils import parsedate_to_datetime
+
+          PUB = os.environ["SUBSTACK_URL"].rstrip("/")
+          OUT_DIR = os.environ["OUT_DIR"]
+          DATA = os.path.join(OUT_DIR, "posts.json")
+          PAGE = os.path.join(OUT_DIR, "index.html")
+          UA = "Mozilla/5.0 (compatible; davidcharles.info newsletter archive)"
+
+          def get(url):
+              req = urllib.request.Request(url, headers={"User-Agent": UA})
+              with urllib.request.urlopen(req, timeout=30) as r:
+                  return r.read()
+
+          def clean(text, limit=220):
+              text = re.sub(r"<[^>]+>", " ", text or "")
+              text = html.unescape(re.sub(r"\s+", " ", text)).strip()
+              if len(text) > limit:
+                  text = text[:limit].rsplit(" ", 1)[0].rstrip(",.;:-") + "…"
+              return text
+
+          def key(url):
+              return url.split("?")[0].split("#")[0].rstrip("/").lower()
+
+          def from_api():
+              posts, offset = [], 0
+              while offset < 5000:
+                  batch = json.loads(get(f"{PUB}/api/v1/archive?sort=new&offset={offset}&limit=50"))
+                  if not isinstance(batch, list) or not batch:
+                      break
+                  for p in batch:
+                      if p.get("type") not in (None, "newsletter", "podcast"):
+                          continue
+                      title = (p.get("title") or "").strip()
+                      if not title:
+                          continue
+                      posts.append({
+                          "url": p.get("canonical_url") or f"{PUB}/p/{p.get('slug')}",
+                          "title": title,
+                          "date": (p.get("post_date") or "")[:10],
+                          "excerpt": clean(p.get("subtitle") or p.get("description") or ""),
+                          "image": p.get("cover_image") or "",
+                          "paid": p.get("audience") == "only_paid",
+                      })
+                  if len(batch) < 50:
+                      break
+                  offset += 50
+              return posts
+
+          def from_rss():
+              root = ET.fromstring(get(f"{PUB}/feed"))
+              posts = []
+              for it in root.iter("item"):
+                  title = (it.findtext("title") or "").strip()
+                  link = (it.findtext("link") or "").strip()
+                  if not title or not link:
+                      continue
+                  try:
+                      date = parsedate_to_datetime(it.findtext("pubDate")).date().isoformat()
+                  except Exception:
+                      date = ""
+                  enc = it.find("enclosure")
+                  img = enc.get("url", "") if enc is not None and (enc.get("type") or "").startswith("image") else ""
+                  posts.append({"url": link, "title": title, "date": date,
+                                "excerpt": clean(it.findtext("description")), "image": img, "paid": False})
+              return posts
+
+          # Load what we already have, so issues are never lost even if the feed drops them
+          known = {}
+          if os.path.exists(DATA):
+              with open(DATA, encoding="utf-8") as f:
+                  for p in json.load(f):
+                      known[key(p["url"])] = p
+
+          fetched, errors = [], []
+          for source in (from_api, from_rss):
+              try:
+                  fetched += source()
+              except Exception as e:
+                  errors.append(f"{source.__name__}: {e}")
+          if not fetched and not known:
+              sys.exit("Could not read Substack: " + "; ".join(errors))
+          for e in errors:
+              print("Note:", e)
+
+          for p in fetched:
+              old = known.get(key(p["url"]), {})
+              merged = dict(old)
+              merged.update({k: v for k, v in p.items() if v or k == "paid"})
+              known[key(p["url"])] = merged
+
+          posts = sorted(known.values(), key=lambda p: (p.get("date", ""), p["title"]), reverse=True)
+          print(f"{len(posts)} issues in the archive")
+
+          esc = lambda s: html.escape(s or "", quote=True)
+          months = ["January","February","March","April","May","June","July",
+                    "August","September","October","November","December"]
+          def nice(d):
+              try:
+                  y, m, day = d.split("-")
+                  return f"{int(day)} {months[int(m) - 1]} {y}"
+              except Exception:
+                  return d
+
+          parts, year = [], None
+          for p in posts:
+              y = (p.get("date") or "")[:4] or "Undated"
+              if y != year:
+                  if year is not None:
+                      parts.append("</ol>")
+                  parts.append(f'<h2>{esc(y)}</h2>\n<ol class="issues">')
+                  year = y
+              img = (f'<img src="{esc(p["image"])}" alt="" loading="lazy" width="120" height="80">'
+                     if p.get("image") else '<span class="noimg"></span>')
+              paid = ' <span class="paid">Paid</span>' if p.get("paid") else ""
+              excerpt = f'<p>{esc(p["excerpt"])}</p>' if p.get("excerpt") else ""
+              parts.append(
+                  f'<li><a href="{esc(p["url"])}">{img}<div>'
+                  f'<time datetime="{esc(p.get("date"))}">{esc(nice(p.get("date", "")))}</time>'
+                  f'<h3>{esc(p["title"])}{paid}</h3>{excerpt}</div></a></li>')
+          if year is not None:
+              parts.append("</ol>")
+
+          page = f"""<!DOCTYPE html>
+          <html lang="en-GB">
+          <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>Newsletter archive | David Charles</title>
+          <meta name="description" content="Every issue of David Charles's newsletter, with links to read them on Substack.">
+          <link rel="canonical" href="https://davidcharles.info/{OUT_DIR}/">
+          <style>
+          :root {{ --ink:#222; --muted:#666; --line:#e6e6e6; --accent:#2f6b4f; }}
+          * {{ box-sizing:border-box; }}
+          body {{ margin:0; font:17px/1.6 Georgia, "Times New Roman", serif; color:var(--ink); background:#fff; }}
+          main {{ max-width:760px; margin:0 auto; padding:32px 20px 64px; }}
+          .home {{ font:15px/1.4 system-ui, sans-serif; color:var(--muted); text-decoration:none; }}
+          .home:hover {{ color:var(--accent); }}
+          h1 {{ font-size:2.1em; line-height:1.2; margin:24px 0 8px; }}
+          .intro {{ color:var(--muted); margin:0 0 20px; }}
+          .subscribe {{ display:inline-block; font:600 15px/1 system-ui, sans-serif; background:var(--accent); color:#fff;
+                       padding:12px 18px; border-radius:6px; text-decoration:none; }}
+          h2 {{ font:600 14px/1 system-ui, sans-serif; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);
+                margin:40px 0 4px; padding-bottom:8px; border-bottom:1px solid var(--line); }}
+          ol.issues {{ list-style:none; margin:0; padding:0; }}
+          ol.issues li {{ border-bottom:1px solid var(--line); }}
+          ol.issues a {{ display:flex; gap:16px; padding:16px 0; color:inherit; text-decoration:none; }}
+          ol.issues a:hover h3 {{ color:var(--accent); }}
+          ol.issues img, .noimg {{ flex:0 0 120px; width:120px; height:80px; object-fit:cover; border-radius:4px; background:#f2f2f2; }}
+          time {{ font:13px/1.4 system-ui, sans-serif; color:var(--muted); }}
+          h3 {{ font-size:1.15em; line-height:1.3; margin:2px 0 4px; }}
+          ol.issues p {{ margin:0; color:var(--muted); font-size:.95em; }}
+          .paid {{ font:600 11px/1 system-ui, sans-serif; text-transform:uppercase; letter-spacing:.06em; color:var(--accent);
+                  border:1px solid var(--accent); border-radius:3px; padding:2px 5px; vertical-align:middle; }}
+          @media (max-width:520px) {{ ol.issues img, .noimg {{ flex-basis:84px; width:84px; height:64px; }} }}
+          </style>
+          </head>
+          <body>
+          <main>
+          <a class="home" href="/">&larr; davidcharles.info</a>
+          <h1>Newsletter archive</h1>
+          <p class="intro">Every issue of my newsletter, newest first. Click any issue to read it on Substack.</p>
+          <a class="subscribe" href="{esc(PUB)}/subscribe">Subscribe on Substack</a>
+          {chr(10).join(parts)}
+          </main>
+          </body>
+          </html>
+          """
+          os.makedirs(OUT_DIR, exist_ok=True)
+          old_page = open(PAGE, encoding="utf-8").read() if os.path.exists(PAGE) else ""
+          if page != old_page:
+              with open(PAGE, "w", encoding="utf-8") as f:
+                  f.write(page)
+              with open(DATA, "w", encoding="utf-8") as f:
+                  json.dump(posts, f, ensure_ascii=False, indent=1)
+              print("Page updated")
+          else:
+              print("No new issues")
+          PY
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add "$OUT_DIR"
+          if git diff --cached --quiet; then
+            echo "Nothing to commit."
+          else
+            git commit -m "Update newsletter archive"
+            git push
+          fi
