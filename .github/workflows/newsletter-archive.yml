@@ -433,6 +433,18 @@ jobs:
           WIDGETS_RE = re.compile(r'<div id="widget-area".*?</div><!-- \.widget-area -->', re.S)
           DEAD_SCRIPTS = re.compile(
               r'<script[^>]+src="[^"]*(?:akismet-frontend|comment-reply\.min|wp-emoji-release)[^"]*"[^>]*></script>\s*')
+          # The "Leave a Reply" form (can't send anything now) and the Reply links on old comments.
+          # The old comments themselves are kept.
+          COMMENT_FORM = re.compile(
+              r'<div id="respond".*?<!-- #respond -->\s*(?:<p class="akismet_comment_form_privacy_notice">.*?</p>\s*)?', re.S)
+          REPLY_LINKS = re.compile(r'<div class="reply"><a [^>]*class="comment-reply-link".*?</a>\s*</div>', re.S)
+          # The embedded Substack sign-up box loads a whole Substack page inside every post;
+          # a plain button does the same job instantly
+          SUBSTACK_EMBED = re.compile(r'<iframe src="https://davidcharles\.substack\.com/embed"[^>]*>\s*</iframe>')
+          SUBSTACK_BUTTON = (
+              f'<p style="margin:2em 0 0"><a href="{PUB}/subscribe" style="display:inline-block;background:#2f6b4f;'
+              'color:#fff;padding:10px 18px;border-radius:4px;text-decoration:none;font-weight:600;border:0;'
+              'font-family:sans-serif">Get my newsletter: subscribe on Substack</a></p>')
           changed = 0
           for root, dirs, files in os.walk("."):
               dirs[:] = [d for d in dirs if d not in {".git", ".github", "wp-content", "wp-includes", "wp-json"}]
@@ -448,6 +460,9 @@ jobs:
                   # address (http or https) the visitor arrived on
                   new = new.replace("https://davidcharles.info/wp-", "/wp-")
                   new = DEAD_SCRIPTS.sub("", new)
+                  new = COMMENT_FORM.sub("", new)
+                  new = REPLY_LINKS.sub("", new)
+                  new = SUBSTACK_EMBED.sub(lambda m: SUBSTACK_BUTTON, new)
                   if new != s:
                       with open(path, "w", encoding="utf-8") as f:
                           f.write(new)
