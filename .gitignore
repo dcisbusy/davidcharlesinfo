@@ -1,3 +1,4 @@
 _search_records.json
 node_modules/
 package-lock.json
+*.csv

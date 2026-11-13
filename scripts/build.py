@@ -34,8 +34,8 @@ os.chdir(ROOT)
 
 SITE = "https://davidcharles.info"
 SUBSTACK = "https://davidcharles.substack.com"
-GA_ID = "G-07CXWP795E"          # Google Analytics. Set to "" to switch it off.
-CSS_VERSION = "4"               # Bump when assets/site.css changes, so browsers fetch the new one.
+GOATCOUNTER = "davidcharles"    # GoatCounter site code (davidcharles.goatcounter.com). Set to "" to switch stats off.
+CSS_VERSION = "5"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
 
 NEWSLETTER_DATA = "newsletter-archive/posts.json"
 BLOG_DATA = "blog-archive/index.json"
@@ -116,6 +116,8 @@ def page(title, description, path, body, current=None, image=None, kind="website
         f'<meta name="description" content="{esc(description)}">',
         f'<link rel="canonical" href="{SITE}{esc(path)}">',
         f'<link rel="stylesheet" href="/assets/site.css?v={CSS_VERSION}">',
+        "<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>",
+        f'<link rel="alternate" type="application/rss+xml" title="David Charles" href="{SITE}/feed.xml">',
         f'<meta property="og:type" content="{kind}">',
         f'<meta property="og:title" content="{esc(title)}">',
         f'<meta property="og:description" content="{esc(description)}">',
@@ -128,13 +130,13 @@ def page(title, description, path, body, current=None, image=None, kind="website
                  '<meta name="twitter:card" content="summary_large_image">']
     if noindex:
         head.append('<meta name="robots" content="noindex">')
-    if GA_ID:
-        head.append(f'<script async src="https://www.googletagmanager.com/gtag/js?id={GA_ID}"></script>'
-                    "<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}"
-                    f"gtag('js',new Date());gtag('config','{GA_ID}');</script>")
+    if GOATCOUNTER:
+        head.append(f'<script data-goatcounter="https://{GOATCOUNTER}.goatcounter.com/count" async '
+                    'src="//gc.zgo.at/count.js"></script>')
     return ("\n".join(head) + "\n</head>\n<body>\n<main>\n"
-            f'<nav class="top"><a class="name" href="/">David Charles</a>{nav}</nav>\n'
-            f"{body}\n</main>\n</body>\n</html>\n")
+            f'<nav class="top"><a class="name" href="/">David Charles</a>{nav}'
+            '<button class="theme-toggle" type="button">Dark</button></nav>\n'
+            f"{body}\n</main>\n<script src=\"/assets/site.js?v={CSS_VERSION}\" defer></script>\n</body>\n</html>\n")
 
 
 def redirect_page(to):
@@ -247,7 +249,8 @@ def update_newsletter(offline=False):
     return issues
 
 
-def issue_list(items):
+def issue_list(items, minutes=None):
+    minutes = minutes or {}
     parts, year = [], None
     for p in items:
         y = (p.get("date") or "")[:4] or "Undated"
@@ -269,7 +272,8 @@ def issue_list(items):
         excerpt = f'<p>{esc(p["excerpt"])}</p>' if p.get("excerpt") else ""
         parts.append(
             f'<li><a href="{esc(p["url"])}">{img}<div>'
-            f'<time datetime="{esc(p.get("date"))}">{esc(nice(p.get("date", "")))}</time>'
+            f'<time datetime="{esc(p.get("date"))}">{esc(nice(p.get("date", "")))}'
+            f'{" &middot; " + str(minutes[p["url"]]) + " min read" if p["url"] in minutes else ""}</time>'
             f'<h3>{esc(p["title"])}{paid}</h3>{excerpt}</div></a></li>')
     if year is not None:
         parts.append("</ol>")
@@ -308,12 +312,17 @@ def wrap_entry(e, older, newer, extra=None):
     c = COMMENTS_RE.search(s)
     comments = c.group(1) if c else ""
 
-    meta = ""
+    words = len(re.findall(r"[A-Za-z\u00C0-\u024F'\u2019-]+", re.sub(r"<[^>]+>", " ", content)))
+    minutes = max(1, round(words / 230))
+    listen = ('<p class="listen" hidden><button class="listen-play" type="button">&#9654; Listen</button>'
+              '<button class="listen-stop" type="button" hidden>&#9632; Stop</button></p>')
+    meta = f'<p class="meta">{minutes} min read</p>' if e["type"] == "page" and words > 300 else ""
     if e["type"] == "post":
         cats = ", ".join(f'<a href="{esc(x["url"])}">{esc(x["name"])}</a>' for x in e.get("cats", []))
         meta = (f'<p class="meta"><time datetime="{esc(e["date"])}">{esc(nice(e["date"]))}</time>'
-                + (f" &middot; {cats}" if cats else "") + "</p>")
-    body = [f'<article class="entry">\n<header class="entry-head"><h1>{esc(e["title"])}</h1>{meta}</header>']
+                + (f" &middot; {cats}" if cats else "") + f" &middot; {minutes} min read</p>")
+    body = [f'<article class="entry">\n<header class="entry-head"><h1>{esc(e["title"])}</h1>{meta}'
+            f'{listen if words > 150 else ""}</header>']
     if extra.get("newsletter"):
         body.append(f'<p class="first-appeared">This story first appeared in my newsletter. '
                     f'<a href="{esc(extra["newsletter"])}">Read it on Substack</a></p>')
@@ -447,7 +456,7 @@ def build_blog(entries, ctx=None):
 
 # ---------------------------------------------------------------- 3. homepage, newsletter page, extras
 
-def build_home(issues, posts, extra=""):
+def build_home(issues, posts, extra="", minutes=None):
     if not os.path.exists(INTRO):
         with open(INTRO, "w", encoding="utf-8") as f:
             f.write("<!-- Edit the words below. This becomes the top of the homepage. -->\n"
@@ -458,13 +467,13 @@ def build_home(issues, posts, extra=""):
             '<a class="button secondary" href="/start-here/">Start here</a>'
             '<a class="button secondary" href="/search/">Search</a></div>\n'
             + extra +
-            '<h2 class="section" id="newsletter">The newsletter</h2>\n' + issue_list(issues))
+            '<h2 class="section" id="newsletter">The newsletter</h2>\n' + issue_list(issues, minutes))
     write_if_changed("index.html", page(
         "David Charles", "Writer and outdoor instructor. Read every issue of my newsletter, and the archive of my blog.",
         "/", body, "/"))
     body = ("<h1>Newsletter archive</h1>\n"
             '<p class="intro muted">Every issue of my newsletter, newest first. Click any issue to read it on '
-            f'Substack.</p>\n<div class="buttons">{SUBSCRIBE}</div>\n' + issue_list(issues))
+            f'Substack.</p>\n<div class="buttons">{SUBSCRIBE}</div>\n' + issue_list(issues, minutes))
     write_if_changed("newsletter-archive/index.html", page(
         "Newsletter archive | David Charles",
         "Every issue of David Charles's newsletter, with links to read them on Substack.",
@@ -506,7 +515,7 @@ if __name__ == "__main__":
     ctx = extras.prepare(issues, entries)
     posts, pages, cats, years = build_blog(entries, ctx)
     home_extra = extras.build_pages(ctx, entries)
-    build_home(issues, posts, home_extra)
+    build_home(issues, posts, home_extra, ctx["minutes"])
     build_extras(posts, pages, cats, years)
     print(f"{len(posts)} blog posts, {len(pages)} pages, {len(cats)} categories")
     print(f"{len(changed_files)} files updated")

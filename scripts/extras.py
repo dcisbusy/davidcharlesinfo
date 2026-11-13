@@ -238,14 +238,16 @@ L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png',{{maxZo
   attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}}).addTo(map);
 var layer=L.markerClusterGroup({{showCoverageOnHover:false,maxClusterRadius:40}});
 map.addLayer(layer);
-var dot={{radius:7,weight:2,color:'#fff',fillOpacity:1}};
+var css=getComputedStyle(document.documentElement);
+function col(v){{return css.getPropertyValue(v).trim();}}
+var dot={{radius:7,weight:2,fillOpacity:1}};
 function draw(){{
   var y=document.getElementById('year').value, n=0;
   layer.clearLayers();
   PINS.forEach(function(p){{
     if(y && p[4].slice(0,4)!==y) return; n++;
     var m=L.circleMarker([p[0]+(Math.random()-.5)*0.002,p[1]+(Math.random()-.5)*0.002],
-      Object.assign({{fillColor:p[6]==='newsletter'?'{NEWSLETTER_GREEN}':'{BLOG_OCHRE}'}},dot));
+      Object.assign({{fillColor:col(p[6]==='newsletter'?'--s0':'--s1'),color:col('--bg')}},dot));
     m.bindPopup('<strong><a href="'+p[3]+'">'+escHtml(p[2])+'</a></strong><br><small>'+escHtml(p[5])+' &middot; '+nice(p[4])+
       (p[6]==='newsletter'?' &middot; newsletter':' &middot; blog')+'</small>');
     layer.addLayer(m);
@@ -253,6 +255,7 @@ function draw(){{
   document.getElementById('count').textContent=n+' stories';
 }}
 document.getElementById('year').addEventListener('change',draw);
+document.addEventListener('themechange',function(){{css=getComputedStyle(document.documentElement);draw();}});
 document.querySelectorAll('#places a').forEach(function(a){{a.addEventListener('click',function(e){{
   e.preventDefault(); var name=a.getAttribute('data-place');
   var p=PINS.filter(function(x){{return x[5]===name;}})[0]; if(p){{map.setView([p[0],p[1]],10);
@@ -260,8 +263,8 @@ document.querySelectorAll('#places a').forEach(function(a){{a.addEventListener('
 }});}});
 draw();
 </script>
-<p class="muted small">Pins: <span class="key" style="background:{NEWSLETTER_GREEN}"></span> newsletter
-<span class="key" style="background:{BLOG_OCHRE}"></span> blog. Places are found automatically from each story's
+<p class="muted small">Pins: <span class="key s0"></span> newsletter
+<span class="key s1"></span> blog. Places are found automatically from each story's
 words, so the odd pin may be in the wrong place.</p>"""
     write_if_changed("map/index.html", page("Adventure map | David Charles",
                                             f"{len(pins)} stories by David Charles, on a map.", "/map/", body, "/map/"))
@@ -322,7 +325,7 @@ def svg_bars(data, series, height=220, width=720, unit="", label_every=1):
         v = top * k / 4
         y = pad_t + plot_h - plot_h * v / top
         g.append(f'<line x1="{pad_l}" x2="{width - 6}" y1="{y:.1f}" y2="{y:.1f}" class="grid"/>'
-                 f'<text x="{pad_l - 6}" y="{y + 4:.1f}" class="tick" text-anchor="end">{int(v):,}</text>')
+                 f'<text x="{pad_l - 6}" y="{y + 4:.1f}" class="tick" text-anchor="end">{(f"{v / 1000:g}k" if v >= 10000 else f"{int(v):,}")}</text>')
     for idx, (label, vals) in enumerate(data):
         x = pad_l + idx * bw + 2
         w = max(2, bw - 4)
@@ -334,22 +337,23 @@ def svg_bars(data, series, height=220, width=720, unit="", label_every=1):
             h = plot_h * v / top
             y = y0 - h
             name, colour = series[i]
+            cls = f"s{i}"
             tip = f"{label}: {v:,}{unit}" + (f" ({name})" if len(series) > 1 else "")
             r = min(4, w / 2, h)
             if i == last:   # rounded top, square base
                 d = (f"M{x:.1f},{y0:.1f} V{y + r:.1f} Q{x:.1f},{y:.1f} {x + r:.1f},{y:.1f} H{x + w - r:.1f} "
                      f"Q{x + w:.1f},{y:.1f} {x + w:.1f},{y + r:.1f} V{y0:.1f} Z")
-                g.append(f'<path d="{d}" fill="{colour}"><title>{esc(tip)}</title></path>')
+                g.append(f'<path d="{d}" class="{cls}"><title>{esc(tip)}</title></path>')
             else:
                 g.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{max(0, h - 2):.1f}" '
-                         f'fill="{colour}"><title>{esc(tip)}</title></rect>')
+                         f'class="{cls}"><title>{esc(tip)}</title></rect>')
             y0 = y
         if idx % label_every == 0:
             g.append(f'<text x="{x + w / 2:.1f}" y="{height - 8}" class="tick" text-anchor="middle">{esc(label)}</text>')
     legend = ""
     if len(series) > 1:
         legend = '<p class="legend">' + "".join(
-            f'<span><i style="background:{c}"></i>{esc(n)}</span>' for n, c in series) + "</p>"
+            f'<span><i class="s{i}"></i>{esc(n)}</span>' for i, (n, c) in enumerate(series)) + "</p>"
     return (legend + f'<svg class="chart" viewBox="0 0 {width} {height}" role="img">' + "".join(g) + "</svg>")
 
 
@@ -365,7 +369,7 @@ def svg_hbars(data, colour=NEWSLETTER_GREEN, width=460, unit=""):
         d = (f"M{pad_l},{y + 3} H{pad_l + w - r:.1f} Q{pad_l + w:.1f},{y + 3} {pad_l + w:.1f},{y + 3 + r:.1f} "
              f"V{y + row - 7 - r:.1f} Q{pad_l + w:.1f},{y + row - 7} {pad_l + w - r:.1f},{y + row - 7} H{pad_l} Z")
         g.append(f'<text x="{pad_l - 8}" y="{y + row / 2 + 2:.1f}" class="label" text-anchor="end">{esc(label)}</text>'
-                 f'<path d="{d}" fill="{colour}"><title>{esc(label)}: {v:,}{unit}</title></path>'
+                 f'<path d="{d}" class="s0"><title>{esc(label)}: {v:,}{unit}</title></path>'
                  f'<text x="{pad_l + w + 6:.1f}" y="{y + row / 2 + 2:.1f}" class="value">{v:,}{unit}</text>')
     return f'<svg class="chart hbars" viewBox="0 0 {width} {height}" role="img">' + "".join(g) + "</svg>"
 
@@ -431,8 +435,8 @@ a newsletter issue, it's counted once.</p>
 
 <h2 class="section">Words per year</h2>
 {svg_bars(words_year, [("Words", NEWSLETTER_GREEN)], label_every=2 if len(years) > 14 else 1)}
-<p class="muted small">Newsletter issues only count here when a copy is on the blog; Substack doesn't let this site
-read the rest.</p>
+<p class="muted small">Newsletter word counts come from the Substack export, so issues published since the last export
+(and the paid-only one) aren't counted yet.</p>
 {table(["Year", "Words"], [(y, f"{v[0]:,}") for y, v in words_year])}
 
 <h2 class="section">Favourite day to publish</h2>
@@ -718,11 +722,33 @@ def prepare(issues, entries):
                     "source": stories[j]["source"]} for j in s.get("related", [])]
             per_post[s["blog_url"]] = {"related": rel, "series": series_box(series_list, s["blog_url"]),
                                        "newsletter": s["url"] if s["source"] == "newsletter" else None}
-    return {"stories": stories, "mentions": mentions, "series": series_list, "per_post": per_post, "by_blog": by_blog}
+    minutes = {}
+    for s in stories:
+        if s["source"] == "newsletter" and s["has_text"] and not s.get("paid"):
+            words = len(re.findall(r"[A-Za-z\u00C0-\u024F'\u2019-]+", s["text"]))
+            minutes[s["url"]] = max(1, round(words / 230))
+    return {"stories": stories, "mentions": mentions, "series": series_list, "per_post": per_post, "by_blog": by_blog,
+            "minutes": minutes}
+
+
+def build_feed(stories, n=40):
+    from email.utils import format_datetime
+    items = []
+    for s in [s for s in stories if s["date"]][:n]:
+        d = datetime.datetime.fromisoformat(s["date"][:10]).replace(hour=12, tzinfo=datetime.timezone.utc)
+        url = s["url"] if s["url"].startswith("http") else SITE + s["url"]
+        items.append(f"<item><title>{esc(s['title'])}</title><link>{esc(url)}</link><guid>{esc(url)}</guid>"
+                     f"<pubDate>{format_datetime(d)}</pubDate><description>{esc(s.get('excerpt') or '')}</description></item>")
+    xml = ('<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>'
+           f'<title>David Charles</title><link>{SITE}/</link>'
+           '<description>Newsletter issues and stories by David Charles.</description><language>en-gb</language>'
+           f'<atom:link href="{SITE}/feed.xml" rel="self" type="application/rss+xml"/>' + "".join(items) + "</channel></rss>\n")
+    write_if_changed("feed.xml", xml)
 
 
 def build_pages(ctx, entries):
     stories = ctx["stories"]
+    build_feed(stories)
     build_map(stories)
     otd = build_on_this_day(stories)
     figures = build_numbers(stories, ctx["mentions"])
