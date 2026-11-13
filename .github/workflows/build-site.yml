@@ -60,5 +60,5 @@ jobs:
             echo "Nothing changed."
           else
             git commit -m "Rebuild site"
-            git push
+            git pull --rebase -X theirs origin main && git push
           fi
