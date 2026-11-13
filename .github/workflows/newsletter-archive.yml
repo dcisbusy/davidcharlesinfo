@@ -398,6 +398,61 @@ jobs:
                       '<meta http-equiv="refresh" content="0; url=/blog-archive/"></head>'
                       '<body><p><a href="/blog-archive/">The blog archive has moved here.</a></p></body></html>\n')
           write_if_changed(os.path.join("archives-the-motherlode", "index.html"), redirect)
+
+          # ---------- 8. Old /blog/ pages (huge, slow) also point to the blog archive ----------
+
+          for root, dirs, files in os.walk("blog"):
+              if "index.html" in files:
+                  write_if_changed(os.path.join(root, "index.html"), redirect)
+
+          # ---------- 9. Random story: picks a random old blog post ----------
+
+          urls = json.dumps([p["url"] for p in blog])
+          random_page = ('<!DOCTYPE html>\n<html lang="en-GB"><head><meta charset="utf-8">'
+                         '<title>Random story | David Charles</title>'
+                         '<meta name="robots" content="noindex"></head><body>'
+                         '<p><a href="/blog-archive/">Finding you a random story…</a></p>'
+                         f'<script>var u={urls};location.replace(u[Math.floor(Math.random()*u.length)]);</script>'
+                         '</body></html>\n')
+          write_if_changed(os.path.join("random-story", "index.html"), random_page)
+
+          # ---------- 10. Old WordPress pages: simple sidebar menu, lighter loading ----------
+
+          NEW_WIDGETS = (
+              '<div id="widget-area" class="widget-area" role="complementary">\n'
+              '<aside class="widget widget_nav_menu"><ul class="menu">'
+              '<li><a href="/">Home</a></li>'
+              '<li><a href="/newsletter-archive/">Newsletter</a></li>'
+              '<li><a href="/blog-archive/">Blog archive</a></li>'
+              '<li><a href="/random-story/">Random story</a></li>'
+              '</ul></aside>\n'
+              f'<aside class="widget"><a href="{PUB}/subscribe" style="display:block;text-align:center;'
+              'background:#2f6b4f;color:#fff;padding:10px 12px;border-radius:4px;text-decoration:none;'
+              'font-weight:600;border:0">Subscribe on Substack</a></aside>\n'
+              "</div><!-- .widget-area -->")
+          WIDGETS_RE = re.compile(r'<div id="widget-area".*?</div><!-- \.widget-area -->', re.S)
+          DEAD_SCRIPTS = re.compile(
+              r'<script[^>]+src="[^"]*(?:akismet-frontend|comment-reply\.min|wp-emoji-release)[^"]*"[^>]*></script>\s*')
+          changed = 0
+          for root, dirs, files in os.walk("."):
+              dirs[:] = [d for d in dirs if d not in {".git", ".github", "wp-content", "wp-includes", "wp-json"}]
+              for name in files:
+                  if not name.endswith(".html"):
+                      continue
+                  path = os.path.join(root, name)
+                  s = open(path, encoding="utf-8", errors="ignore").read()
+                  if 'id="widget-area"' not in s:
+                      continue
+                  new = WIDGETS_RE.sub(lambda m: NEW_WIDGETS, s, count=1)
+                  # Load styles, scripts and images from this site directly, whichever
+                  # address (http or https) the visitor arrived on
+                  new = new.replace("https://davidcharles.info/wp-", "/wp-")
+                  new = DEAD_SCRIPTS.sub("", new)
+                  if new != s:
+                      with open(path, "w", encoding="utf-8") as f:
+                          f.write(new)
+                      changed += 1
+          print(f"Tidied {changed} old WordPress pages")
           PY
 
       - name: Commit changes
