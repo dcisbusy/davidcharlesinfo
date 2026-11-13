@@ -45,10 +45,15 @@ jobs:
           OUT_DIR = os.environ["OUT_DIR"]
           DATA = os.path.join(OUT_DIR, "posts.json")
           PAGE = os.path.join(OUT_DIR, "index.html")
-          UA = "Mozilla/5.0 (compatible; davidcharles.info newsletter archive)"
+          HEADERS = {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                            "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml,application/json;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-GB,en;q=0.9",
+          }
 
           def get(url):
-              req = urllib.request.Request(url, headers={"User-Agent": UA})
+              req = urllib.request.Request(url, headers=HEADERS)
               with urllib.request.urlopen(req, timeout=30) as r:
                   return r.read()
 
@@ -105,6 +110,24 @@ jobs:
                                 "excerpt": clean(it.findtext("description")), "image": img, "paid": False})
               return posts
 
+          def from_relay():
+              # Backup route: a free feed-reading service fetches the RSS for us,
+              # for when Substack blocks requests coming from GitHub's servers.
+              from urllib.parse import quote
+              data = json.loads(get("https://api.rss2json.com/v1/api.json?rss_url=" + quote(f"{PUB}/feed", safe="")))
+              if data.get("status") != "ok":
+                  raise RuntimeError(data.get("message") or "relay error")
+              posts = []
+              for it in data.get("items", []):
+                  title, link = (it.get("title") or "").strip(), (it.get("link") or "").strip()
+                  if not title or not link:
+                      continue
+                  enc = it.get("enclosure") or {}
+                  img = it.get("thumbnail") or (enc.get("link", "") if str(enc.get("type", "")).startswith("image") else "")
+                  posts.append({"url": link, "title": title, "date": (it.get("pubDate") or "")[:10],
+                                "excerpt": clean(it.get("description")), "image": img, "paid": False})
+              return posts
+
           # Load what we already have, so issues are never lost even if the feed drops them
           known = {}
           if os.path.exists(DATA):
@@ -113,9 +136,13 @@ jobs:
                       known[key(p["url"])] = p
 
           fetched, errors = [], []
-          for source in (from_api, from_rss):
+          for source in (from_api, from_rss, from_relay):
+              if source is from_relay and fetched:
+                  break
               try:
-                  fetched += source()
+                  got = source()
+                  print(f"{source.__name__}: {len(got)} issues")
+                  fetched += got
               except Exception as e:
                   errors.append(f"{source.__name__}: {e}")
           if not fetched and not known:
