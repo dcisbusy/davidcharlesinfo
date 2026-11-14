@@ -159,7 +159,7 @@ makes no commit.
 | **Work with me** | `/work-with-me/` | Words in `data/work-with-me.html`. Hidden from search engines and unlinked while its first line says DRAFT. |
 | **Dead links** | old posts | `scripts/linkcheck.py` runs monthly on GitHub (*Actions → Check links*). Dead outside links get their Internet Archive copy, listed in `data/dead-links.json`; delete an entry to have it rechecked. |
 | **Share cards** | every post and page | A 1200×630 picture (the story's photo with its title, or a cream card when there's no photo) shown when a link is shared on WhatsApp, Bluesky, Facebook, LinkedIn and so on. Made by `scripts/make_cards.py` and kept in `cards/`; the build uses a page's card when one exists. Run `python3 scripts/make_cards.py` after adding pages or changing titles (it only redraws what changed). |
-| **Image descriptions** | old posts | Over 800 photos that had no description now have one (alt text), read aloud by screen readers and used by search engines. Written by looking at each photo alongside its post and caption. Kept in `data/alt-text.json` (image address → description); the build adds them to any image with a missing or filename-style description. Edit a description there. |
+| **Image descriptions** | old posts | Over 800 photos that had no description now have one (alt text), read aloud by screen readers and used by search engines. Written by looking at each photo alongside its post and caption (about 1,000 images; a dozen dead images have none). Kept in `data/alt-text.json` (image address → description); the build adds them to any image with a missing or filename-style description. Edit a description there. |
 | **Search engines** | every page | `sitemap.xml` and `robots.txt`; canonical links; schema.org structured data (articles, the site and its author, free books); share cards. Changed pages are reported to Bing and other IndexNow engines after each build (`scripts/indexnow.py`, key file `<key>.txt` in the root). Search Console verification codes go in `GOOGLE_VERIFICATION` / `BING_VERIFICATION` at the top of `scripts/build.py`. |
 | **Old comments** | old posts | Shown as they were. New comments aren't possible; readers are pointed to Substack. |
 
@@ -304,6 +304,7 @@ build runs by itself afterwards and the live site updates a couple of minutes la
 
 - The relay only carries the latest ~10 issues; if the build fails for more than ~10
   issues in a row, older ones would need adding from a new export.
+- Substack retired its old image address (`cdn.substack.com`); the build rewrites those to `substackcdn.com`, which serves the same images.
 - A few very old posts link to images or files on services that no longer exist (e.g.
   Windows Live file storage). They show as broken images or dead links.
 - Map pins come from automatic text matching, so the odd wrong pin may still turn up. Fix

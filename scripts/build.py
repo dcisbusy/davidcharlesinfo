@@ -432,7 +432,9 @@ def wrap_entry(e, older, newer, extra=None):
     if not m:
         print("No <!--content:start--> marker in", path, "- left as it is")
         return
-    content = add_alt_text(archive_links(m.group(1)))
+    # Substack retired its old image address (cdn.substack.com); the same images live at substackcdn.com
+    content = m.group(1).replace("https://cdn.substack.com/image/", "https://substackcdn.com/image/")
+    content = add_alt_text(archive_links(content))
     c = COMMENTS_RE.search(s)
     comments = c.group(1) if c else ""
 
