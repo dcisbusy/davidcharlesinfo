@@ -1,0 +1,39 @@
+name: Check DNS
+
+# Diagnoses the custom domain: asks the registry, Heart, Cloudflare and public resolvers what they say about
+# davidcharles.info, and asks GitHub Pages for its own health check. Read-only. Actions -> Check DNS -> Run.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: read
+
+jobs:
+  dns:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Install dig
+        run: sudo apt-get install -y -q dnsutils >/dev/null
+      - name: What the .info registry delegates to
+        run: dig +norec NS davidcharles.info @a0.info.afilias-nst.info | sed -n '/AUTHORITY SECTION/,/^$/p'
+      - name: What Heart answers
+        run: |
+          for t in A NS AAAA; do echo "== $t"; dig +short $t davidcharles.info @ns.heartinternet.uk; done
+          echo "== www"; dig +short CNAME www.davidcharles.info @ns.heartinternet.uk
+      - name: What Cloudflare's nameservers answer (should be REFUSED or nothing)
+        run: |
+          for ns in elliot.ns.cloudflare.com lana.ns.cloudflare.com; do
+            echo "== $ns"; dig +norec A davidcharles.info @$ns | grep -E "status:|^davidcharles" || true
+          done
+      - name: What public resolvers answer
+        run: |
+          for r in 8.8.8.8 8.8.4.4 1.1.1.1 9.9.9.9 208.67.222.222; do
+            echo "== $r A: $(dig +short A davidcharles.info @$r | tr '\n' ' ')  NS: $(dig +short NS davidcharles.info @$r | tr '\n' ' ')"
+          done
+      - name: GitHub Pages health check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/${{ github.repository }}/pages --jq '{status,cname,https_enforced,https_certificate}' || true
+          gh api repos/${{ github.repository }}/pages/health || true
