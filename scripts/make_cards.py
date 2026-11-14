@@ -160,6 +160,8 @@ def targets():
         if name:
             out.append(("/" + os.path.dirname(f) + "/", build.html.unescape(name.group(1)), "A series by David Charles",
                         hero.group(1) if hero else None))
+    for b in json.load(open("data/books.json", encoding="utf-8")).get("books", []):
+        out.append((f'/books/{b["slug"]}/', b["title"], "A free ebook by David Charles", b.get("cover_photo")))
     for url, title, kicker in (("/", "Twenty years of stories about adventure, nature and being human",
                                 "David Charles"),
                                ("/timeline/", "Twenty years: a timeline", "David Charles"),
