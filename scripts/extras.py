@@ -193,8 +193,8 @@ def find_places(stories, over):
             for n in re.findall(r"(?:^|[\s:,–-])(" + "|".join(re.escape(n) for n in skip) + r")(?=\s*[–:,-])", title + ":"):
                 score[n] += 6
         # "Greetings from Perth", "a warm welcome from Thessaloniki", "coming to you live from Paris": where the
-        # story was written from. A named place there almost always wins; "the Palace" is home (Crystal Palace),
-        # a weaker hint because those issues are often about somewhere else.
+        # story was written from. A named place there almost always wins; nicknames like "the Palace" (see
+        # opener_names in places.json) are a weaker hint, because those issues are often about somewhere else.
         g = re.search(r"(?i)\b(?:greetings|welcome|hello|writing|dispatch(?:es)?|postcard|coming to you(?: live)?)"
                       r"(?:,)?\s+(?:\w+\s+){0,2}?from\b(.{0,90})", body[:400])
         where = re.split(r"[.;:!?(—–]", g.group(1))[0] if g else ""
@@ -205,8 +205,9 @@ def find_places(stories, over):
             opened = set(body_re.findall(where) + ctx_re.findall(" in " + where))
             for n in opened:
                 score[n] += 12
-            if re.match(r"\s+the Palace\b(?! of)", where) and "Crystal Palace" in places:
-                score["Crystal Palace"] += 3
+            for nick, n in gaz.get("opener_names", {}).items():     # "from the Ness", "from the Palace"
+                if re.match(r"(?i)\s+" + re.escape(nick) + r"\b(?! of)", where) and n in places:
+                    score[n] += 4
         lead = body[:700]
         for n in body_re.findall(lead) + ctx_re.findall(lead):
             score[n] += 2

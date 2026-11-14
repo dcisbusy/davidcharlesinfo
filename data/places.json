@@ -1,5 +1,5 @@
 {
- "_note": "Places the adventure map looks for in each story. Add a place as \"Name\": [latitude, longitude]. 'broad' places (countries, big regions, London) are only used when nothing more specific is mentioned. 'skip_words' are place names that are also ordinary words or people's names: they only count after words like 'in', 'to' or 'from', or in a title. 'not_places' are phrases that contain a place name but aren't about the place.",
+ "_note": "Places the adventure map looks for in each story. Add a place as \"Name\": [latitude, longitude]. 'broad' places (countries, big regions, London) are only used when nothing more specific is mentioned. 'skip_words' are place names that are also ordinary words or people's names: they only count after words like 'in', 'to' or 'from', or in a title. 'not_places' are phrases that contain a place name but aren't about the place. 'opener_names' are nicknames for places David writes from (\"a warm welcome from the Ness\"): they count as a hint, so a story mainly about somewhere else still goes there.",
  "places": {
   "London": [
    51.5074,
@@ -1400,5 +1400,10 @@
   "Warsaw Pact",
   "Yalta",
   "Zurich University"
- ]
+ ],
+ "opener_names": {
+  "the Palace": "Crystal Palace",
+  "the Ness": "Thorpeness",
+  "the Tower": "Bournemouth"
+ }
 }
