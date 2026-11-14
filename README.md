@@ -1,0 +1,313 @@
+# davidcharles.info
+
+The website of David Charles: twenty years of blog posts (2005–2025) and an archive of the
+[David Charles newsletter](https://davidcharles.substack.com), served free by GitHub Pages at
+**https://davidcharles.info**.
+
+The site used to be a WordPress blog on paid GoDaddy hosting. In November 2026 it became a
+static archive. Nothing runs on a server any more: every page is a plain HTML file in this
+repository. New writing happens on Substack, and the site picks up new newsletter issues
+automatically every evening.
+
+This README explains how it all fits together, the decisions behind it, and what is still
+open.
+
+---
+
+## Contents
+
+1. [The big picture](#1-the-big-picture)
+2. [Where things live](#2-where-things-live)
+3. [How the site is built](#3-how-the-site-is-built)
+4. [Features and how each one works](#4-features-and-how-each-one-works)
+5. [Everyday jobs: how to change things](#5-everyday-jobs-how-to-change-things)
+6. [Hosting, domain and DNS](#6-hosting-domain-and-dns)
+7. [Privacy and security](#7-privacy-and-security)
+8. [Decisions we made, and why](#8-decisions-we-made-and-why)
+9. [Outstanding questions and to-dos](#9-outstanding-questions-and-to-dos)
+10. [Running the build on your own computer](#10-running-the-build-on-your-own-computer)
+
+---
+
+## 1. The big picture
+
+```
+ Substack (new writing)                   This GitHub repository
+ ──────────────────────                   ─────────────────────────────────────────
+ davidcharles.substack.com  ──feed──▶  scripts/build.py   ──▶  every HTML page
+                                       scripts/extras.py       (homepage, posts,
+ Substack export folder  ──full text─▶  (map, numbers,          archives, map, …)
+ (substackpostsexport…)                 series, related…)
+                                       scripts/search.mjs ──▶  pagefind/ (search)
+ Old WordPress posts  ──already here as HTML──┘
+                                                     │
+                     GitHub Actions runs the build   │  nightly + on every change
+                                                     ▼
+                                     GitHub Pages serves the repo
+                                     at https://davidcharles.info
+```
+
+- **Old blog posts** (933 posts, 30 pages) were exported from WordPress once and now live
+  here as HTML files. Each one keeps its original web address, so old links still work.
+- **Newsletter issues** (about 490 and counting) stay on Substack. The site lists them,
+  links to them, and uses their full text for search, related reading, the map and the
+  numbers.
+- **A build script** wraps every page in the same design and generates all the archive and
+  discovery pages. GitHub runs it for us; there is nothing to install.
+
+---
+
+## 2. Where things live
+
+| Path | What it is | Edit by hand? |
+|---|---|---|
+| `home-intro.html` | The welcome text at the top of the homepage. | **Yes** |
+| `blog-archive/index.json` | The master list of blog posts and pages: title, date, categories, tags, excerpt, image. | Yes, carefully |
+| `<category>/<post>/index.html` | Each old blog post. Its words sit between `<!--content:start-->` and `<!--content:end-->`; everything outside those markers is regenerated. | Only between the markers |
+| `wp-content/uploads/` | Every image, PDF and audio file from the old blog, by year and month. | Rarely |
+| `substackpostsexport10october2026/` | Full text of published newsletter issues, from Substack's export of 10 October 2026. | No (see §5) |
+| `newsletter-archive/posts.json` | The list of newsletter issues (title, date, link, image, excerpt, paid flag). Updated automatically. | Rarely |
+| `data/places.json` | The map's gazetteer: place names, coordinates, and lists of words that look like places but aren't. | Yes |
+| `data/story-overrides.json` | Manual corrections: map pins, and which blog post is or isn't a copy of a newsletter issue. | Yes |
+| `data/series.json` | Series trails, such as Cycling to the Sahara, and their descriptions. | Yes |
+| `data/start-here.json` | The picks and blurbs on the Start here page. | **Yes, please** (see §9) |
+| `assets/site.css` | The whole look of the site, light and dark. | Yes |
+| `assets/site.js` | Dark-mode button and "Listen to this post". | Yes |
+| `assets/leaflet/` | The map library, hosted here rather than on someone else's server. | No |
+| `scripts/build.py` | The main build. | Yes, with care |
+| `scripts/extras.py` | Map, On this day, numbers, photos, series, Start here, related reading, RSS feed, search records. | Yes, with care |
+| `scripts/search.mjs` | Builds the search index with Pagefind. | Rarely |
+| `.github/workflows/build-site.yml` | Tells GitHub when and how to run the build. | Rarely |
+| `CNAME` | Tells GitHub Pages the site's domain name. | **No** |
+| `.nojekyll` | Tells GitHub Pages to serve files exactly as they are. | **No** |
+| Everything else (`index.html`, `category/`, `tag/`, `2019/`, `map/`, `numbers/`, `pagefind/`, `feed.xml`, `sitemap.xml`, …) | **Generated.** Hand edits are overwritten by the next build. | No |
+
+---
+
+## 3. How the site is built
+
+### When it runs
+
+The workflow in `.github/workflows/build-site.yml` runs:
+
+- **every evening at 21:17 UTC**, to pick up new newsletter issues;
+- **straight away** whenever someone pushes a change to `home-intro.html`,
+  `blog-archive/index.json`, any post's `index.html`, or anything in `scripts/`, `assets/`
+  or `data/`;
+- **by hand**: on GitHub, go to *Actions → Build site → Run workflow*.
+
+### What it does, in order
+
+1. **Fetch new newsletter issues** (`update_newsletter` in `build.py`). Substack blocks
+   requests from GitHub's servers, so the build tries three sources in turn: Substack's
+   API, then its RSS feed, then a free relay service (rss2json.com) that fetches the RSS
+   for us. In practice the relay is what works from GitHub. It only carries the latest
+   ~10 issues, which is plenty for a nightly check. Every link must point at
+   `davidcharles.substack.com/p/…` and every image must be `https://`, otherwise the
+   issue is ignored. New issues are merged into `newsletter-archive/posts.json`.
+2. **Load the blog posts** from `blog-archive/index.json` and the post files.
+3. **Prepare the shared story list** (`extras.prepare`). Blog posts and newsletter issues
+   are combined into one list of about 1,170 *stories*. Many newsletter stories were also
+   copied onto the blog; where a blog post matches a newsletter issue (same title, or very
+   similar text within a day), **the newsletter issue wins** and the blog copy is treated as
+   a duplicate. About 240 such pairs are found automatically; corrections go in
+   `data/story-overrides.json`.
+4. **Re-wrap every post and page** in the site design: header, navigation, date, reading
+   time, Listen button, series box, newsletter note, tags, Related reading,
+   previous/next links.
+5. **Generate the archive pages**: blog archive, every category (with its sub-categories)
+   and tag, every year, Random story.
+6. **Generate the discovery pages**: map, On this day, 20 years in numbers, photo wall,
+   series, Start here, search, RSS feed.
+7. **Generate the homepage**, newsletter archive, 404 page, `sitemap.xml` and `robots.txt`.
+8. **Build the search index** (`node scripts/search.mjs`) with Pagefind.
+9. **Commit** anything that changed as "Rebuild site", and push. GitHub Pages then
+   republishes, usually within a minute or two.
+
+The build only rewrites files whose content actually changed, so a run with nothing new
+makes no commit.
+
+---
+
+## 4. Features and how each one works
+
+| Feature | Where | How it works |
+|---|---|---|
+| **Homepage** | `/` | Your intro, headline figures (linking to the numbers page), latest newsletter issues and highlights. |
+| **Newsletter archive** | `/newsletter-archive/` | Every issue by year, with cover image, date, reading time and excerpt. Paid issues are labelled. Links go to Substack. |
+| **Blog archive** | `/blog-archive/` | Pages, the full category tree, years, and every post. |
+| **Start here** | `/start-here/` | Hand-picked stories from `data/start-here.json`. |
+| **Series** | `/series/` | 12 trails such as Cycling to the Sahara, defined in `data/series.json` by category or title pattern. Each post in a series shows a "Part n of N" box. |
+| **Map** | `/map/` | Story text is scanned for places in `data/places.json`. Common false alarms (Geneva Convention, Isaiah Berlin, HMS Belfast…) are excluded. Pins use OpenStreetMap tiles and a self-hosted copy of Leaflet. |
+| **On this day** | homepage panel | Stories published on today's date in earlier years, from `assets/on-this-day.json`. |
+| **20 years in numbers** | `/numbers/` | Posts and words per year, top places and more. Newsletter word counts come from the export, so issues after 10 October 2026 aren't counted until the export is refreshed. |
+| **Photo wall** | `/photos/` | One photo per story, linking to the story. |
+| **Search** | `/search/` | [Pagefind](https://pagefind.app): the index is built in advance as small files in `/pagefind/`, and the browser downloads only the parts it needs. It covers blog posts and full newsletter text. No search server, no third party. |
+| **Related reading** | end of every post | The three or four most similar stories, by word-pattern similarity (TF-IDF) across the whole archive. |
+| **Reading time** | posts, pages, lists | Words ÷ 230 per minute. |
+| **Dark mode** | everywhere | Follows the device setting. The Dark/Light button in the menu overrides it and is remembered in the browser. Chart and map colours have checked dark versions. |
+| **Listen to this post** | posts over ~150 words | The browser's own text-to-speech, preferring a British voice. Nothing is sent anywhere. Hidden on browsers that can't do it. |
+| **RSS feed** | `/feed.xml` | The latest 40 stories (newsletter and blog, without duplicates). |
+| **Analytics** | everywhere | [GoatCounter](https://www.goatcounter.com): no cookies, no personal data. See §9: the account still needs creating. |
+| **Old comments** | old posts | Shown as they were. New comments aren't possible; readers are pointed to Substack. |
+
+---
+
+## 5. Everyday jobs: how to change things
+
+Edit files straight on github.com (open the file, click the pencil, "Commit changes"). The
+build runs by itself afterwards and the live site updates a couple of minutes later.
+
+- **Change the homepage intro:** edit `home-intro.html`.
+- **Fix a typo in an old post:** open the post's `index.html` and edit **only** between
+  `<!--content:start-->` and `<!--content:end-->`.
+- **Change a post's title, date, categories or tags:** edit its entry in
+  `blog-archive/index.json`. Categories must use an existing name and URL pair; copy one
+  from another post.
+- **Fix a wrong map pin:** add the phrase to `not_places` or `skip_words` in
+  `data/places.json`, or add a per-story correction under `places` in
+  `data/story-overrides.json`.
+- **Mark a blog post as (not) a copy of a newsletter issue:** use `duplicates` /
+  `not_duplicates` in `data/story-overrides.json`.
+- **Add or edit a series:** `data/series.json`.
+- **Change the Start here picks:** `data/start-here.json`.
+- **Change colours or fonts:** `assets/site.css`. The colours are CSS variables at the top,
+  with a separate dark block. After changing `site.css` or `site.js`, bump `CSS_VERSION`
+  in `scripts/build.py` so browsers fetch the new file.
+- **Refresh the newsletter full text:** export from Substack (Settings → Exports), unzip,
+  and add a folder named `substackpostsexport<date>` to the repository root. The newest
+  folder wins. **Before committing, delete:**
+  - every `.csv` file: they contain subscriber email addresses (the repo also refuses
+    `.csv` files);
+  - any draft, unpublished or paid-only issue: this repository is public.
+
+---
+
+## 6. Hosting, domain and DNS
+
+- **Hosting:** GitHub Pages, from the `main` branch, repository root. Free.
+- **Domain:** `davidcharles.info`, registered with **Heart Internet**, using Heart's
+  nameservers. (It was briefly on Cloudflare during the move; that has been removed.)
+- **DNS records at Heart:**
+  - `A` records for `davidcharles.info` → `185.199.108.153`, `185.199.109.153`,
+    `185.199.110.153`, `185.199.111.153` (GitHub Pages)
+  - `CNAME` for `www` → `dcisbusy.github.io.`
+- **HTTPS:** GitHub issues a free certificate automatically once DNS points at it. This
+  was delayed by old Cloudflare records cached around the internet. Once the certificate
+  shows as issued, tick **Enforce HTTPS** in *Settings → Pages*.
+- **GoDaddy:** the old hosting is cancelled and refunded. Nothing depends on GoDaddy any
+  more.
+
+---
+
+## 7. Privacy and security
+
+- **No server, no database, no logins.** There is nothing to hack in the usual WordPress
+  way: no admin page, no plugins, no PHP.
+- **No cookies, no Google.** Google Analytics was removed; GoatCounter counts visits
+  without cookies or personal data. Text uses the reader's own system fonts; the map library and search are hosted here.
+  YouTube embeds use the privacy-enhanced `youtube-nocookie.com`. Map tiles come from
+  OpenStreetMap.
+- **This repository is public.** Anyone can read every file and its history. Never commit:
+  - subscriber lists (`.csv` files are blocked by `.gitignore`);
+  - drafts or paid-only issues;
+  - passwords or keys;
+  - commenters' email addresses;
+  - contact-form messages.
+- **The build trusts as little as possible.** Newsletter data from feeds is checked before
+  use, all text is escaped before it goes into a page, and data embedded in pages is made
+  script-safe.
+- **Supply chain.** The GitHub Actions used are pinned to exact commits and Pagefind to an
+  exact version, installed without running install scripts. The workflow's only
+  permission is to write to this repository.
+- GitHub **secret scanning** and **push protection** are switched on.
+
+---
+
+## 8. Decisions we made, and why
+
+| Decision | Why |
+|---|---|
+| **Static archive on GitHub Pages instead of WordPress** | Free, fast, nothing to update or patch, nothing to hack, and it will keep working untouched for years. WordPress was costing money for a blog no longer being written. |
+| **Substack stays the home of new writing** | That's where readers and subscribers are. The site is the archive and shop window, not a second publishing platform. |
+| **Keep every old URL** | Twenty years of links from other sites, search engines and social media still work, including the `/uncategorised/…` addresses. |
+| **Newsletter wins over its blog copy** | Many stories were posted to both. The newsletter is the newer, canonical version, so discovery features show each story once and point to Substack. |
+| **A small Python build, not a framework** | No build tools to install or keep updated; GitHub runs it in seconds; the whole site is understandable from two scripts. |
+| **Generated pages are committed to the repo** | GitHub Pages serves the repository directly, so what you see in the repo is exactly what is live. |
+| **The relay for Substack data** | Substack blocks GitHub's servers. The free rss2json relay is the simplest workaround; links it supplies are validated. |
+| **Full text from a Substack export** | The feed only has the latest issues. The export gives the full archive text for search, related reading, map and numbers. It needs refreshing now and then (§5). |
+| **Pagefind for search** | Search with no server and no third-party service, fast even with 1,200 stories. |
+| **Map pins from the text itself** | No manual tagging of 1,170 stories; mistakes are fixed with small exclusion lists. |
+| **Leaflet hosted locally, tiles from OpenStreetMap** | No API keys, no Google Maps. |
+| **GoatCounter instead of Google Analytics** | Privacy-friendly, no cookie banner needed, free for personal sites. |
+| **Listen uses the browser's own voice** | Free, private, works offline; quality depends on the device. |
+| **Old comments kept, new comments off** | Preserves the conversations; Substack is the place to reply now. |
+| **Contact form retired** | No server to send email from, and forms attract spam. Readers are pointed to Substack. |
+| **Uncategorised posts given real categories** (Nov 2026) | 51 posts, mostly 2010–11 and the 2024–25 newsletter copies, had lost their categories. Each was assigned by reading it. Parent categories now include their sub-categories' posts. |
+| **Images compressed** (Nov 2026) | Longest side capped at 1800px, JPEG quality 82; about 172MB → 118MB with no visible change. |
+| **Subscriber CSVs removed from history** (Nov 2026) | They were committed briefly by accident in the first export; the commit was rewritten out of the branch. |
+
+---
+
+## 9. Outstanding questions and to-dos
+
+**For David to do (needs your logins):**
+
+1. **Ask GitHub Support to purge cached data** from the history rewrite. GitHub keeps
+   rewritten commits reachable by ID until Support removes them. Use their "remove
+   sensitive data" form.
+2. **Enforce HTTPS** in *Settings → Pages* once the certificate is issued.
+3. **Create the GoatCounter account** at goatcounter.com with the code `davidcharles`. If
+   that code is taken, change `GOATCOUNTER` near the top of `scripts/build.py`.
+4. **Account security:** make sure two-factor authentication is on for GitHub, Heart
+   Internet, Substack and your email; and that the domain has registrar lock and
+   auto-renew at Heart.
+5. **Verify the domain with GitHub** (*Settings → Pages → Verified domains*, or your
+   account's Pages settings). This stops anyone else's GitHub repository claiming
+   `davidcharles.info` if the site is ever switched off.
+
+**Decisions waiting on David:**
+
+6. **Rewrite the Start here blurbs** in `data/start-here.json` in your own voice. The
+   current ones are drafts.
+7. **Colour scheme:** four bold alternatives were proposed (Seaside postcard, Risograph
+   zine, Allotment, Night bus). None applied yet.
+8. **Older copies of drafts in history:** unpublished drafts and the paid issue from the
+   Substack export were removed from the site in November 2026, but remain readable in
+   this public repository's history. Rewriting history would remove them (needs your
+   go-ahead), followed by a GitHub Support purge.
+9. **The 2016 CV PDF** (`wp-content/uploads/2016/12/`) contains a personal phone number and
+   email address. It was public on the old site too. Keep, replace, or remove?
+10. **Category judgement calls:** a few posts could go either way, e.g. *Everything Is
+    Free\** (How to be Human vs Activism), *Bad Romance* (Creative Writing).
+11. **Shop and pay-what-you-like pages:** check the payment and book links still work.
+12. **Refresh the Substack export** occasionally, so newer issues get full-text search,
+    related reading and word counts.
+
+**Known limitations:**
+
+- The relay only carries the latest ~10 issues; if the build fails for more than ~10
+  issues in a row, older ones would need adding from a new export.
+- A few very old posts link to images or files on services that no longer exist (e.g.
+  Windows Live file storage). They show as broken images or dead links.
+- Map pins come from automatic text matching, so the odd wrong pin may still turn up. Fix
+  it via `data/places.json`.
+- "Listen" quality varies with the device's built-in voices.
+- GitHub Pages can't send custom security headers. The site has no forms or logins, so the
+  risk is small.
+
+---
+
+## 10. Running the build on your own computer
+
+You don't need to; GitHub does it. But if you want to preview changes locally:
+
+```bash
+python3 scripts/build.py --offline      # --offline skips checking Substack
+npm install --no-save pagefind@1.6.0
+node scripts/search.mjs                 # rebuilds the search index
+python3 -m http.server 8000             # then open http://localhost:8000
+```
+
+Requires Python 3.12+ and Node 20+. Running the build twice should change nothing the second
+time.
