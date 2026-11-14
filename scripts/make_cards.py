@@ -131,6 +131,30 @@ def draw_card(title, kicker, photo, out):
     im.save(out, "JPEG", quality=82, optimize=True, progressive=True)
 
 
+def tree_backdrop():
+    """The tree map's own trees as dots: a picture of the area made of nothing but trees."""
+    try:
+        lines = open("trees/trees-data.txt", encoding="utf-8").read().split("\n")
+        cats = json.load(open("trees/trees-lookup.json", encoding="utf-8"))["locations"]
+    except OSError:
+        return None
+    colours = {"Highways": (226, 161, 61), "Parks": (120, 170, 120), "Housing": (154, 181, 150), "Other": (138, 132, 120)}
+    lat0, lon0, zoom = 51.4215, -0.062, 14000          # centre on Crystal Palace, pixels per degree of latitude
+    kx = zoom * 0.623                                    # cos(51.4°): longitude degrees are shorter
+    im = Image.new("RGB", (W, H), (22, 29, 36))
+    d = ImageDraw.Draw(im)
+    for line in lines:
+        p = line.split("|")
+        if len(p) < 5:
+            continue
+        x = W / 2 + (float(p[2]) - lon0) * kx * 1.0
+        y = H / 2 - (float(p[1]) - lat0) * zoom
+        if 0 <= x < W and 0 <= y < H:
+            c = colours.get(cats[int(p[4])] if p[4].isdigit() and int(p[4]) < len(cats) else "Other")
+            d.ellipse((x - 1.1, y - 1.1, x + 1.1, y + 1.1), fill=c)
+    return im
+
+
 def targets():
     """(url, title, kicker, photo) for every page that gets a card."""
     issues = json.load(open(build.NEWSLETTER_DATA, encoding="utf-8"))
@@ -172,6 +196,9 @@ def targets():
                                ("/newsletter-archive/", "Every issue of the newsletter", "David Charles"),
                                ("/books/", "Free ebooks", "David Charles")):
         out.append((url, title, kicker, None))
+    if os.path.exists("trees/trees-data.txt"):
+        out.append(("/trees/", "Tree map: tap any tree to find out what it is",
+                    "Crystal Palace · Norwood · Beckenham · Sydenham", "trees"))
     return out
 
 
@@ -186,7 +213,7 @@ def main(force=False):
         out = card_path(url)
         if index.get(url) == fp and os.path.exists(out):
             continue
-        draw_card(title, kicker, load_photo(photo), out)
+        draw_card(title, kicker, tree_backdrop() if photo == "trees" else load_photo(photo), out)
         index[url] = fp
         made += 1
     json.dump(dict(sorted(index.items())), open(index_file, "w", encoding="utf-8"), indent=0)

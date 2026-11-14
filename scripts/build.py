@@ -99,7 +99,7 @@ def slugify(s):
 # ---------------------------------------------------------------- page template
 
 NAV = [("/start-here/", "Start here"), ("/newsletter-archive/", "Newsletter"), ("/blog-archive/", "Archive"),
-       ("/series/", "Series"), ("/map/", "Map"), ("/photos/", "Photos"), ("/search/", "Search")]
+       ("/series/", "Series"), ("/map/", "Map"), ("/trees/", "Trees"), ("/photos/", "Photos"), ("/search/", "Search")]
 
 
 # Search Console: paste the content="..." code Google gives for the HTML-tag method here.
@@ -606,7 +606,7 @@ def build_home(issues, posts, extra="", minutes=None):
             '<a href="/random-story/?m=10">10</a> or <a href="/random-story/?m=20">20</a>? '
             '<a href="/random-story/">Pick me a story</a></p>\n'
             '<p class="quick-pick">Explore: <a href="/timeline/">twenty-year timeline</a> &middot; '
-            '<a href="/map/">map</a> &middot; <a href="/series/">series</a> &middot; <a href="/photos/">photo wall</a> '
+            '<a href="/map/">map</a> &middot; <a href="/trees/">tree map</a> &middot; <a href="/series/">series</a> &middot; <a href="/photos/">photo wall</a> '
             '&middot; <a href="/books/cycling-to-the-sahara/">free ebook</a></p>\n'
             + extra +
             '<h2 class="section" id="newsletter">The newsletter</h2>\n' + issue_list(issues, minutes))
@@ -630,7 +630,7 @@ def build_extras(posts, pages, cats, years):
     write_if_changed("404.html", page("Page not found | David Charles", "Page not found.", "/404.html", body,
                                       noindex=True))
     urls = [("/", ""), ("/start-here/", ""), ("/newsletter-archive/", ""), ("/blog-archive/", ""), ("/series/", ""),
-            ("/map/", ""), ("/photos/", ""), ("/numbers/", ""), ("/search/", ""), ("/timeline/", ""),
+            ("/map/", ""), ("/trees/", ""), ("/photos/", ""), ("/numbers/", ""), ("/search/", ""), ("/timeline/", ""),
             ("/random-story/", ""), ("/books/", "")]
     urls += [(u, "") for u in sorted("/" + os.path.dirname(f).replace(os.sep, "/") + "/"
                                      for f in __import__("glob").glob("series/*/index.html")

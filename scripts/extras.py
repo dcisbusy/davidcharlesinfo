@@ -262,7 +262,7 @@ def build_map(stories):
 <div id="map" role="region" aria-label="Map of stories"></div>
 <h2>Most-visited places</h2>
 <ul class="chips" id="places">{top}</ul>
-<p class="back"><a href="/numbers/">More in 20 years in numbers</a></p>
+<p class="back"><a href="/trees/">Tree map: every tree around Crystal Palace</a> &middot; <a href="/numbers/">More in 20 years in numbers</a></p>
 <link rel="stylesheet" href="/assets/leaflet/leaflet.css">
 <link rel="stylesheet" href="/assets/leaflet/MarkerCluster.css">
 <link rel="stylesheet" href="/assets/leaflet/MarkerCluster.Default.css">
