@@ -54,7 +54,8 @@ def load_export():
     """Full text of newsletter issues from Substack export folders, by slug (newest export wins)."""
     out = {}
     for d in EXPORT_DIRS:
-        for f in os.listdir(d):
+        # Sorted by post id, so if a slug appears twice the newest version wins
+        for f in sorted(os.listdir(d), key=lambda f: int(f.split(".")[0]) if f.split(".")[0].isdigit() else 0):
             if f.endswith(".html") and "." in f[:-5]:
                 out[f[:-5].split(".", 1)[1]] = os.path.join(d, f)
     return out
@@ -214,6 +215,7 @@ def build_map(stories):
     years = sorted({p[4][:4] for p in pins if p[4]}, reverse=True)
     top = "".join(f'<li><a href="#" data-place="{esc(n)}">{esc(n)} <span>{c}</span></a></li>'
                   for n, c in counts.most_common(40))
+    pins_js = json.dumps(pins, ensure_ascii=False).replace("</", "<\\/")   # safe inside <script>
     body = f"""<h1>Adventure map</h1>
 <p class="intro muted">{len(pins)} stories from {len(counts)} places, from the newsletter and the blog. Click a pin
 (or a numbered cluster to zoom in), or pick a place below. Newsletter issues open on Substack.</p>
@@ -229,7 +231,7 @@ def build_map(stories):
 <script src="/assets/leaflet/leaflet.js"></script>
 <script src="/assets/leaflet/leaflet.markercluster.js"></script>
 <script>
-var PINS={json.dumps(pins, ensure_ascii=False)};
+var PINS={pins_js};
 var MONTHS={json.dumps(MONTHS)};
 function nice(d){{var p=d.split('-');return p.length<3?d:(+p[2])+' '+MONTHS[+p[1]-1]+' '+p[0];}}
 function escHtml(s){{return s.replace(/[&<>"]/g,function(c){{return {{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}}[c];}});}}
@@ -248,7 +250,7 @@ function draw(){{
     if(y && p[4].slice(0,4)!==y) return; n++;
     var m=L.circleMarker([p[0]+(Math.random()-.5)*0.002,p[1]+(Math.random()-.5)*0.002],
       Object.assign({{fillColor:col(p[6]==='newsletter'?'--s0':'--s1'),color:col('--bg')}},dot));
-    m.bindPopup('<strong><a href="'+p[3]+'">'+escHtml(p[2])+'</a></strong><br><small>'+escHtml(p[5])+' &middot; '+nice(p[4])+
+    m.bindPopup('<strong><a href="'+escHtml(p[3])+'">'+escHtml(p[2])+'</a></strong><br><small>'+escHtml(p[5])+' &middot; '+nice(p[4])+
       (p[6]==='newsletter'?' &middot; newsletter':' &middot; blog')+'</small>');
     layer.addLayer(m);
   }});

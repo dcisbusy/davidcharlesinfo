@@ -239,9 +239,16 @@ def update_newsletter(offline=False):
         sys.exit("Could not read Substack: " + "; ".join(errors))
     for e in errors:
         print("Note:", e)
+    # Only trust issues that really point at the Substack, with https images. This stops a
+    # compromised feed relay from adding fake issues or javascript: links to the site.
+    ok_url = lambda u: isinstance(u, str) and u.startswith(SUBSTACK + "/p/") and not re.search(r'[\s"<>]', u)
+    ok_img = lambda u: isinstance(u, str) and u.startswith("https://") and not re.search(r'[\s"<>]', u)
+    fetched = [dict(p, image=p.get("image") if ok_img(p.get("image")) else "", title=p["title"][:300],
+                    excerpt=(p.get("excerpt") or "")[:1000], date=p.get("date", "")[:10])
+               for p in fetched if ok_url(p.get("url"))]
     for p in fetched:
         merged = dict(known.get(key(p["url"]), {}))
-        merged.update({k: v for k, v in p.items() if v or k == "paid"})
+        merged.update({k: v for k, v in p.items() if v or (k == "paid" and "paid" not in merged)})
         known[key(p["url"])] = merged
     issues = sorted(known.values(), key=lambda p: (p.get("date", ""), p["title"]), reverse=True)
     write_if_changed(NEWSLETTER_DATA, json.dumps(issues, ensure_ascii=False, indent=1))
