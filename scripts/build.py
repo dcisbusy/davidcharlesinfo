@@ -124,7 +124,16 @@ def page(title, description, path, body, current=None, image=None, kind="website
         f'<meta property="og:url" content="{SITE}{esc(path)}">',
         '<meta property="og:site_name" content="David Charles">',
     ]
-    if image:
+    card = "cards/" + (path.strip("/").replace("/", "--") or "home") + ".jpg"
+    if os.path.exists(card):
+        # a share card made by scripts/make_cards.py: photo plus title, 1200 x 630
+        head += [f'<meta property="og:image" content="{SITE}/{card}">',
+                 '<meta property="og:image:width" content="1200">',
+                 '<meta property="og:image:height" content="630">',
+                 f'<meta property="og:image:alt" content="{esc(title)}">',
+                 '<meta name="twitter:card" content="summary_large_image">',
+                 f'<meta name="twitter:image" content="{SITE}/{card}">']
+    elif image:
         img = image if image.startswith("http") else SITE + image
         head += [f'<meta property="og:image" content="{esc(img)}">',
                  '<meta name="twitter:card" content="summary_large_image">']
