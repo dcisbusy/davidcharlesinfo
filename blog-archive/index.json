@@ -6,8 +6,8 @@
   "date": "2025-06-28",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Activism",
+    "url": "/category/activism/"
    }
   ],
   "tags": [],
@@ -21,8 +21,12 @@
   "date": "2025-06-20",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "How to be Human",
+    "url": "/category/how-to-be-human/"
+   },
+   {
+    "name": "Nature & Environment",
+    "url": "/category/nature/"
    }
   ],
   "tags": [],
@@ -36,8 +40,8 @@
   "date": "2025-06-13",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "How to be Human",
+    "url": "/category/how-to-be-human/"
    }
   ],
   "tags": [],
@@ -51,8 +55,12 @@
   "date": "2025-06-06",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Creative Writing",
+    "url": "/category/creative-writing/"
+   },
+   {
+    "name": "Writing about Writing",
+    "url": "/category/creative-writing/writing-about-writing/"
    }
   ],
   "tags": [],
@@ -66,8 +74,8 @@
   "date": "2025-05-24",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Adventure & Observation",
+    "url": "/category/adventure/"
    }
   ],
   "tags": [],
@@ -81,8 +89,12 @@
   "date": "2025-03-19",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Creative Writing",
+    "url": "/category/creative-writing/"
+   },
+   {
+    "name": "Writing about Writing",
+    "url": "/category/creative-writing/writing-about-writing/"
    }
   ],
   "tags": [],
@@ -96,8 +108,8 @@
   "date": "2025-02-28",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Adventure & Observation",
+    "url": "/category/adventure/"
    }
   ],
   "tags": [],
@@ -111,8 +123,16 @@
   "date": "2025-02-18",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Nature & Environment",
+    "url": "/category/nature/"
+   },
+   {
+    "name": "Adventure & Observation",
+    "url": "/category/adventure/"
+   },
+   {
+    "name": "Walking",
+    "url": "/category/adventure/walking/"
    }
   ],
   "tags": [],
@@ -126,8 +146,8 @@
   "date": "2025-02-07",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Adventure & Observation",
+    "url": "/category/adventure/"
    }
   ],
   "tags": [],
@@ -141,8 +161,12 @@
   "date": "2025-02-01",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Adventure & Observation",
+    "url": "/category/adventure/"
+   },
+   {
+    "name": "Nature & Environment",
+    "url": "/category/nature/"
    }
   ],
   "tags": [],
@@ -156,8 +180,8 @@
   "date": "2025-01-05",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Tiny Big Things",
+    "url": "/category/tiny-big-things/"
    }
   ],
   "tags": [],
@@ -171,8 +195,8 @@
   "date": "2024-12-31",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Tiny Big Things",
+    "url": "/category/tiny-big-things/"
    }
   ],
   "tags": [],
@@ -186,8 +210,8 @@
   "date": "2024-12-07",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "How to be Human",
+    "url": "/category/how-to-be-human/"
    }
   ],
   "tags": [],
@@ -201,8 +225,8 @@
   "date": "2024-12-01",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Adventure & Observation",
+    "url": "/category/adventure/"
    }
   ],
   "tags": [],
@@ -216,8 +240,8 @@
   "date": "2024-11-15",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "How to be Human",
+    "url": "/category/how-to-be-human/"
    }
   ],
   "tags": [],
@@ -231,8 +255,8 @@
   "date": "2024-10-27",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Nature & Environment",
+    "url": "/category/nature/"
    }
   ],
   "tags": [],
@@ -246,8 +270,8 @@
   "date": "2024-10-11",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "How to be Human",
+    "url": "/category/how-to-be-human/"
    }
   ],
   "tags": [],
@@ -261,8 +285,8 @@
   "date": "2024-09-22",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "How to be Human",
+    "url": "/category/how-to-be-human/"
    }
   ],
   "tags": [],
@@ -276,8 +300,12 @@
   "date": "2024-09-15",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Adventure & Observation",
+    "url": "/category/adventure/"
+   },
+   {
+    "name": "Nature & Environment",
+    "url": "/category/nature/"
    }
   ],
   "tags": [],
@@ -291,8 +319,8 @@
   "date": "2024-09-07",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Nature & Environment",
+    "url": "/category/nature/"
    }
   ],
   "tags": [],
@@ -306,8 +334,8 @@
   "date": "2024-08-26",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Nature & Environment",
+    "url": "/category/nature/"
    }
   ],
   "tags": [],
@@ -17339,8 +17367,8 @@
   "date": "2014-08-26",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Activism",
+    "url": "/category/activism/"
    }
   ],
   "tags": [
@@ -17797,8 +17825,8 @@
   "date": "2013-03-07",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Talk / Lecture Reviews",
+    "url": "/category/talk-lecture-reviews/"
    }
   ],
   "tags": [
@@ -18023,8 +18051,8 @@
   "date": "2012-07-05",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "How to be Human",
+    "url": "/category/how-to-be-human/"
    }
   ],
   "tags": [
@@ -18933,8 +18961,8 @@
   "date": "2011-07-10",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Activism",
+    "url": "/category/activism/"
    }
   ],
   "tags": [
@@ -19484,8 +19512,8 @@
   "date": "2011-04-29",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Adventure & Observation",
+    "url": "/category/adventure/"
    }
   ],
   "tags": [
@@ -19827,8 +19855,8 @@
   "date": "2011-02-26",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Activism",
+    "url": "/category/activism/"
    }
   ],
   "tags": [
@@ -19908,8 +19936,8 @@
   "date": "2011-02-22",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Creative Writing",
+    "url": "/category/creative-writing/"
    }
   ],
   "tags": [
@@ -20267,8 +20295,8 @@
   "date": "2011-02-05",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Creative Writing",
+    "url": "/category/creative-writing/"
    }
   ],
   "tags": [
@@ -20319,8 +20347,8 @@
   "date": "2011-02-03",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Activism",
+    "url": "/category/activism/"
    }
   ],
   "tags": [
@@ -21155,8 +21183,8 @@
   "date": "2010-12-31",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Activism",
+    "url": "/category/activism/"
    }
   ],
   "tags": [
@@ -21733,8 +21761,12 @@
   "date": "2010-11-26",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Creative Writing",
+    "url": "/category/creative-writing/"
+   },
+   {
+    "name": "Foiled & Comedy Writing",
+    "url": "/category/creative-writing/foiled-comedy-writing/"
    }
   ],
   "tags": [
@@ -21825,8 +21857,8 @@
   "date": "2010-11-18",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Talk / Lecture Reviews",
+    "url": "/category/talk-lecture-reviews/"
    }
   ],
   "tags": [
@@ -21873,8 +21905,12 @@
   "date": "2010-11-17",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Creative Writing",
+    "url": "/category/creative-writing/"
+   },
+   {
+    "name": "Foiled & Comedy Writing",
+    "url": "/category/creative-writing/foiled-comedy-writing/"
    }
   ],
   "tags": [
@@ -21957,8 +21993,12 @@
   "date": "2010-11-13",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Creative Writing",
+    "url": "/category/creative-writing/"
+   },
+   {
+    "name": "Foiled & Comedy Writing",
+    "url": "/category/creative-writing/foiled-comedy-writing/"
    }
   ],
   "tags": [
@@ -21977,8 +22017,12 @@
   "date": "2010-11-12",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Creative Writing",
+    "url": "/category/creative-writing/"
+   },
+   {
+    "name": "Foiled & Comedy Writing",
+    "url": "/category/creative-writing/foiled-comedy-writing/"
    }
   ],
   "tags": [
@@ -21997,8 +22041,12 @@
   "date": "2010-11-11",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Creative Writing",
+    "url": "/category/creative-writing/"
+   },
+   {
+    "name": "Foiled & Comedy Writing",
+    "url": "/category/creative-writing/foiled-comedy-writing/"
    }
   ],
   "tags": [
@@ -22057,8 +22105,12 @@
   "date": "2010-11-10",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Creative Writing",
+    "url": "/category/creative-writing/"
+   },
+   {
+    "name": "Foiled & Comedy Writing",
+    "url": "/category/creative-writing/foiled-comedy-writing/"
    }
   ],
   "tags": [
@@ -22077,8 +22129,12 @@
   "date": "2010-11-09",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Creative Writing",
+    "url": "/category/creative-writing/"
+   },
+   {
+    "name": "Foiled & Comedy Writing",
+    "url": "/category/creative-writing/foiled-comedy-writing/"
    }
   ],
   "tags": [
@@ -22097,8 +22153,12 @@
   "date": "2010-11-08",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Creative Writing",
+    "url": "/category/creative-writing/"
+   },
+   {
+    "name": "Foiled & Comedy Writing",
+    "url": "/category/creative-writing/foiled-comedy-writing/"
    }
   ],
   "tags": [
@@ -22160,8 +22220,12 @@
   "date": "2010-11-06",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Creative Writing",
+    "url": "/category/creative-writing/"
+   },
+   {
+    "name": "Foiled & Comedy Writing",
+    "url": "/category/creative-writing/foiled-comedy-writing/"
    }
   ],
   "tags": [
@@ -22180,8 +22244,12 @@
   "date": "2010-11-05",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Creative Writing",
+    "url": "/category/creative-writing/"
+   },
+   {
+    "name": "Foiled & Comedy Writing",
+    "url": "/category/creative-writing/foiled-comedy-writing/"
    }
   ],
   "tags": [
@@ -22200,8 +22268,12 @@
   "date": "2010-11-04",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Creative Writing",
+    "url": "/category/creative-writing/"
+   },
+   {
+    "name": "Foiled & Comedy Writing",
+    "url": "/category/creative-writing/foiled-comedy-writing/"
    }
   ],
   "tags": [
@@ -22276,8 +22348,12 @@
   "date": "2010-11-02",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Creative Writing",
+    "url": "/category/creative-writing/"
+   },
+   {
+    "name": "Foiled & Comedy Writing",
+    "url": "/category/creative-writing/foiled-comedy-writing/"
    }
   ],
   "tags": [
@@ -22296,8 +22372,12 @@
   "date": "2010-11-01",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Creative Writing",
+    "url": "/category/creative-writing/"
+   },
+   {
+    "name": "Foiled & Comedy Writing",
+    "url": "/category/creative-writing/foiled-comedy-writing/"
    }
   ],
   "tags": [
@@ -22423,8 +22503,8 @@
   "date": "2010-10-04",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Activism",
+    "url": "/category/activism/"
    }
   ],
   "tags": [
@@ -22834,8 +22914,8 @@
   "date": "2010-06-08",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Creative Writing",
+    "url": "/category/creative-writing/"
    }
   ],
   "tags": [
@@ -23024,8 +23104,8 @@
   "date": "2010-02-24",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Activism",
+    "url": "/category/activism/"
    }
   ],
   "tags": [
@@ -23048,8 +23128,8 @@
   "date": "2010-01-24",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Activism",
+    "url": "/category/activism/"
    }
   ],
   "tags": [
@@ -23267,8 +23347,8 @@
   "date": "2009-10-11",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Adventure & Observation",
+    "url": "/category/adventure/"
    }
   ],
   "tags": [
@@ -23923,8 +24003,8 @@
   "date": "2006-07-28",
   "cats": [
    {
-    "name": "Uncategorised",
-    "url": "/category/uncategorised/"
+    "name": "Activism",
+    "url": "/category/activism/"
    }
   ],
   "tags": [

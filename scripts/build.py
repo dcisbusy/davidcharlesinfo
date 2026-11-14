@@ -35,7 +35,7 @@ os.chdir(ROOT)
 SITE = "https://davidcharles.info"
 SUBSTACK = "https://davidcharles.substack.com"
 GOATCOUNTER = "davidcharles"    # GoatCounter site code (davidcharles.goatcounter.com). Set to "" to switch stats off.
-CSS_VERSION = "5"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
+CSS_VERSION = "6"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
 
 NEWSLETTER_DATA = "newsletter-archive/posts.json"
 BLOG_DATA = "blog-archive/index.json"
@@ -379,6 +379,15 @@ def build_blog(entries, ctx=None):
     for p in posts:
         for c in p.get("cats", []):
             cats.setdefault(c["url"], {"name": c["name"], "posts": []})["posts"].append(p)
+    # A parent category also lists every post in its sub-categories (no duplicates, newest first)
+    order = {id(p): i for i, p in enumerate(posts)}
+    for u in sorted(cats, key=lambda u: -u.count("/")):
+        seen = {id(p) for p in cats[u]["posts"]}
+        for s2 in [s2 for s2 in cats if s2.startswith(u) and s2 != u]:
+            for p in cats[s2]["posts"]:
+                if id(p) not in seen:
+                    seen.add(id(p)); cats[u]["posts"].append(p)
+        cats[u]["posts"].sort(key=lambda p: order[id(p)])
     top_cats = sorted([u for u in cats if u.count("/") == 3], key=lambda u: (cats[u]["name"] == "Uncategorised",
                                                                               cats[u]["name"].lower()))
     for u, c in cats.items():
@@ -427,6 +436,15 @@ def build_blog(entries, ctx=None):
     for y in years:
         by_year.append(f'<h2 id="y{y}"><a href="/{y}/">{y}</a></h2>\n'
                        + post_rows([p for p in posts if p["date"].startswith(y)]))
+    def kids(u):
+        return sorted([s2 for s2 in cats if s2.startswith(u) and s2 != u and s2.count("/") == u.count("/") + 1],
+                      key=lambda s2: cats[s2]["name"].lower())
+
+    def branch(u):
+        sub = kids(u)
+        return (f'<li><a href="{esc(u)}">{esc(cats[u]["name"])} <span>{len(cats[u]["posts"])}</span></a>'
+                + ('<ul>' + "".join(branch(k) for k in sub) + '</ul>' if sub else "") + "</li>")
+    cat_tree = '<ul class="cat-tree">' + "".join(branch(u) for u in top_cats) + "</ul>"
     first, last = (years[-1], years[0]) if years else ("", "")
     body = (
         "<h1>Blog archive</h1>\n"
@@ -436,8 +454,7 @@ def build_blog(entries, ctx=None):
         '<a href="/series/">series</a>, or try a <a href="/random-story/">random story</a>.</p>\n'
         '<h2 class="section">Pages</h2>\n<ul class="pages">'
         + "".join(f'<li><a href="{esc(e["url"])}">{esc(e["title"])}</a></li>' for e in pages) + "</ul>\n"
-        '<h2 class="section">Categories</h2>\n'
-        + chips([(u, cats[u]["name"], len(cats[u]["posts"])) for u in top_cats]) + "\n"
+        '<h2 class="section">Categories</h2>\n' + cat_tree + "\n"
         '<h2 class="section">Years</h2>\n' + year_chips + "\n"
         '<h2 class="section">Every post</h2>\n' + "\n".join(by_year))
     write_if_changed("blog-archive/index.html",
