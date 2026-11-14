@@ -246,6 +246,7 @@ build runs by itself afterwards and the live site updates a couple of minutes la
 | **Uncategorised posts given real categories** (Nov 2026) | 51 posts, mostly 2010–11 and the 2024–25 newsletter copies, had lost their categories. Each was assigned by reading it. Parent categories now include their sub-categories' posts. |
 | **Images compressed** (Nov 2026) | Longest side capped at 1800px, JPEG quality 82; about 172MB → 118MB with no visible change. |
 | **Subscriber CSVs removed from history** (Nov 2026) | They were committed briefly by accident in the first export; the commit was rewritten out of the branch. |
+| **Drafts, the paid issue and the old CV removed from history** (Nov 2026) | Unpublished drafts and the paid-only issue from the Substack export, and a 2016 CV with personal contact details, were stripped from every commit. |
 
 ---
 
@@ -253,7 +254,7 @@ build runs by itself afterwards and the live site updates a couple of minutes la
 
 **For David to do (needs your logins):**
 
-1. **Ask GitHub Support to purge cached data** from the history rewrite. GitHub keeps
+1. **Ask GitHub Support to purge cached data** from the history rewrites (November 2026). GitHub keeps
    rewritten commits reachable by ID until Support removes them. Use their "remove
    sensitive data" form.
 2. **Enforce HTTPS** in *Settings → Pages* once the certificate is issued.
@@ -272,16 +273,10 @@ build runs by itself afterwards and the live site updates a couple of minutes la
    current ones are drafts.
 7. **Colour scheme:** four bold alternatives were proposed (Seaside postcard, Risograph
    zine, Allotment, Night bus). None applied yet.
-8. **Older copies of drafts in history:** unpublished drafts and the paid issue from the
-   Substack export were removed from the site in November 2026, but remain readable in
-   this public repository's history. Rewriting history would remove them (needs your
-   go-ahead), followed by a GitHub Support purge.
-9. **The 2016 CV PDF** (`wp-content/uploads/2016/12/`) contains a personal phone number and
-   email address. It was public on the old site too. Keep, replace, or remove?
-10. **Category judgement calls:** a few posts could go either way, e.g. *Everything Is
+8. **Category judgement calls:** a few posts could go either way, e.g. *Everything Is
     Free\** (How to be Human vs Activism), *Bad Romance* (Creative Writing).
-11. **Shop and pay-what-you-like pages:** check the payment and book links still work.
-12. **Refresh the Substack export** occasionally, so newer issues get full-text search,
+9. **Shop and pay-what-you-like pages:** check the payment and book links still work.
+10. **Refresh the Substack export** occasionally, so newer issues get full-text search,
     related reading and word counts.
 
 **Known limitations:**
