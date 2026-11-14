@@ -318,8 +318,13 @@ def update_newsletter(offline=False):
         merged.update({k: v for k, v in p.items() if v or (k == "paid" and "paid" not in merged)})
         known[key(p["url"])] = merged
     issues = sorted(known.values(), key=lambda p: (p.get("date", ""), p["title"]), reverse=True)
+    try:                                   # duplicates David chose to hide (data/hidden-issues.json)
+        hidden = {key(u) for u in json.load(open("data/hidden-issues.json", encoding="utf-8"))["hidden"]}
+    except (OSError, ValueError, KeyError):
+        hidden = set()
     write_if_changed(NEWSLETTER_DATA, json.dumps(issues, ensure_ascii=False, indent=1))
-    print(f"{len(issues)} newsletter issues")
+    issues = [p for p in issues if key(p["url"]) not in hidden]
+    print(f"{len(issues)} newsletter issues ({len(hidden)} hidden)")
     return issues
 
 

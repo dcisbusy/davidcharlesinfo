@@ -13278,30 +13278,6 @@
  },
  {
   "type": "post",
-  "url": "/adventure/cycle-touring/camber-sands-ride/",
-  "title": "Camber Sands ride details",
-  "date": "2017-06-09",
-  "cats": [
-   {
-    "name": "Cycle Touring & Bikepacking",
-    "url": "/category/adventure/cycle-touring/"
-   },
-   {
-    "name": "Sea Cycles",
-    "url": "/category/adventure/cycle-touring/seacycles/"
-   }
-  ],
-  "tags": [
-   {
-    "name": "Sea Cycles",
-    "url": "/tag/sea-cycles/"
-   }
-  ],
-  "excerpt": "The sun will surely shine on Camber Sands, a beautiful strip of dunes on the south Sussex coast. It’s a moderately hilly ride from London on a mixture of country lanes and (hopefully quiet) A roads…",
-  "image": "/wp-content/uploads/2015/05/DSCF4205-604x270.jpg"
- },
- {
-  "type": "post",
   "url": "/talk-lecture-reviews/science-psychedelics-exceptional-human-experience-david-luke/",
   "title": "The Science of Psychedelics and Exceptional Human Experience",
   "date": "2017-05-11",
@@ -19912,25 +19888,6 @@
  },
  {
   "type": "post",
-  "url": "/creative-writing/writing-about-writing/g-verbs-to-watch-girls-go-by/",
-  "title": "G-Verbs to Watch Girls Go By",
-  "date": "2011-02-23",
-  "cats": [
-   {
-    "name": "Creative Writing",
-    "url": "/category/creative-writing/"
-   },
-   {
-    "name": "Writing about Writing",
-    "url": "/category/creative-writing/writing-about-writing/"
-   }
-  ],
-  "tags": [],
-  "excerpt": "Still casual. Check she’s not actually a fella, then move on.",
-  "image": null
- },
- {
-  "type": "post",
   "url": "/uncategorised/too-much/",
   "title": "Too Much",
   "date": "2011-02-22",
@@ -22148,30 +22105,6 @@
  },
  {
   "type": "post",
-  "url": "/uncategorised/idiots-idioms-vi-cripples/",
-  "title": "Idiots’ Idioms VI: Cripples",
-  "date": "2010-11-08",
-  "cats": [
-   {
-    "name": "Creative Writing",
-    "url": "/category/creative-writing/"
-   },
-   {
-    "name": "Foiled & Comedy Writing",
-    "url": "/category/creative-writing/foiled-comedy-writing/"
-   }
-  ],
-  "tags": [
-   {
-    "name": "Idiots' Idioms",
-    "url": "/tag/idiots-idioms/"
-   }
-  ],
-  "excerpt": "",
-  "image": null
- },
- {
-  "type": "post",
   "url": "/how-to-be-human/you-are-what-you-dont/dhamma-dipa-vipassana-my-experience/",
   "title": "Vipassana Meditation at Dhamma Dipa: A Philosophical Consideration",
   "date": "2010-11-08",
@@ -22848,25 +22781,6 @@
   ],
   "tags": [],
   "excerpt": "Facing the cathedral, from the opposite bank, with the Tate Modern at my back. I can hear a constant hissing of water sprinklers for the small area of grass behind me. The wind in the birch trees…",
-  "image": null
- },
- {
-  "type": "post",
-  "url": "/creative-writing/text-me-your-number/",
-  "title": "Text me your number",
-  "date": "2010-07-30",
-  "cats": [
-   {
-    "name": "Creative Writing",
-    "url": "/category/creative-writing/"
-   },
-   {
-    "name": "Short Stories",
-    "url": "/category/creative-writing/short-stories/"
-   }
-  ],
-  "tags": [],
-  "excerpt": "",
   "image": null
  },
  {
@@ -24102,16 +24016,6 @@
  },
  {
   "type": "page",
-  "url": "/writing-services/",
-  "title": "Writing Services",
-  "date": "",
-  "cats": [],
-  "tags": [],
-  "excerpt": "Hi there. My name is David Charles and I have over 10 years’ experience in the words industry as a writer and editor.",
-  "image": "/wp-content/uploads/2020/01/Doorstep-Mile.jpg"
- },
- {
-  "type": "page",
   "url": "/winter-forest-sunsets/",
   "title": "Winter Forest Sunsets",
   "date": "",
@@ -24222,16 +24126,6 @@
  },
  {
   "type": "page",
-  "url": "/hi/",
-  "title": "Hi!",
-  "date": "",
-  "cats": [],
-  "tags": [],
-  "excerpt": "My name is David Charles and I probably met you out somewhere. Thanks for stopping by!",
-  "image": "/wp-content/uploads/2018/08/Teddies-Diavata.jpg"
- },
- {
-  "type": "page",
   "url": "/foiled/",
   "title": "Foiled",
   "date": "",
@@ -24282,60 +24176,6 @@
  },
  {
   "type": "page",
-  "url": "/cycling-to-syria/5/",
-  "title": "Cycling to Syria",
-  "date": "",
-  "cats": [],
-  "tags": [],
-  "excerpt": "Thanks to the awesome hospitality of Elizabeth and Markus, we had a day off in Hirten to make mandelhoenchen, but mostly we recovered from a belting thunderstorm that dissolved everything.",
-  "image": null,
-  "listed": false
- },
- {
-  "type": "page",
-  "url": "/cycling-to-syria/4/",
-  "title": "Cycling to Syria",
-  "date": "",
-  "cats": [],
-  "tags": [],
-  "excerpt": "We had a day off in Augsburg to enjoy Grandhotel Cosmopolis, watch storms flood the pretty canals and fantasise about staying forever.",
-  "image": null,
-  "listed": false
- },
- {
-  "type": "page",
-  "url": "/cycling-to-syria/3/",
-  "title": "Cycling to Syria",
-  "date": "",
-  "cats": [],
-  "tags": [],
-  "excerpt": "We had a day off in Daun on the 19 May to stock up on tech, go for a swim, shave my beard and recover from watching Liverpool lose the Europa Cup final.",
-  "image": null,
-  "listed": false
- },
- {
-  "type": "page",
-  "url": "/cycling-to-syria/2/",
-  "title": "Cycling to Syria",
-  "date": "",
-  "cats": [],
-  "tags": [],
-  "excerpt": "It was only two weeks into the ride that I realised that my phone battery could handle running Strava all day. Some days I forgot to start the clock, some days I forgot to stop it, but here is a…",
-  "image": null,
-  "listed": false
- },
- {
-  "type": "page",
-  "url": "/cycling-to-syria/",
-  "title": "Cycling to Syria",
-  "date": "",
-  "cats": [],
-  "tags": [],
-  "excerpt": "In May 2016, I set off a very long bicycle tour, following the routes of migration from the safe refuge of London to the bombed-out streets of Syria.",
-  "image": "/wp-content/uploads/2019/02/Cycling-towards-Syria-Cycling-World-magazine.jpg"
- },
- {
-  "type": "page",
   "url": "/cycling-to-syria-campsites/",
   "title": "Cycling to Syria: Campsites",
   "date": "",
@@ -24353,36 +24193,6 @@
   "tags": [],
   "excerpt": "This is a book full of tips and tricks on how to cycle an awfully long way when you don’t know anything about bicycles and you HATE Lycra.",
   "image": "/wp-content/uploads/2013/12/Lycra-book-front-cover-300x270.png"
- },
- {
-  "type": "page",
-  "url": "/contact-david/",
-  "title": "Contact David",
-  "date": "",
-  "cats": [],
-  "tags": [],
-  "excerpt": "This is who I am , but who are you? Drop me a line using the form below, for questions, suggestions, corrections, and connections.",
-  "image": "/wp-content/uploads/2018/08/Teddies-Diavata-1200x929.jpg"
- },
- {
-  "type": "page",
-  "url": "/comedy-courses/",
-  "title": "Chalk + Charms",
-  "date": "",
-  "cats": [],
-  "tags": [],
-  "excerpt": "Chalk + Charms is a series of comedy writing courses run by BBC comedy writers Beth Granville and David Charles. We exist to help people write the funniest scripts of their lives and get those…",
-  "image": "/wp-content/uploads/2019/11/Eventbrite-comedy-workshops-image.jpg"
- },
- {
-  "type": "page",
-  "url": "/about-me/",
-  "title": "About me",
-  "date": "",
-  "cats": [],
-  "tags": [],
-  "excerpt": "I write stories that help you and me understand the world (and ourselves) a little better.",
-  "image": "/wp-content/uploads/2019/02/D-A-V-E.jpg"
  },
  {
   "type": "page",

@@ -1,0 +1,21 @@
+{
+ "_note": "Newsletter issues left out of every list on the site: copies that Mailchimp/TinyLetter sent twice, with the same words as another issue. Add an issue address to hide it.",
+ "hidden": [
+  "https://davidcharles.substack.com/p/1358765_power-of-networks-foiled-copy-01-",
+  "https://davidcharles.substack.com/p/1372957_no-tabbed-browsing-3-",
+  "https://davidcharles.substack.com/p/1452189_-re-sent-50-iona",
+  "https://davidcharles.substack.com/p/1454497_-re-sent-51-casper-henderson-and-wonder",
+  "https://davidcharles.substack.com/p/1456885_-re-sent-52-a-year-of-mailing-lists-",
+  "https://davidcharles.substack.com/p/1466045_-re-sent-56-lake-district",
+  "https://davidcharles.substack.com/p/1467177_-re-sent-57-crisis-and-no-news",
+  "https://davidcharles.substack.com/p/1469001_-re-sent-58-act-1-of-the-novel",
+  "https://davidcharles.substack.com/p/1472505_-re-sent-60-500-words-of-the-novel",
+  "https://davidcharles.substack.com/p/1476109_-re-sent-63-carpe-diem",
+  "https://davidcharles.substack.com/p/3246409_-re-sent-64-no-no-aeroplanes",
+  "https://davidcharles.substack.com/p/3253737_-re-sent-65-squatting",
+  "https://davidcharles.substack.com/p/3262465_-re-sent-67-worry-is-the-opposite-of-work",
+  "https://davidcharles.substack.com/p/3272581_-re-sent-70-victor-frankl",
+  "https://davidcharles.substack.com/p/3342961_-99-to-do-list-bankruptcy-copy-01-",
+  "https://davidcharles.substack.com/p/3500781_-re-sent-140-paris"
+ ]
+}
