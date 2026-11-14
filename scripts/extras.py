@@ -16,6 +16,7 @@ import json
 import math
 import os
 import re
+import sys
 from urllib.parse import quote
 
 from build import (MONTHS, PERSON, SITE, SUBSTACK, TILE_COLOURS, chips, esc, file_for, nice, page, read, write_if_changed)
@@ -997,34 +998,84 @@ def build_timeline(stories, series_list):
 
 
 def build_start_here(stories, entries, series_list):
+    """The Start here page: a photo doorway, one tile per theme, then each theme's picks as photo cards.
+    Words come from data/start-here.json; photos from each story (or an item's own "photo")."""
     conf = json.load(open("data/start-here.json", encoding="utf-8"))
     by_blog = {s["blog_url"]: s for s in stories if s.get("blog_url")}
     by_url = {s["url"]: s for s in stories}
     entry = {e["url"]: e for e in entries}
     slugs = {f'/series/{sr["slug"]}/': sr for sr in series_list}
-    parts = []
+    common = common_photos(stories)
+
+    def pic(photo, title):
+        if photo:
+            return f'<img src="{esc(photo)}" alt="" loading="lazy" decoding="async">'
+        colour = TILE_COLOURS[sum(map(ord, title)) % len(TILE_COLOURS)]
+        return f'<span class="ph" style="background:{colour}" aria-hidden="true"></span>'
+
+    themes = []
     for th in conf["themes"]:
-        lis = []
+        cards = []
         for it in th["items"]:
             u = it["url"]
             st = by_blog.get(u) or by_url.get(u)
             if u in slugs:
-                title, url, date, kind = slugs[u]["name"], u, slugs[u]["items"][0]["date"], f'series of {len(slugs[u]["items"])}'
+                sr = slugs[u]
+                cover = sr.get("cover") or next((x["photo"] for x in sr["items"] if x.get("photo")), None)
+                title, url, date, photo = sr["name"], u, sr["items"][0]["date"], it.get("photo") or cover
+                meta = f'Series &middot; {len(sr["items"])} parts'
             elif st:
-                title, url, date, kind = st["title"], st["url"], st["date"], st["source"]
+                title, url, date = st["title"], st["url"], st["date"]
+                photo = it.get("photo") or story_photo(st, common)
+                text = st.get("text") or ""
+                if st["source"] != "newsletter":                    # blog stories: count the whole post
+                    m = sys.modules["build"].CONTENT_RE.search(read(file_for(st["url"])) or "")
+                    text = re.sub(r"<[^>]+>", " ", m.group(1)) if m else text
+                words = len(re.findall(r"[A-Za-z\u00C0-\u024F'\u2019-]+", text))
+                meta = (f"{max(1, round(words / 230))} min read" if words > 150 else "") + \
+                    (" &middot; newsletter" if st["source"] == "newsletter" else "")
             elif u in entry:
-                title, url, date, kind = entry[u]["title"], u, entry[u]["date"], "page"
+                title, url, date, photo, meta = entry[u]["title"], u, entry[u]["date"], it.get("photo"), ""
             else:
                 print("Start here: can't find", u)
                 continue
-            lis.append(f'<li><a href="{esc(url)}">{esc(title)}</a><p>{esc(it["note"])}</p>'
-                       f'<time datetime="{esc(date)}">{esc(nice(date))}'
-                       f'{" &middot; " + esc(kind) if kind in ("newsletter",) or kind.startswith("series") else ""}</time></li>')
-        parts.append(f'<h2 class="section">{esc(th["name"])}</h2>\n<ul class="picks">{"".join(lis)}</ul>')
-    body = (f'<h1>Start here</h1>\n<p class="intro">{esc(conf["intro"])}</p>\n' + "\n".join(parts) +
+            cards.append({"title": title, "url": url, "date": date, "photo": photo, "meta": meta, "note": it["note"]})
+        if cards:
+            themes.append((th, cards))
+
+    def anchor(name):
+        return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+
+    hero = conf.get("hero")
+    doors = "".join(
+        f'<li><a href="#{anchor(th["name"])}">{pic(th.get("photo") or next((c["photo"] for c in cards if c["photo"]), None), th["name"])}'
+        f'<span class="label">{esc(th["name"])}<small>{len(cards)} {"story" if len(cards) == 1 else "stories"}</small></span></a></li>'
+        for th, cards in themes)
+    sections = []
+    for th, cards in themes:
+        lis = "".join(
+            f'<li><a href="{esc(c["url"])}">{pic(c["photo"], c["title"])}<div><h3>{esc(c["title"])}</h3>'
+            f'<p>{esc(c["note"])}</p><span class="meta">{esc(c["date"][:4])}'
+            f'{" &middot; " + c["meta"] if c["meta"] else ""}</span></div></a></li>' for c in cards)
+        sections.append(f'<h2 class="section" id="{anchor(th["name"])}">{esc(th["name"])}</h2>\n'
+                        f'<ul class="sh-picks">{lis}</ul>')
+    explore = [("/series/", "Series"), ("/map/", "Adventure map"), ("/trees/", "Tree map"), ("/timeline/", "Timeline"),
+               ("/random-story/", "Pick me a story"), ("/books/", "Free ebooks")]
+    tiles = "".join(f'<li><a href="{u}"><img src="/cards/{u.strip("/")}.jpg" alt="{esc(t)}" loading="lazy" '
+                    f'decoding="async" width="1200" height="630"></a></li>'
+                    for u, t in explore if os.path.exists(f'cards/{u.strip("/")}.jpg'))
+    body = ((f'<header class="sh-hero"><img src="{esc(hero)}" alt="" fetchpriority="high">' if hero
+             else '<header class="sh-hero plain">') +
+            f'<div><h1>Start here</h1><p>{esc(conf["intro"])}</p></div></header>\n'
+            f'<ul class="sh-doors">{doors}</ul>\n'
+            '<p class="quick-pick">Got <a href="/random-story/?m=2">2 minutes</a>, <a href="/random-story/?m=5">5</a>, '
+            '<a href="/random-story/?m=10">10</a> or <a href="/random-story/?m=20">20</a>? '
+            '<a href="/random-story/">Pick me a story</a></p>\n'
+            + "\n".join(sections) +
             '\n<h2 class="section">Then&hellip;</h2>\n<p>Follow one of the <a href="/series/">series</a>, wander the '
             '<a href="/map/">map</a>, <a href="/search/">search</a> for anything, or let me pick a '
             '<a href="/random-story/">random story</a>.</p>\n'
+            f'<ul class="sh-explore">{tiles}</ul>\n'
             f'<div class="buttons"><a class="button primary" href="{SUBSTACK}/subscribe">Subscribe on Substack</a></div>')
     write_if_changed("start-here/index.html", page("Start here | David Charles",
                                                    "The best places to begin reading David Charles.", "/start-here/",

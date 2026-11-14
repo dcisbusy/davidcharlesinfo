@@ -1,5 +1,6 @@
 {
- "_note": "The Start here page. Each item is a blog post or newsletter address and a line about it. Newsletter copies link to Substack automatically. Edit, add or remove freely.",
+ "_note": "The Start here page. 'hero' is the big photo at the top. Each item is a blog post, series or newsletter address and a line about it; add \"photo\": \"/wp-content/...jpg\" to an item (or a theme) to choose its picture. Newsletter copies link to Substack automatically. Edit, add or remove freely.",
+ "hero": "/wp-content/uploads/2018/02/Path-Cairngorms-Me.jpg",
  "intro": "Twenty years of writing is a lot to wade into, so here are some good places to begin.",
  "themes": [
   {"name": "Adventure", "items": [

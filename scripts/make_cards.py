@@ -195,7 +195,8 @@ def targets():
                                ("/start-here/", "Start here", "David Charles"),
                                ("/newsletter-archive/", "Every issue of the newsletter", "David Charles"),
                                ("/books/", "Free ebooks", "David Charles")):
-        out.append((url, title, kicker, None))
+        hero = json.load(open("data/start-here.json", encoding="utf-8")).get("hero") if url == "/start-here/" else None
+        out.append((url, title, kicker, hero))
     if os.path.exists("trees/trees-data.txt"):
         out.append(("/trees/", "Tree map: tap any tree to find out what it is",
                     "Crystal Palace · Norwood · Beckenham · Sydenham", "trees"))
