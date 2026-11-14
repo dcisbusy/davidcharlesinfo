@@ -526,18 +526,27 @@ def common_photos(stories):
 
 
 def story_photo(s, common=frozenset()):
-    return next((u for u in photo_candidates(s) if img_key(u) not in common), None)
+    skip = skip_words()
+    return next((u for u in photo_candidates(s) if img_key(u) not in common and not any(w in u for w in skip)), None)
+
+
+def skip_words():
+    try:
+        return json.load(open("data/timeline.json", encoding="utf-8")).get("skip_photos", [])
+    except (OSError, ValueError):
+        return []
 
 
 def build_photos(stories):
     usage = collections.Counter()
     picks = []
+    skip = skip_words()
     for s in stories:
         cands = []
         for t in re.findall(r"<img\b[^>]*>", s["html"]):
             src = re.search(r'\ssrc="([^"]+)"', t)
             if not src or re.search(r"(logo|avatar|icon|emoji|smiley|button|banner|header|\.gif$|\.svg$)",
-                                    src.group(1), re.I):
+                                    src.group(1), re.I) or any(w in src.group(1) for w in skip):
                 continue
             w = re.search(r'\swidth="(\d+)"', t)
             h = re.search(r'\sheight="(\d+)"', t)
@@ -552,6 +561,7 @@ def build_photos(stories):
             cands.insert(0, (s["image"], ""))
         elif not cands and s.get("image") and s["image"].startswith("/"):
             cands.append((s["image"], ""))
+        cands = [c for c in cands if not any(w in c[0] for w in skip)]
         if cands:
             usage[re.sub(r"-\d+x\d+(?=\.\w+$)", "", cands[0][0])] += 1
             picks.append((s, cands[0]))
@@ -673,9 +683,134 @@ def series_box(series_list, blog_url):
                     links += f'<a href="{esc(prev["url"])}">&larr; {esc(prev["title"])}</a>'
                 if nxt:
                     links += f'<a class="next" href="{esc(nxt["url"])}">{esc(nxt["title"])} &rarr;</a>'
-                return (f'<aside class="series-box"><p><a href="/series/{esc(sr["slug"])}/">{esc(sr["name"])}</a>: '
-                        f'part {i + 1} of {len(sr["items"])}</p><div class="series-links">{links}</div></aside>')
+                data = json.dumps({"slug": sr["slug"], "name": sr["name"], "part": i + 1, "total": len(sr["items"]),
+                                   "title": it["title"], "next": nxt["url"] if nxt else "",
+                                   "nextTitle": nxt["title"] if nxt else ""}, ensure_ascii=False)
+                return (f'<aside class="series-box" data-progress="{esc(data)}"><p><a href="/series/{esc(sr["slug"])}/">'
+                        f'{esc(sr["name"])}</a>: part {i + 1} of {len(sr["items"])}</p>'
+                        f'<div class="series-links">{links}</div></aside>')
     return ""
+
+
+def load_books():
+    try:
+        books = json.load(open("data/books.json", encoding="utf-8"))["books"]
+    except (OSError, ValueError):
+        return []
+    return [b for b in books if os.path.exists(f'books/{b["slug"]}/{b["slug"]}.epub')]
+
+
+def book_button(series_slug):
+    b = next((b for b in load_books() if b["series"] == series_slug), None)
+    return f' <a class="button" href="/books/{esc(b["slug"])}/">Read it as a free ebook</a>' if b else ""
+
+
+def build_books(series_list):
+    books = load_books()
+    if not books:
+        return
+    cards = []
+    for b in books:
+        sr = next((x for x in series_list if x["slug"] == b["series"]), None)
+        d = f'books/{b["slug"]}'
+        size = lambda f: f'{max(1, round(os.path.getsize(f"{d}/{f}") / 1048576))} MB'
+        parts = f'{len(sr["items"])} chapters' if sr else ""
+        words = f', about {b["words"]:,} words' if b.get("words") else ""
+        body = (f'<p class="meta crumbs"><a href="/books/">Books</a></p>'
+                f'<div class="book"><img class="book-cover" src="/{d}/cover-small.jpg" alt="Cover of {esc(b["title"])}" '
+                f'width="300" height="424"><div><h1>{esc(b["title"])}</h1><p class="intro"><em>{esc(b["subtitle"])}</em></p>'
+                f'<p>{esc(b["description"])}</p><p class="muted">{parts}{words}. Free to read and share.</p>'
+                f'<div class="buttons"><a class="button primary" href="/{d}/{b["slug"]}.epub" download>Download ebook '
+                f'(EPUB, {size(b["slug"] + ".epub")})</a> <a class="button" href="/{d}/{b["slug"]}.pdf" download>'
+                f'PDF to read or print ({size(b["slug"] + ".pdf")})</a></div>'
+                f'<p class="muted small">EPUB opens in Apple Books, Google Play Books, Kobo and most e-readers. For '
+                f'Kindle, send it to your Kindle with Amazon’s Send to Kindle. Prefer reading online? '
+                + (f'<a href="/series/{esc(b["series"])}/">Read it here as a series</a>.' if sr else "")
+                + '</p></div></div>'
+                '<aside class="newsletter-box"><h2>Liked it?</h2><p>Every Friday I send a short story about '
+                'adventure, nature and being human. Join the readers of my newsletter.</p><p><a class="button primary" '
+                'href="https://davidcharles.substack.com/subscribe">Subscribe free</a></p></aside>')
+        write_if_changed(f"{d}/index.html", page(f'{b["title"]}: free ebook | David Charles', b["description"],
+                                                 f"/{d}/", body, image=f"/{d}/cover.jpg"))
+        cards.append(f'<li><a href="/{d}/"><img src="/{d}/cover-small.jpg" alt="" width="300" height="424" '
+                     f'loading="lazy"><h3>{esc(b["title"])}</h3><p>{esc(b["subtitle"])}</p></a></li>')
+    body = ('<h1>Books</h1><p class="intro muted">Free ebooks made from the stories on this site, to read on your '
+            'phone, e-reader or paper. For my published books, see <a href="/shop/">the shop</a>.</p>'
+            f'<ul class="book-grid">{"".join(cards)}</ul>')
+    write_if_changed("books/index.html", page("Free ebooks | David Charles",
+                                              "Free ebooks by David Charles, made from his travel stories.",
+                                              "/books/", body))
+
+
+TOPICS = [("a", "Adventure", "/category/adventure/"), ("w", "Nature", "/category/nature/"),
+          ("h", "How to be human", "/category/how-to-be-human/"), ("p", "Activism", "/category/activism/"),
+          ("c", "Writing", "/category/creative-writing/"), ("n", "Newsletter", None)]
+
+
+def build_picker(stories, entries):
+    """The 'Got 5 minutes?' story picker at /random-story/, fed by assets/stories.json."""
+    cats_of = {e["url"]: [c["url"] for c in e.get("cats", [])] for e in entries}
+    rows = []
+    for s in stories:
+        words = len((s.get("text") or "").split())
+        if words < 80:
+            continue
+        mins = max(1, round(words / 230))
+        cats = cats_of.get(s.get("blog_url"), [])
+        topics = [k for k, _, u in TOPICS if u and any(c.startswith(u) for c in cats)]
+        if s["source"] == "newsletter":
+            topics.append("n")
+        rows.append([s["url"], s["title"], mins, s["date"][:4], "".join(topics)])
+    rows.sort(key=lambda r: r[0])
+    write_if_changed("assets/stories.json", json.dumps(rows, ensure_ascii=False, separators=(",", ":")) + "\n")
+    times = "".join(f'<button type="button" class="chip" data-min="{a}" data-max="{b}">{t}</button>'
+                    for a, b, t in ((1, 3, "2 minutes"), (4, 6, "5 minutes"), (7, 12, "10 minutes"),
+                                    (13, 999, "20 minutes or more")))
+    topics = ('<button type="button" class="chip on" data-topic="">Anything</button>'
+              + "".join(f'<button type="button" class="chip" data-topic="{k}">{esc(n)}</button>'
+                        for k, n, _ in TOPICS))
+    body = f"""<h1>Pick me a story</h1>
+<p class="intro muted">How long have you got? I’ll find you something from twenty years of stories.</p>
+<div class="picker">
+<p class="picker-label">Time</p><div class="chips" id="times">{times}</div>
+<p class="picker-label">About</p><div class="chips" id="topics">{topics}</div>
+<div class="buttons"><button type="button" class="button primary" id="pick">Surprise me</button></div>
+<div id="choice" aria-live="polite"></div>
+</div>
+<script>
+(function(){{
+  var data=null, mn=1, mx=999, topic="";
+  var q=new URLSearchParams(location.search), m=parseInt(q.get("m")||"0",10);
+  function load(cb){{ if(data) return cb(); fetch("/assets/stories.json").then(function(r){{return r.json();}})
+    .then(function(d){{data=d;cb();}}).catch(function(){{document.getElementById("choice").textContent="Sorry, couldn’t load the stories.";}}); }}
+  function mark(group,el){{ group.querySelectorAll(".chip").forEach(function(c){{c.classList.toggle("on",c===el);}}); }}
+  function pick(){{ load(function(){{
+    var pool=data.filter(function(r){{return r[2]>=mn&&r[2]<=mx&&(!topic||r[4].indexOf(topic)>=0);}});
+    var out=document.getElementById("choice");
+    if(!pool.length){{ out.innerHTML=""; out.textContent="Nothing quite fits. Try another topic."; return; }}
+    var r=pool[Math.floor(Math.random()*pool.length)], a=document.createElement("a");
+    a.href=r[0]; a.className="choice-card";
+    var t=document.createElement("strong"); t.textContent=r[1];
+    var meta=document.createElement("span"); meta.textContent=r[3]+" · "+r[2]+" min read"+(r[4].indexOf("n")>=0?" · newsletter":"");
+    a.appendChild(t); a.appendChild(meta);
+    out.innerHTML=""; out.appendChild(a);
+    var again=document.createElement("button"); again.type="button"; again.className="button"; again.textContent="Another one";
+    again.onclick=pick; out.appendChild(again);
+    document.getElementById("pick").textContent="Pick again";
+  }}); }}
+  document.getElementById("times").addEventListener("click",function(e){{ var c=e.target.closest(".chip"); if(!c) return;
+    if(c.classList.contains("on")){{ c.classList.remove("on"); mn=1; mx=999; }} else {{ mark(this,c); mn=+c.dataset.min; mx=+c.dataset.max; }} pick(); }});
+  document.getElementById("topics").addEventListener("click",function(e){{ var c=e.target.closest(".chip"); if(!c) return;
+    mark(this,c); topic=c.dataset.topic; if(document.getElementById("choice").firstChild) pick(); }});
+  document.getElementById("pick").addEventListener("click",pick);
+  if(m){{ var b=[].find.call(document.querySelectorAll("#times .chip"),function(c){{return m>=+c.dataset.min&&m<=+c.dataset.max;}});
+    if(b) b.click(); }}
+}})();
+</script>"""
+    write_if_changed("random-story/index.html", page("Pick me a story | David Charles",
+                                                     "Got five minutes? A story picker for twenty years of writing.",
+                                                     "/random-story/", body))
+    return len(rows)
 
 
 def build_series_pages(series_list):
@@ -704,7 +839,8 @@ def build_series_pages(series_list):
         body = (f'<p class="meta crumbs"><a href="/series/">Series</a></p>{hero}<h1>{esc(sr["name"])}</h1>\n'
                 f'<p class="intro">{esc(sr["description"])}</p>\n<p class="intro muted">{len(sr["items"])} parts, '
                 f'{years}, in order.</p>\n<div class="buttons"><a class="button primary" href="{esc(first["url"])}">'
-                f'Start at part 1</a></div>\n<ol class="series-cards">{rows}</ol>')
+                f'Start at part 1</a>{book_button(sr["slug"])}</div>\n'
+                f'<p class="continue" data-series="{esc(sr["slug"])}" hidden></p>\n<ol class="series-cards">{rows}</ol>')
         write_if_changed(f'series/{sr["slug"]}/index.html', page(f'{sr["name"]} | David Charles', sr["description"],
                                                                  f'/series/{sr["slug"]}/', body,
                                                                  image=cover["photo"] if cover else None))
@@ -723,6 +859,96 @@ def build_series_pages(series_list):
 
 
 # ---------------------------------------------------------------- Start here
+
+def build_work_with_me():
+    """/work-with-me/ from data/work-with-me.html. Hidden (noindex, unlinked) while its first comment says DRAFT."""
+    src = read("data/work-with-me.html")
+    if not src:
+        return
+    draft = bool(re.match(r"\s*<!--[^>]*\bDRAFT\b", src))
+    body = re.sub(r"<!--.*?-->\s*", "", src, flags=re.S).strip()
+    write_if_changed("work-with-me/index.html", page(
+        "Work with me | David Charles",
+        "Nature connection, wilderness therapy, talks, writing, editing and comedy writing with David Charles.",
+        "/work-with-me/", body, noindex=draft))
+    return draft
+
+
+def build_timeline(stories, series_list):
+    """/timeline/: twenty years, a year at a time. Milestones from data/timeline.json, plus series,
+    yearly story counts and a few photographs chosen from each year's stories."""
+    try:
+        tl = json.load(open("data/timeline.json", encoding="utf-8"))
+    except (OSError, ValueError):
+        tl = {}
+    miles, skip = tl.get("milestones", []), tl.get("skip_photos", [])
+    common = common_photos(stories)
+    try:
+        picks = {it["url"] for th in json.load(open("data/start-here.json", encoding="utf-8")).get("themes", [])
+                 for it in th.get("items", [])}
+    except (OSError, ValueError, AttributeError):
+        picks = set()
+    firsts = {sr["items"][0]["url"] for sr in series_list}
+    years = {}
+    for st in stories:
+        y = st["date"][:4]
+        if y.isdigit():
+            years.setdefault(y, []).append(st)
+    for m in miles:
+        years.setdefault(m["date"][:4], [])
+    starts = {}
+    for sr in series_list:
+        starts.setdefault(sr["items"][0]["date"][:4], []).append(sr)
+
+    out = []
+    for y in sorted(years):
+        ys = years[y]
+        nb = sum(1 for x in ys if x["source"] == "blog")
+        nn = sum(1 for x in ys if x["source"] == "newsletter")
+        counts = " &middot; ".join(t for t in (f"{nb} blog post{'s' * (nb != 1)}" if nb else "",
+                                                f"{nn} newsletter issue{'s' * (nn != 1)}" if nn else "") if t)
+        events = []
+        for m in sorted((m for m in miles if m["date"][:4] == y), key=lambda m: m["date"]):
+            t = esc(m["title"])
+            if m.get("url"):
+                t = f'<a href="{esc(m["url"])}">{t}</a>'
+            events.append((m["date"], f'<li class="milestone"><strong>{t}</strong> {esc(m.get("text", ""))}</li>'))
+        for sr in starts.get(y, []):
+            events.append((sr["items"][0]["date"],
+                           f'<li class="series-start"><strong><a href="/series/{esc(sr["slug"])}/">{esc(sr["name"])}</a>'
+                           f'</strong> {esc(sr["description"])} <span class="muted">{len(sr["items"])} parts</span></li>'))
+        events.sort(key=lambda e: e[0])
+        # up to three photos: series openers and Start here picks first, then the longest stories
+        cands = sorted(ys, key=lambda x: (x["url"] not in firsts and x["url"] not in picks,
+                                          -len((x.get("text") or "").split())))
+        photos, used = [], set()
+        for x in cands:
+            ph = next((u for u in photo_candidates(x) if img_key(u) not in common
+                       and not re.search(r"\.png($|\?)|%2F[^/]*\.png|/image/youtube/", u, re.I)
+                       and not any(w in u for w in skip)), None)
+            if ph and img_key(ph) not in used:
+                used.add(img_key(ph))
+                photos.append(f'<a href="{esc(x["url"])}" title="{esc(x["title"])}"><img src="{esc(ph)}" alt="" '
+                              f'loading="lazy" decoding="async"><span>{esc(x["title"])}</span></a>')
+            if len(photos) == 3:
+                break
+        if not (events or photos or counts):
+            continue
+        out.append(f'<section class="tl-year" id="y{y}"><h2>'
+                   + (f'<a href="/{y}/">{y}</a>' if os.path.exists(f"{y}/index.html") else y) + '</h2>'
+                   + (f'<p class="muted tl-count">{counts}</p>' if counts else "")
+                   + (f'<ul class="tl-events">{"".join(e for _, e in events)}</ul>' if events else "")
+                   + (f'<div class="tl-photos">{"".join(photos)}</div>' if photos else "")
+                   + "</section>")
+    first, last = (min(years), max(years)) if years else ("", "")
+    jump = " ".join(f'<a href="#y{y}">{y[2:] if i else y}</a>' for i, y in enumerate(sorted(years)))
+    body = (f'<h1>Twenty years</h1><p class="intro muted">{first} to {last}, a year at a time: the journeys, the '
+            f'projects, the turning points, and the stories written along the way.</p>'
+            f'<p class="tl-jump">{jump}</p><div class="timeline">{"".join(out)}</div>')
+    write_if_changed("timeline/index.html", page("Twenty years: a timeline | David Charles",
+                                                 "Twenty years of journeys, projects and stories by David Charles.",
+                                                 "/timeline/", body))
+
 
 def build_start_here(stories, entries, series_list):
     conf = json.load(open("data/start-here.json", encoding="utf-8"))
@@ -832,6 +1058,10 @@ def build_pages(ctx, entries):
     figures = build_numbers(stories, ctx["mentions"])
     n = build_photos(stories)
     build_series_pages(ctx["series"])
+    build_books(ctx["series"])
+    build_picker(stories, entries)
+    build_timeline(stories, ctx["series"])
+    build_work_with_me()
     build_start_here(stories, entries, ctx["series"])
     search_records(stories, entries)
     print(f"Map: {sum(1 for s in stories if s.get('place'))} stories placed; photo wall: {n} photos; "

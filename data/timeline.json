@@ -1,0 +1,95 @@
+{
+ "_note": "Milestones for /timeline/. Series, yearly story counts and photos are added automatically; add life and work milestones here. date is YYYY or YYYY-MM-DD; url is optional (a post, page or Substack link). skip_photos: any photo whose address contains one of these words is left off the timeline, photo wall and series pages.",
+ "milestones": [
+  {
+   "date": "2005-05-05",
+   "title": "The first post",
+   "text": "Travel expenses from a trip to Spain and Morocco: the blog begins.",
+   "url": "/adventure/travel-expenses-spain-morocco-2005/"
+  },
+  {
+   "date": "2010-01",
+   "title": "Two decisions",
+   "text": "An internship at Amnesty International and a place at Sanford housing cooperative set the course for the decade: writing, volunteering and travel.",
+   "url": "https://davidcharles.substack.com/p/2010-2019-a-new-davecade-begins"
+  },
+  {
+   "date": "2010",
+   "title": "No more aeroplanes",
+   "text": "Gave up flying for slow travel, “for the simple reason that air travel stunts my imagination”.",
+   "url": "/i-believe-in-adventure/"
+  },
+  {
+   "date": "2012-07-23",
+   "title": "The Soles of My Shoes is published",
+   "text": "A hitch-hiking tale of London to Ben Nevis, released as a paperback, an ebook and 152 blog episodes: Slow Publishing.",
+   "url": "/creative-writing/writing-about-writing/experiments-in-publishing-success/"
+  },
+  {
+   "date": "2014-07-24",
+   "title": "The newsletter begins",
+   "text": "The first monthly email newsletter goes out. It goes weekly in 2017 and is still going every Friday.",
+   "url": "https://davidcharles.substack.com/p/632801_july-2014-newsletter"
+  },
+  {
+   "date": "2014-12-17",
+   "title": "Elevate #10",
+   "text": "A book of creative responses to a world in crisis, pay what you want.",
+   "url": "/elevate-10/"
+  },
+  {
+   "date": "2016-08",
+   "title": "Foiled at the Edinburgh Fringe",
+   "text": "The hair salon sitcom, co-written with Beth Granville, gets a five-star run at the Fringe.",
+   "url": "/foiled/"
+  },
+  {
+   "date": "2018-08",
+   "title": "Joining Thighs of Steel",
+   "text": "First ride with Thighs of Steel, Ljubljana to Sofia: “I had found my community.”",
+   "url": "/series/thighs-of-steel/"
+  },
+  {
+   "date": "2017",
+   "title": "Foiled on BBC Radio Wales",
+   "text": "Three radio series from 2017 to 2019, with guest stars including Miles Jupp, Ralf Little and Sir Derek Jacobi.",
+   "url": "/foiled/"
+  },
+  {
+   "date": "2019-04",
+   "title": "A Celtic Media Award nomination",
+   "text": "The second radio series of Foiled is nominated.",
+   "url": "/foiled/"
+  },
+  {
+   "date": "2019-12-27",
+   "title": "A new Davecade",
+   "text": "Looking back on the 2010s and forward to the twenties.",
+   "url": "https://davidcharles.substack.com/p/2010-2019-a-new-davecade-begins"
+  },
+  {
+   "date": "2021-01-01",
+   "title": "100 Days of Adventure",
+   "text": "After 2,117 hours at the computer in 2020, a year counting days spent outdoors on adventures.",
+   "url": "/100-days-of-adventure/"
+  },
+  {
+   "date": "2025-12-30",
+   "title": "Goodbye, Thighs of Steel",
+   "text": "Thighs of Steel, the refugee solidarity bike ride, closes. Together the riders raised over £760,000 for projects run by refugees for refugees.",
+   "url": "https://davidcharles.substack.com/p/760000-and-out"
+  },
+  {
+   "date": "2026-11",
+   "title": "This archive",
+   "text": "The blog moves off WordPress to become this free, permanent archive of twenty years of stories.",
+   "url": "/start-here/"
+  }
+ ],
+ "skip_photos": [
+  "haruki-murakami",
+  "brain-networks",
+  "Quiet-American-chapter-analysis",
+  "Flights-and-Holidays"
+ ]
+}

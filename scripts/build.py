@@ -35,7 +35,7 @@ os.chdir(ROOT)
 SITE = "https://davidcharles.info"
 SUBSTACK = "https://davidcharles.substack.com"
 GOATCOUNTER = "davidcharles"    # GoatCounter site code (davidcharles.goatcounter.com). Set to "" to switch stats off.
-CSS_VERSION = "7"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
+CSS_VERSION = "8"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
 
 NEWSLETTER_DATA = "newsletter-archive/posts.json"
 BLOG_DATA = "blog-archive/index.json"
@@ -147,6 +147,19 @@ def redirect_page(to):
 
 
 SUBSCRIBE = f'<a class="button primary" href="{SUBSTACK}/subscribe">Subscribe on Substack</a>'
+# The sign-up box at the end of posts. "Subscribe free" opens Substack's own sign-up form in place (site.js);
+# nothing loads from Substack until someone taps it. The latest issue is filled in from /assets/latest.json.
+SUBSCRIBE_BOX = (
+    '<aside class="newsletter-box subscribe-box"><h2>Enjoyed this? There’s a new story every Friday.</h2>'
+    '<p>These days I write a free weekly newsletter about adventure, nature and how to be human. '
+    'Join the readers who get it in their inbox.</p>'
+    '<p class="latest" hidden>Latest issue: <a href="/newsletter-archive/"></a></p>'
+    f'<div class="buttons"><a class="button primary subscribe-open" href="{SUBSTACK}/subscribe?utm_source='
+    'davidcharles.info&amp;utm_medium=archive&amp;utm_campaign=post-end">Subscribe free</a>'
+    '<a class="button secondary" href="/newsletter-archive/">Read past issues</a></div>'
+    '<div class="subscribe-embed"></div>'
+    '<p class="small muted">Plus: <a href="/books/cycling-to-the-sahara/">Cycling to the Sahara</a>, a free ebook.</p>'
+    '</aside>')
 
 
 # ---------------------------------------------------------------- 1. newsletter
@@ -359,12 +372,9 @@ def wrap_entry(e, older, newer, extra=None):
     body.append(f'<div class="entry-content">\n<!--content:start-->{content}<!--content:end-->\n</div>')
     if extra.get("series"):
         body.append(extra["series"])
+    if e["type"] == "post" or words > 300:
+        body.append(SUBSCRIBE_BOX)
     if e["type"] == "post":
-        body.append(
-            '<aside class="newsletter-box"><p><strong>Enjoyed this?</strong> These days I write a free newsletter '
-            'on Substack about adventure, nature and how to be human.</p>'
-            f'<div class="buttons">{SUBSCRIBE}'
-            '<a class="button secondary" href="/newsletter-archive/">Read past issues</a></div></aside>')
         if e.get("tags"):
             body.append('<p class="tags">Tagged: ' + ", ".join(
                 f'<a href="{esc(t["url"])}">{esc(t["name"])}</a>' for t in e["tags"]) + "</p>")
@@ -491,13 +501,7 @@ def build_blog(entries, ctx=None):
                      page("Blog archive | David Charles", f"All {len(posts)} posts from David Charles's blog.",
                           "/blog-archive/", body, "/blog-archive/"))
 
-    # Random story
-    urls = json.dumps([p["url"] for p in posts])
-    write_if_changed("random-story/index.html", page(
-        "Random story | David Charles", "A random story from David Charles's blog.", "/random-story/",
-        '<p class="intro"><a href="/blog-archive/">Finding you a random story&hellip;</a></p>'
-        f"<script>var u={urls};location.replace(u[Math.floor(Math.random()*u.length)]);</script>",
-        "/random-story/", noindex=True))
+    # The Random story page is the story picker, made in extras.build_picker
     return posts, pages, cats, years
 
 
@@ -513,6 +517,13 @@ def build_home(issues, posts, extra="", minutes=None):
             f'<div class="buttons">{SUBSCRIBE}'
             '<a class="button secondary" href="/start-here/">Start here</a>'
             '<a class="button secondary" href="/search/">Search</a></div>\n'
+            '<aside class="continue-home" hidden><h2 class="section">Carry on reading</h2><ul></ul></aside>\n'
+            '<p class="quick-pick">Got <a href="/random-story/?m=2">2 minutes</a>, <a href="/random-story/?m=5">5</a>, '
+            '<a href="/random-story/?m=10">10</a> or <a href="/random-story/?m=20">20</a>? '
+            '<a href="/random-story/">Pick me a story</a></p>\n'
+            '<p class="quick-pick">Explore: <a href="/timeline/">twenty-year timeline</a> &middot; '
+            '<a href="/map/">map</a> &middot; <a href="/series/">series</a> &middot; <a href="/photos/">photo wall</a> '
+            '&middot; <a href="/books/cycling-to-the-sahara/">free ebook</a></p>\n'
             + extra +
             '<h2 class="section" id="newsletter">The newsletter</h2>\n' + issue_list(issues, minutes))
     write_if_changed("index.html", page(
@@ -535,9 +546,13 @@ def build_extras(posts, pages, cats, years):
     write_if_changed("404.html", page("Page not found | David Charles", "Page not found.", "/404.html", body,
                                       noindex=True))
     urls = [("/", ""), ("/start-here/", ""), ("/newsletter-archive/", ""), ("/blog-archive/", ""), ("/series/", ""),
-            ("/map/", ""), ("/photos/", ""), ("/numbers/", ""), ("/search/", "")]
+            ("/map/", ""), ("/photos/", ""), ("/numbers/", ""), ("/search/", ""), ("/timeline/", ""),
+            ("/random-story/", ""), ("/books/", "")]
     urls += [(u, "") for u in sorted("/" + os.path.dirname(f).replace(os.sep, "/") + "/"
-                                     for f in __import__("glob").glob("series/*/index.html"))]
+                                     for f in __import__("glob").glob("series/*/index.html")
+                                     + __import__("glob").glob("books/*/index.html"))]
+    if "noindex" not in (read("work-with-me/index.html") or "noindex"):
+        urls.append(("/work-with-me/", ""))
     urls += [(p["url"], p["date"]) for p in posts] + [(p["url"], "") for p in pages]
     urls += [(u, "") for u in cats] + [(f"/{y}/", "") for y in years]
     xml = ['<?xml version="1.0" encoding="UTF-8"?>',
@@ -555,6 +570,10 @@ def build_extras(posts, pages, cats, years):
 if __name__ == "__main__":
     offline = "--offline" in sys.argv          # skip Substack (for testing)
     issues = update_newsletter(offline)
+    latest = next((i for i in sorted(issues, key=lambda i: i["date"], reverse=True) if not i.get("paid")), None)
+    if latest:
+        write_if_changed("assets/latest.json", json.dumps({"title": latest["title"], "url": latest["url"],
+                                                            "date": latest["date"]}, ensure_ascii=False) + "\n")
     entries = json.load(open(BLOG_DATA, encoding="utf-8"))
     sys.modules["build"] = sys.modules[__name__]      # let extras.py share these helpers
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

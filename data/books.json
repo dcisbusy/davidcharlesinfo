@@ -1,0 +1,22 @@
+{
+ "_note": "Ebooks made from series with: python3 scripts/make_ebook.py <slug>. The build makes /books/ pages from this file. intro_html and end_html go at the start and end of the book.",
+ "books": [
+  {
+   "slug": "cycling-to-the-sahara",
+   "series": "cycling-to-the-sahara",
+   "title": "Cycling to the Sahara",
+   "subtitle": "1,279 miles from London to the desert, by bike, boat and (whisper it) train",
+   "kicker": "Spring 2012",
+   "cover_photo": "/wp-content/uploads/2015/05/DSCF4205.jpg",
+   "skip_images": [
+    "DSCF4205-604x270"
+   ],
+   "rights": "© David Charles 2012, 2026. Free to read and share.",
+   "description": "In spring 2012 David Charles set off from his front door in London to cycle to the Sahara. Things did not go entirely to plan. Twenty-eight dispatches from the road: French pizza, Marseille ferries, killer guard dogs, Matmata moped men, Ksar Ghilane in the rain, Tunisia a year after its revolution, and an awful lot of couscous.",
+   "intro_html": "<p>In February 2012 I worked out that it is 1,279 miles from my house in London to the Saharan desert. Not far, eh? So I decided to cycle there.</p><p>This book collects the dispatches I wrote along the way, as I wrote them at the time, from the Newhaven ferry to a sand dune in southern Tunisia and back to Tunis in the turbulent spring after the revolution. They were first published on my blog, davidcharles.info. I have only tidied them up a little: some photographs from that era have been lost, and links that no longer work have been left out.</p><p>There are twenty-eight chapters. You can read them in order, as a journey, or dip in wherever the road looks interesting.</p>",
+   "end_html": "<p>Thank you for riding along.</p><p>The story didn’t end in Tunis. Four years later I set off again, this time cycling towards Syria along the routes of migration, and later I spent many summers riding with Thighs of Steel. You can read all of it, free, at <a href=\"{SITE}/series/\">davidcharles.info/series</a>.</p><p>Every Friday I send a short story about adventure, nature and being human to readers of my newsletter. If you enjoyed this book, I’d love you to join them: <a href=\"https://davidcharles.substack.com/subscribe\">davidcharles.substack.com</a>.</p><p>This book is free to read and share. If you’d like to give something back, the best thing you can do is tell a friend about it.</p>",
+   "strip_prefix": "^Cycling (to|and) the Sahara: ",
+   "words": 23000
+  }
+ ]
+}
