@@ -422,6 +422,51 @@ def table(headers, rows):
             + "</tbody></table></details>")
 
 
+def keyword_section():
+    """'Words that are special to me', from data/keywords.json (made by scripts/keywords.py)."""
+    try:
+        k = json.load(open("data/keywords.json", encoding="utf-8"))
+    except (OSError, ValueError):
+        return ""
+
+    def cloud(rows, cls):
+        if not rows:
+            return ""
+        top = max(math.log(r["g2"]) for r in rows)
+        low = min(math.log(r["g2"]) for r in rows)
+        return f'<p class="cloud {cls}">' + " ".join(
+            f'<a href="/search/?q={esc(r["w"])}" style="font-size:{0.9 + 1.5 * (math.log(r["g2"]) - low) / ((top - low) or 1):.2f}em" '
+            f'title="{r["n"]:,} times, {r["x"]:,}× more often than in everyday English">'
+            f'{esc(r["w"].title() if cls == "kw-names" and r["w"] not in ("bbc", "lsd", "covid") else r["w"].upper() if cls == "kw-names" else r["w"])}</a>'
+            for r in sorted(rows, key=lambda r: r["w"])) + "</p>"
+
+    most = sorted([r for r in k["words"] if r["n"] >= 40], key=lambda r: -r["x"])[:10]
+    mx = math.log10(most[0]["x"]) if most else 1
+    bars = "".join(
+        f'<li><a href="/search/?q={esc(r["w"])}">{esc(r["w"])}</a><span class="bar" style="width:{max(4, 100 * math.log10(r["x"]) / mx):.0f}%"></span>'
+        f'<b>{r["x"]:,}×</b></li>' for r in most)
+    eras = "".join(
+        f'<div><h3>{esc(e)}</h3><p>' + " ".join(f'<a href="/search/?q={esc(r["w"])}">{esc(r["w"])}</a>' for r in ws)
+        + "</p></div>" for e, ws in k["eras"].items())
+    return f"""<h2 class="section">Words that are special to me</h2>
+<p>Not the words I use most ("people", "life" and "good", like most writers), but the words I use far
+more than most writers do. Each word in twenty years of stories is compared with how often it appears in everyday
+English: books, news, Wikipedia, film subtitles and the web.</p>
+<h3 class="kw-h">Most out of the ordinary</h3>
+<p class="muted small">How many times more often I use these words than English in general.</p>
+<ol class="kw-bars">{bars}</ol>
+<h3 class="kw-h">My words</h3>
+{cloud(k["words"], "kw-words")}
+<h3 class="kw-h">My people, places and projects</h3>
+{cloud(k["names"], "kw-names")}
+<p class="muted small">Bigger means more distinctive: used both far more than usual and often enough to matter (a
+log-likelihood score). Tap a word to find the stories it's in.</p>
+<h3 class="kw-h">How the words changed</h3>
+<div class="kw-eras">{eras}</div>
+<p class="muted small">For each era, the words used at least twice as often as in the other two. Counted
+{k["total_words"]:,} words, {nice(k["made"])}.</p>"""
+
+
 def build_numbers(stories, mentions):
     for s in stories:
         s["words"] = len(re.findall(r"[A-Za-zÀ-ɏ'’-]+", s["text"])) if s["has_text"] else 0
@@ -498,10 +543,13 @@ a newsletter issue, it's counted once.</p>
 <li><strong>Average story:</strong> {int(sum(s["words"] for s in with_text) / len(with_text)):,} words, about {max(1, round(sum(s["words"] for s in with_text) / len(with_text) / 230))} minutes' reading.</li>
 </ul>
 
-<h2 class="section">Most-used words</h2>
+{keyword_section()}
+
+<details class="plain-count"><summary>Plain word count: the 60 words used most often</summary>
 <p class="cloud">{cloud}</p>
-<p class="muted small">The 60 words used most often, leaving out little words like "the" and "really". Bigger means
-more often; hover for the count.</p>"""
+<p class="muted small">Leaving out little words like "the" and "really". Bigger means more often; hover for the count.
+Frequency alone mostly shows what every writer says a lot, which is why the comparison above is more revealing.</p>
+</details>"""
     write_if_changed("numbers/index.html", page("20 years in numbers | David Charles",
                                                 f"{len(stories):,} stories and {total_words:,} words, counted.",
                                                 "/numbers/", body))

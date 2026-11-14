@@ -35,7 +35,7 @@ os.chdir(ROOT)
 SITE = "https://davidcharles.info"
 SUBSTACK = "https://davidcharles.substack.com"
 GOATCOUNTER = "davidcharles"    # GoatCounter site code (davidcharles.goatcounter.com). Set to "" to switch stats off.
-CSS_VERSION = "9"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
+CSS_VERSION = "11"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
 
 NEWSLETTER_DATA = "newsletter-archive/posts.json"
 BLOG_DATA = "blog-archive/index.json"
@@ -43,6 +43,17 @@ INTRO = "home-intro.html"
 
 MONTHS = ["January", "February", "March", "April", "May", "June", "July",
           "August", "September", "October", "November", "December"]
+HOME_HERO = "/wp-content/uploads/2018/02/Lake-in-Cairngorms.jpg"     # the big photo at the top of the homepage
+HOME_DOORS = [                                                         # homepage tiles: address, label, photo
+    ("/start-here/", "Start here", "/wp-content/uploads/2018/02/Me-in-Cairngorms.jpg"),
+    ("/map/", "Adventure map", "/wp-content/uploads/2013/12/Cycling-Around-Britain-122.jpg"),
+    ("/trees/", "Tree map", "/assets/trees-tile.jpg"),
+    ("/series/", "Series", "/wp-content/uploads/2012/03/Country-road-Tunisia-768x576.jpg"),
+    ("/timeline/", "Twenty-year timeline", "/wp-content/uploads/2018/10/Me-2007-to-2018.jpg"),
+    ("/photos/", "Photo wall", "/wp-content/uploads/2016/02/IMG_2598.jpg"),
+    ("/random-story/", "Pick me a story", "/wp-content/uploads/2016/01/IMG_1379.jpg"),
+    ("/books/", "Free ebooks", "/books/cycling-to-the-sahara/cover.jpg"),
+]
 TILE_COLOURS = ["#2f6b4f", "#4a7a8c", "#8a6d3b", "#5b6e3a", "#7a4e5c", "#3f5a7a", "#9a5b34", "#4f6f63"]
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -597,17 +608,31 @@ def build_home(issues, posts, extra="", minutes=None):
             f.write("<!-- Edit the words below. This becomes the top of the homepage. -->\n"
                     "<h1>Hello, I'm David Charles</h1>\n<p>Write something here.</p>\n")
     intro = re.sub(r"<!--.*?-->\s*", "", read(INTRO), flags=re.S).strip()
-    body = (f'<div class="intro">\n{intro}\n</div>\n'
-            f'<div class="buttons">{SUBSCRIBE}'
-            '<a class="button secondary" href="/start-here/">Start here</a>'
-            '<a class="button secondary" href="/search/">Search</a></div>\n'
+    h1 = re.search(r"<h1>(.*?)</h1>", intro, re.S)
+    rest = intro.replace(h1.group(0), "", 1).strip() if h1 else intro
+    hero = (f'<header class="sh-hero home-hero"><img src="{HOME_HERO}" alt="" fetchpriority="high">'
+            f'<div><h1>{h1.group(1) if h1 else "David Charles"}</h1>'
+            f'<div class="buttons">{SUBSCRIBE}<a class="button ghost" href="/start-here/">Start here</a></div></div></header>')
+    latest = ""
+    if issues:
+        p = issues[0]
+        pic = (f'<img src="{esc(p["image"])}" alt="" decoding="async">' if p.get("image") else
+               f'<span class="ph" style="background:{TILE_COLOURS[0]}" aria-hidden="true"></span>')
+        mins = f' &middot; {minutes[p["url"]]} min read' if minutes and p["url"] in minutes else ""
+        latest = (f'<a class="home-latest" href="{esc(p["url"])}">{pic}<div><span class="kicker">Latest issue</span>'
+                  f'<h2>{esc(p["title"])}</h2>' + (f'<p>{esc(p["excerpt"])}</p>' if p.get("excerpt") else "") +
+                  f'<time datetime="{esc(p.get("date"))}">{esc(nice(p.get("date", "")))}{mins}</time></div></a>')
+    doors = "".join(
+        f'<li><a href="{u}"><img src="{img}" alt="" loading="lazy" decoding="async">'
+        f'<span class="label">{esc(t)}</span></a></li>' for u, t, img in HOME_DOORS if os.path.exists(img.lstrip("/")))
+    body = (hero + "\n"
+            f'<div class="intro home-intro">\n{rest}\n</div>\n'
+            + latest + "\n"
+            f'<ul class="sh-doors home-doors">{doors}</ul>\n'
             '<aside class="continue-home" hidden><h2 class="section">Carry on reading</h2><ul></ul></aside>\n'
             '<p class="quick-pick">Got <a href="/random-story/?m=2">2 minutes</a>, <a href="/random-story/?m=5">5</a>, '
             '<a href="/random-story/?m=10">10</a> or <a href="/random-story/?m=20">20</a>? '
             '<a href="/random-story/">Pick me a story</a></p>\n'
-            '<p class="quick-pick">Explore: <a href="/timeline/">twenty-year timeline</a> &middot; '
-            '<a href="/map/">map</a> &middot; <a href="/trees/">tree map</a> &middot; <a href="/series/">series</a> &middot; <a href="/photos/">photo wall</a> '
-            '&middot; <a href="/books/cycling-to-the-sahara/">free ebook</a></p>\n'
             + extra +
             '<h2 class="section" id="newsletter">The newsletter</h2>\n' + issue_list(issues, minutes))
     write_if_changed("index.html", page(
