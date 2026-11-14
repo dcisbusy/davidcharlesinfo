@@ -207,9 +207,13 @@ build runs by itself afterwards and the live site updates a couple of minutes la
   - `A` records for `davidcharles.info` → `185.199.108.153`, `185.199.109.153`,
     `185.199.110.153`, `185.199.111.153` (GitHub Pages)
   - `CNAME` for `www` → `dcisbusy.github.io.`
-- **HTTPS:** GitHub issues a free certificate automatically once DNS points at it. This
-  was delayed by old Cloudflare records cached around the internet. Once the certificate
-  shows as issued, tick **Enforce HTTPS** in *Settings → Pages*.
+- **HTTPS:** a free certificate from GitHub, issued 14 November 2026 for `davidcharles.info` and
+  `www.davidcharles.info`, renewed automatically. It was delayed by old Cloudflare records cached
+  around the internet. **Enforce HTTPS** should be ticked in *Settings → Pages*.
+- **Checking DNS:** *Actions → Check DNS → Run workflow* asks the registry, Heart, Cloudflare and
+  the big public resolvers what they say about the domain, and reports GitHub's certificate status.
+  Read-only. (Cloudflare's nameservers still answer for the old zone even after it was removed
+  from Cloudflare, but the registry no longer points at them, so visitors aren't affected.)
 - **GoDaddy:** the old hosting is cancelled and refunded. Nothing depends on GoDaddy any
   more.
 
@@ -275,7 +279,7 @@ build runs by itself afterwards and the live site updates a couple of minutes la
 1. **Ask GitHub Support to purge cached data** from the history rewrites (November 2026). GitHub keeps
    rewritten commits reachable by ID until Support removes them. Use their "remove
    sensitive data" form.
-2. **Enforce HTTPS** in *Settings → Pages* once the certificate is issued.
+2. **Enforce HTTPS** in *Settings → Pages*: the certificate was issued on 14 November 2026, so the box can be ticked now.
 3. **Create the GoatCounter account** at goatcounter.com with the code `davidcharles`. If
    that code is taken, change `GOATCOUNTER` near the top of `scripts/build.py`.
 4. **Account security:** make sure two-factor authentication is on for GitHub, Heart
