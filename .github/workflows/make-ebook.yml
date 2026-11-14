@@ -1,0 +1,59 @@
+name: Make ebook
+
+# Builds EPUB and PDF ebooks from series (scripts/make_ebook.py, details in data/books.json).
+# Runs on GitHub because newsletter photos have to be downloaded from Substack.
+# Actions -> Make ebook -> Run workflow, and type the book slugs (or leave "all").
+on:
+  workflow_dispatch:
+    inputs:
+      books:
+        description: "Book slugs separated by spaces, or 'all'"
+        required: true
+        default: "all"
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  ebook:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+        with:
+          python-version: "3.12"
+      - name: Install tools and fonts
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y -q pandoc poppler-utils
+          pip install --quiet pillow==11.3.0
+          mkdir -p ~/.fonts
+          curl -sSL -o ~/.fonts/Lora.ttf "https://github.com/google/fonts/raw/main/ofl/lora/Lora%5Bwght%5D.ttf"
+          curl -sSL -o ~/.fonts/Lora-Italic.ttf "https://github.com/google/fonts/raw/main/ofl/lora/Lora-Italic%5Bwght%5D.ttf"
+          curl -sSL -o ~/.fonts/Inter.ttf "https://github.com/google/fonts/raw/main/ofl/inter/Inter%5Bopsz%2Cwght%5D.ttf"
+          fc-cache -f >/dev/null
+          pandoc --version | head -1
+      - name: Make the books
+        env:
+          BOOKS: ${{ inputs.books }}
+        run: |
+          if [ "$BOOKS" = "all" ]; then
+            BOOKS=$(python -c "import json;print(' '.join(b['slug'] for b in json.load(open('data/books.json'))['books']))")
+          fi
+          for b in $BOOKS; do
+            case "$b" in *[!a-z0-9-]*) echo "Bad slug: $b"; exit 1;; esac
+            echo "::group::$b"; python scripts/make_ebook.py "$b"; echo "::endgroup::"
+          done
+      - name: Commit the books
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add books/
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "Make ebooks"
+          git pull --rebase -X theirs origin main && git push
+      - name: Rebuild the site so the book pages appear
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run build-site.yml --ref main

@@ -14,6 +14,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import urllib.parse
 
 sys.path.insert(0, os.path.dirname(__file__))
 import build  # noqa: E402
@@ -25,39 +26,116 @@ SITE = build.SITE
 CHROME = shutil.which("google-chrome") or shutil.which("chromium") or shutil.which("chromium-browser")
 
 
-def clean(content, stock):
+IMG_CACHE = os.path.join(tempfile.gettempdir(), "ebook-images")
+
+
+def fetch_image(url):
+    """Download a newsletter image once and shrink it for the book. Returns a local path or None."""
+    import hashlib
+    import urllib.request
+    os.makedirs(IMG_CACHE, exist_ok=True)
+    url = html.unescape(url)
+    # Substack's CDN wraps the original: ask it for a 1400px JPEG
+    m = re.search(r"/(https?%3A%2F%2F[^?\s]+)$", url)
+    original = urllib.parse.unquote(m.group(1)) if m else url
+    path = os.path.join(IMG_CACHE, hashlib.sha1(original.encode()).hexdigest() + ".jpg")
+    if os.path.exists(path):
+        return path
+    for u in (f"https://substackcdn.com/image/fetch/w_1400,c_limit,f_jpg,q_80/{urllib.parse.quote(original, safe='')}",
+              original):
+        try:
+            req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0 (davidcharles.info ebook maker)"})
+            with urllib.request.urlopen(req, timeout=40) as r:
+                data = r.read()
+            from PIL import Image
+            import io
+            im = Image.open(io.BytesIO(data)).convert("RGB")
+            im.thumbnail((1400, 1400))
+            im.save(path, "JPEG", quality=80, optimize=True, progressive=True)
+            return path
+        except Exception as e:  # noqa: BLE001
+            last = e
+    print(f"  could not fetch image {original[:90]}: {last}")
+    return None
+
+
+def cut_sections(c, pattern):
+    """Remove whole sections whose heading matches pattern (up to the next heading that doesn't).
+    Numbered sub-headings ('1. …') belong to whichever section they sit in."""
+    if not pattern:
+        return c
+    parts = re.split(r"(<h[1-4]\b[^>]*>.*?</h[1-4]>)", c, flags=re.S)
+    out, cutting = [], False
+    for part in parts:
+        hm = re.match(r"<h[1-4]\b[^>]*>(.*?)</h[1-4]>", part, re.S)
+        if hm:
+            text = html.unescape(re.sub(r"<[^>]+>", "", hm.group(1))).strip()
+            if re.match(r"\d+\.\s", text):
+                pass                                    # keep current state
+            else:
+                cutting = bool(re.search(pattern, text, re.I))
+        if not cutting:
+            out.append(part)
+    return "".join(out)
+
+
+def clean(content, stock, book):
     c = content
     c = re.sub(r"<span id=\"more-\d+\"></span>", "", c)
+    # Substack furniture: buttons, icons, sign-up and share widgets, embeds
+    for tag in ("button", "svg", "script", "style", "iframe", "form", "noscript"):
+        c = re.sub(rf"<{tag}\b.*?</{tag}>", "", c, flags=re.S | re.I)
+    c = re.sub(r'<div class="[^"]*(subscription-widget|subscribe-widget|embedded-post|youtube-wrap|tweet|'
+               r'digest-post-embed|install-substack|captioned-button|poll-embed|image-link-expand)[^"]*".*?</div>\s*</div>',
+               "", c, flags=re.S)
+    c = re.sub(r'<p class="button-wrapper".*?</p>', "", c, flags=re.S)
+    c = re.sub(r"<source\b[^>]*>", "", c)
+    c = re.sub(r"</?picture\b[^>]*>", "", c)
+    c = cut_sections(c, book.get("cut_headings"))
+    for pat in book.get("cut_paragraphs", []):
+        c = re.sub(r"<p\b[^>]*>(?:(?!</p>).)*?" + pat + r".*?</p>", "", c, flags=re.S | re.I)
     # featured header images that are stock across the series
     c = re.sub(r'<figure class="featured">.*?</figure>', lambda m: "" if any(s in m.group(0) for s in stock)
                else m.group(0), c, flags=re.S)
     # old Blogger photo tables whose images were lost: drop tables with captions but no pictures
     c = re.sub(r"<table\b.*?</table>", lambda m: m.group(0) if "<img" in m.group(0) else "", c, flags=re.S)
-    c = re.sub(r"<iframe\b.*?</iframe>", "", c, flags=re.S)
-    c = re.sub(r"<script\b.*?</script>", "", c, flags=re.S)
     c = re.sub(r"<p>\s*(&nbsp;)?\s*</p>", "", c)
-    # simple <img>: largest local version, no srcset
+
     def img(m):
         t = m.group(0)
         src = re.search(r'\ssrc="([^"]+)"', t)
         if not src:
             return ""
         s = src.group(1)
+        alt = re.search(r'\salt="([^"]*)"', t)
+        alt = alt.group(1) if alt else ""
+        if any(w in s for w in stock):
+            return ""
+        if s.startswith(("http://", "https://")):
+            local = fetch_image(s)
+            return f'<img src="{local}" alt="{alt}">' if local else ""
         full = re.sub(r"-\d+x\d+(?=\.\w+$)", "", s)
         if full.startswith("/") and os.path.exists(full.lstrip("/")):
             s = full
         if not s.startswith("/") or not os.path.exists(s.lstrip("/")):
-            return ""                       # lost or remote image
-        alt = re.search(r'\salt="([^"]*)"', t)
-        return f'<img src="{os.path.abspath(s.lstrip("/"))}" alt="{alt.group(1) if alt else ""}">'
+            return ""                       # lost image
+        return f'<img src="{os.path.abspath(s.lstrip("/"))}" alt="{alt}">'
     c = re.sub(r"<img\b[^>]*>", img, c)
+    # unwrap image links
+    c = re.sub(r'<a\b[^>]*>\s*(<img\b[^>]*>)\s*</a>', r"\1", c, flags=re.S)
+    c = re.sub(r"<div\b[^>]*>", "", c)
+    c = re.sub(r"</div>", "", c)
     c = re.sub(r'<figure\b[^>]*>', "<figure>", c)
     c = re.sub(r'<figcaption\b[^>]*>', "<figcaption>", c)
     c = re.sub(r"<figure>\s*</figure>", "", c)
     c = re.sub(r"<figure>\s*<figcaption>.*?</figcaption>\s*</figure>", "", c, flags=re.S)
+    # chapter sub-headings sit below the chapter title
+    c = re.sub(r"<(/?)h[1-2]\b", r"<\1h3", c)
     # site-relative links become full links
     c = re.sub(r'href="/', f'href="{SITE}/', c)
-    c = re.sub(r'\s(class|id|style|width|height|sizes|srcset|loading|decoding|aria-describedby)="[^"]*"', "", c)
+    c = re.sub(r'\s(class|id|style|width|height|sizes|srcset|loading|decoding|aria-describedby|data-[\w-]+|'
+               r'target|rel|tabindex|role|aria-[\w-]+)="[^"]*"', "", c)
+    c = re.sub(r"<p>\s*(&nbsp;|<br\s*/?>)?\s*</p>", "", c)
     return c.strip()
 
 
@@ -69,13 +147,27 @@ def main(slug):
     stories, _ = extras.load_stories(issues, entries)
     sr = next(s for s in extras.build_series_data(stories, entries) if s["slug"] == book["series"])
     stock = book.get("skip_images", [])
+    by_url = {s["url"]: s for s in stories}
+    skip = set(book.get("skip_chapters", []))
 
     chapters = []
     for it in sr["items"]:
-        path = build.file_for(it["blog_url"] or it["url"])
-        m = build.CONTENT_RE.search(open(path, encoding="utf-8").read())
+        if it["url"] in skip or it.get("blog_url") in skip:
+            continue
+        st = by_url.get(it["url"])
+        if st and st.get("html"):
+            content = st["html"]
+        else:
+            m = build.CONTENT_RE.search(open(build.file_for(it["blog_url"] or it["url"]), encoding="utf-8").read())
+            content = m.group(1)
         title = re.sub(book["strip_prefix"], "", it["title"]) if book.get("strip_prefix") else it["title"]
-        chapters.append((dict(it, title=title), clean(m.group(1), stock)))
+        title = re.sub(r"^#\d+:\s*", "", title)
+        body = clean(content, stock, book)
+        # newsletter issues repeat their own title as the first heading
+        body = re.sub(r"^\s*<h3>\s*(?:<strong>)?" + re.escape(html.escape(it["title"], quote=False)) + r"(?:</strong>)?\s*</h3>",
+                      "", body)
+        body = re.sub(r"^\s*<h3>\s*" + re.escape(it["title"]) + r"\s*</h3>", "", body)
+        chapters.append((dict(it, title=title), body))
 
     out = f"books/{slug}"
     os.makedirs(out, exist_ok=True)
@@ -102,9 +194,11 @@ def main(slug):
         subprocess.run([CHROME, "--headless", "--no-sandbox", "--hide-scrollbars", "--force-device-scale-factor=1",
                         "--allow-file-access-from-files", "--window-size=1600,2263",
                         f"--screenshot={tmp}/cover.png", "file://" + hp], check=True, capture_output=True)
-        subprocess.run(["convert", f"{tmp}/cover.png", "-quality", "86", f"{out}/cover.jpg"], check=True)
-    subprocess.run(["convert", f"{out}/cover.jpg", "-resize", "600x900", "-quality", "82",
-                    f"{out}/cover-small.jpg"], check=True)
+        from PIL import Image
+        im = Image.open(f"{tmp}/cover.png").convert("RGB")
+        im.save(f"{out}/cover.jpg", "JPEG", quality=86, optimize=True)
+        im.thumbnail((600, 900))
+        im.save(f"{out}/cover-small.jpg", "JPEG", quality=82, optimize=True)
 
     # ---- the book as one HTML document
     intro = book["intro_html"]
@@ -118,8 +212,12 @@ def main(slug):
     words = sum(len(re.sub(r"<[^>]+>", " ", c).split()) for _, c in chapters)
 
     # EPUB via pandoc (one chapter per <h1>)
-    epub_src = (f'<section class="intro"><h1>Before you set off</h1>{intro}</section>\n'
-                + body + f'<section><h1>After the ride</h1>{end}</section>')
+    # pandoc only splits chapters at top-level headings, so no <section> wrappers in the EPUB source
+    epub_body = "".join(
+        f'<h1 id="ch{i + 1}">{html.escape(it["title"])}</h1>\n<p class="date">{html.escape(build.nice(it["date"]))}</p>\n{c}\n'
+        for i, (it, c) in enumerate(chapters))
+    epub_src = (f'<h1>{book.get("intro_title", "Before you set off")}</h1>\n{intro}\n'
+                + epub_body + f'<h1>{book.get("end_title", "After the ride")}</h1>\n{end}')
     meta = os.path.join(out, ".meta.yaml")
     open(meta, "w", encoding="utf-8").write(
         f'---\ntitle: "{book["title"]}"\nsubtitle: "{book["subtitle"]}"\ncreator:\n  - role: author\n'
@@ -157,10 +255,10 @@ a {{ color: inherit; text-decoration: none; }}
 <div class="title-page"><h1>{html.escape(book["title"])}</h1><p><em>{html.escape(book["subtitle"])}</em></p>
 <p style="margin-top:30mm">David Charles</p><p style="font-size:8.5pt;color:#8a7a68;margin-top:40mm">
 {html.escape(book["rights"])}<br>{SITE.replace("https://", "")}</p></div>
-<section class="front"><h1>Before you set off</h1>{intro}</section>
+<section class="front"><h1>{book.get("intro_title", "Before you set off")}</h1>{intro}</section>
 <section class="front toc"><h1>Contents</h1><ol>{toc}</ol></section>
 {body}
-<section class="back"><h1>After the ride</h1>{end}</section>
+<section class="back"><h1>{book.get("end_title", "After the ride")}</h1>{end}</section>
 </html>"""
     ph = os.path.abspath(f"{out}/.print.html")
     open(ph, "w", encoding="utf-8").write(pdf_html)
@@ -178,6 +276,7 @@ a {{ color: inherit; text-decoration: none; }}
     for f in (f"{slug}.epub", f"{slug}.pdf"):
         print(f"{out}/{f}: {os.path.getsize(f'{out}/{f}') // 1024} KB")
     print(f"{len(chapters)} chapters, {words:,} words")
+    return words
 
 
 if __name__ == "__main__":

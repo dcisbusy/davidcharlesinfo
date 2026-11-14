@@ -149,7 +149,7 @@ makes no commit.
 | **Listen to this post** | posts over ~150 words | The browser's own text-to-speech, preferring a British voice. Nothing is sent anywhere. Hidden on browsers that can't do it. |
 | **RSS feed** | `/feed.xml` | The latest 40 stories (newsletter and blog, without duplicates). |
 | **Analytics** | everywhere | [GoatCounter](https://www.goatcounter.com): no cookies, no personal data. See §9: the account still needs creating. |
-| **Free ebooks** | `/books/` | Series turned into EPUB and PDF books by `scripts/make_ebook.py` (run by hand, not nightly), with details in `data/books.json`. The first is *Cycling to the Sahara*. |
+| **Free ebooks** | `/books/` | Series turned into EPUB and PDF books by `scripts/make_ebook.py`, with details in `data/books.json`: *Cycling to the Sahara*, *Cycling towards Syria*, *Thighs of Steel*, and *Cycling Round Britain (Twice)* (a hidden draft, see §9). Built on GitHub by *Actions → Make ebook*, because newsletter photos are downloaded from Substack. Recurring newsletter sections (credits, book club, Days of Adventure, etc.) are trimmed by `cut_headings`. |
 | **Twenty-year timeline** | `/timeline/` | Each year's milestones (`data/timeline.json`), series that began, story counts and up to three photos. |
 | **Pick me a story** | `/random-story/` | Choose a reading time (2, 5, 10, 20+ minutes) and a topic; picks from `assets/stories.json`. Homepage links like `/random-story/?m=5` preselect a time. |
 | **Carry on reading** | series pages, homepage | Remembers the furthest part of each series you've read, in your own browser only. |
@@ -179,7 +179,7 @@ build runs by itself afterwards and the live site updates a couple of minutes la
 - **Add or edit a series:** `data/series.json`. Add a story with its address in `include`, remove one with `exclude`.
 - **Change the Start here picks:** `data/start-here.json`.
 - **Add timeline milestones:** `data/timeline.json`. Keep a photo off the timeline, photo wall and series pages by adding a word from its file name to `skip_photos`.
-- **Make another ebook:** add an entry to `data/books.json` (copy the Sahara one), then run `python3 scripts/make_ebook.py <slug>` on a computer with pandoc and Google Chrome, and commit the `books/<slug>/` folder.
+- **Make or remake an ebook:** add or edit its entry in `data/books.json` (copy an existing one), then on GitHub go to *Actions → Make ebook → Run workflow* and type its slug (or `all`). It commits the files and rebuilds the site. `draft: true` keeps a book hidden. (It also runs on a computer with pandoc, Google Chrome and Pillow: `python3 scripts/make_ebook.py <slug>`.)
 - **Publish the Work with me page:** edit `data/work-with-me.html` and delete the word DRAFT from its first line.
 - **Change colours or fonts:** `assets/site.css`. The colours are CSS variables at the top,
   with a separate dark block. After changing `site.css` or `site.js`, bump `CSS_VERSION`
@@ -278,6 +278,9 @@ build runs by itself afterwards and the live site updates a couple of minutes la
    `davidcharles.info` if the site is ever switched off.
 
 **Decisions waiting on David:**
+
+- **Cycling Round Britain (Twice) ebook:** built but hidden (`draft: true` in `data/books.json`), because a free ebook might compete with *Life to the Lees* and the planned book *Coasting*. Delete the draft line to publish it.
+- **Ebook introductions and endings** are drafts in `data/books.json`; rewrite them in your own words.
 
 6. **Rewrite the Start here blurbs** in `data/start-here.json` in your own voice. The
    current ones are drafts.

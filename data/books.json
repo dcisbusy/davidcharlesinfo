@@ -1,5 +1,5 @@
 {
- "_note": "Ebooks made from series with: python3 scripts/make_ebook.py <slug>. The build makes /books/ pages from this file. intro_html and end_html go at the start and end of the book.",
+ "_note": "Ebooks made from series with: python3 scripts/make_ebook.py <slug>, or on GitHub with Actions -> Make ebook. The build makes /books/ pages from this file. intro_html and end_html go at the start and end of the book. cut_headings removes recurring newsletter sections by heading; cut_paragraphs removes matching paragraphs; skip_chapters leaves stories out; draft: true keeps a book off the books and series pages.",
  "books": [
   {
    "slug": "cycling-to-the-sahara",
@@ -17,6 +17,76 @@
    "end_html": "<p>Thank you for riding along.</p><p>The story didn’t end in Tunis. Four years later I set off again, this time cycling towards Syria along the routes of migration, and later I spent many summers riding with Thighs of Steel. You can read all of it, free, at <a href=\"{SITE}/series/\">davidcharles.info/series</a>.</p><p>Every Friday I send a short story about adventure, nature and being human to readers of my newsletter. If you enjoyed this book, I’d love you to join them: <a href=\"https://davidcharles.substack.com/subscribe\">davidcharles.substack.com</a>.</p><p>This book is free to read and share. If you’d like to give something back, the best thing you can do is tell a friend about it.</p>",
    "strip_prefix": "^Cycling (to|and) the Sahara: ",
    "words": 23000
+  },
+  {
+   "cut_headings": "^(CREDITS|Now On:|Day \\d+$|Inexplicably Popular|Thanks for reading|\\d* ?Days? [Oo]f Adventure|100 D|Free But Not Cheap|Three Small|Unlock [Tt]he [Cc]ommons|This email was|▲|Can.t even|Full marks|FOILED UPDATE|Foiled is back|Books Make Books|Every Dylan Album|Go Flight Free|Gift Economy|Strange things|#1: The Body Test|.SYLVA.|This week I believe in hairs|No Place Like Holm|Your neck of the woods|Habit \\(re\\)formation|Social climbing|Pluralistic Ignorance|This Weee?kend: Thighs LIVE|Flight Free UK|My Next Adventure)",
+   "cut_paragraphs": [
+    "For those of you new around these parts",
+    "Welcome to edition \\d+",
+    "That.s all we have time for",
+    "davidcharles\\.info // @dcisbusy",
+    "Comic by "
+   ],
+   "rights": "© David Charles. Free to read and share.",
+   "intro_title": "About this book",
+   "end_title": "Where next",
+   "slug": "cycling-towards-syria",
+   "series": "cycling-towards-syria",
+   "title": "Cycling towards Syria",
+   "subtitle": "London to Vienna by bike in 2016, following the routes of migration",
+   "kicker": "Spring 2016",
+   "cover_photo": "/wp-content/uploads/2016/03/Cycle-to-Charing-with-Claire-2015-08-01-026.jpg",
+   "skip_chapters": [
+    "https://davidcharles.substack.com/p/3287633_-74-thighs-of-steel"
+   ],
+   "description": "In May 2016 David Charles set off from London to cycle 3,000 miles along the routes people were taking into Europe, collecting stories from refugees, volunteers and officials on the way: Calais and Grande-Synthe, the Belgian asylum system, Germany’s welcome and its limits, and a refugee camp in Vienna.",
+   "intro_html": "<p>In spring 2016, as more than a million people crossed into Europe seeking safety, David Charles set out from London on his bicycle. His plan was to follow the routes of migration in reverse, towards Syria, listening to the people he met: refugees, volunteers, officials and neighbours.</p><p>These are the dispatches he wrote along the way, first published on his blog and newsletter, from the camps of Calais to a refugee centre in Vienna. They are presented as they were written at the time, with a little tidying.</p>",
+   "end_html": "<p>All of David’s stories, including the other long rides, are free to read at <a href=\"{SITE}/series/\">davidcharles.info/series</a>.</p><p>Every Friday David sends a short story about adventure, nature and being human to readers of his newsletter. To join them, visit <a href=\"https://davidcharles.substack.com/subscribe\">davidcharles.substack.com</a>.</p><p>This book is free to read and share. If you enjoyed it, the best thing you can do is tell a friend.</p>"
+  },
+  {
+   "cut_headings": "^(CREDITS|Now On:|Day \\d+$|Inexplicably Popular|Thanks for reading|\\d* ?Days? [Oo]f Adventure|100 D|Free But Not Cheap|Three Small|Unlock [Tt]he [Cc]ommons|This email was|▲|Can.t even|Full marks|FOILED UPDATE|Foiled is back|Books Make Books|Every Dylan Album|Go Flight Free|Gift Economy|Strange things|#1: The Body Test|.SYLVA.|This week I believe in hairs|No Place Like Holm|Your neck of the woods|Habit \\(re\\)formation|Social climbing|Pluralistic Ignorance|This Weee?kend: Thighs LIVE|Flight Free UK|My Next Adventure)",
+   "cut_paragraphs": [
+    "For those of you new around these parts",
+    "Welcome to edition \\d+",
+    "That.s all we have time for",
+    "davidcharles\\.info // @dcisbusy",
+    "Comic by "
+   ],
+   "rights": "© David Charles. Free to read and share.",
+   "intro_title": "About this book",
+   "end_title": "Where next",
+   "slug": "cycling-round-britain",
+   "series": "cycling-round-britain",
+   "title": "Cycling Round Britain (Twice)",
+   "subtitle": "4,110 miles in 2011, and the long way round again in the 2020s",
+   "kicker": "2011 and 2020–2023",
+   "cover_photo": "/wp-content/uploads/2022/05/https3A2F2Fbucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com2Fpublic2Fimages2Fe5a2ed0e-a55e-4a2b-9892-a1cee68591ce_4032x2268.jpg",
+   "draft": true,
+   "description": "Two journeys round the coast of Britain, a decade apart: a solo 4,110-mile ride in 2011, and a slower, stage-by-stage return after lockdown. Tents, rainstorms, cheese sandwiches, ghosts, and what changes when you do the same thing twice.",
+   "intro_html": "<p>In 2011 David Charles cycled 4,110 miles around the coast of Britain. Nine years later, as lockdown lifted, he set off to do it again, this time in stages, and with a very different view of the country and of himself.</p><p>This book gathers his blog posts and newsletter stories from both journeys, as they were first published. The story of the 2011 ride is told in full in his book <em>Life to the Lees</em>.</p>",
+   "end_html": "<p>All of David’s stories, including the other long rides, are free to read at <a href=\"{SITE}/series/\">davidcharles.info/series</a>.</p><p>Every Friday David sends a short story about adventure, nature and being human to readers of his newsletter. To join them, visit <a href=\"https://davidcharles.substack.com/subscribe\">davidcharles.substack.com</a>.</p><p>This book is free to read and share. If you enjoyed it, the best thing you can do is tell a friend.</p>"
+  },
+  {
+   "cut_headings": "^(CREDITS|Now On:|Day \\d+$|Inexplicably Popular|Thanks for reading|\\d* ?Days? [Oo]f Adventure|100 D|Free But Not Cheap|Three Small|Unlock [Tt]he [Cc]ommons|This email was|▲|Can.t even|Full marks|FOILED UPDATE|Foiled is back|Books Make Books|Every Dylan Album|Go Flight Free|Gift Economy|Strange things|#1: The Body Test|.SYLVA.|This week I believe in hairs|No Place Like Holm|Your neck of the woods|Habit \\(re\\)formation|Social climbing|Pluralistic Ignorance|This Weee?kend: Thighs LIVE|Flight Free UK|My Next Adventure)",
+   "cut_paragraphs": [
+    "For those of you new around these parts",
+    "Welcome to edition \\d+",
+    "That.s all we have time for",
+    "davidcharles\\.info // @dcisbusy",
+    "Comic by "
+   ],
+   "rights": "© David Charles. Free to read and share.",
+   "intro_title": "About this book",
+   "end_title": "Where next",
+   "slug": "thighs-of-steel",
+   "series": "thighs-of-steel",
+   "title": "Thighs of Steel",
+   "subtitle": "Riding in solidarity with people on the move, 2017–2025",
+   "kicker": "2017–2025",
+   "cover_photo": "/wp-content/uploads/2018/08/DSC_2027.jpg",
+   "description": "Thighs of Steel was a relay bike ride from London (and later Glasgow) to Athens, raising over £760,000 for projects run by and for refugees. David Charles rode with it, organised it and wrote about it for eight summers. These are his stories: the riders, the roads, the people on the move, and what it means to build a community on wheels.",
+   "intro_html": "<p>Thighs of Steel was a relay bike ride across Europe, from London and later Glasgow to Athens, raising money for projects run by refugees for refugees. Over its lifetime the riders raised more than £760,000.</p><p>David Charles first joined the ride in 2018, then became part of the core team that ran it. This book collects what he wrote about it in his blog and his weekly newsletter, from the first mention in 2017 to the goodbye in 2025. Other newsletter news from the same weeks has been left out.</p>",
+   "end_html": "<p>All of David’s stories, including the other long rides, are free to read at <a href=\"{SITE}/series/\">davidcharles.info/series</a>.</p><p>Every Friday David sends a short story about adventure, nature and being human to readers of his newsletter. To join them, visit <a href=\"https://davidcharles.substack.com/subscribe\">davidcharles.substack.com</a>.</p><p>This book is free to read and share. If you enjoyed it, the best thing you can do is tell a friend.</p>"
   }
  ]
 }

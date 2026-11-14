@@ -560,7 +560,8 @@ def build_extras(posts, pages, cats, years):
             ("/random-story/", ""), ("/books/", "")]
     urls += [(u, "") for u in sorted("/" + os.path.dirname(f).replace(os.sep, "/") + "/"
                                      for f in __import__("glob").glob("series/*/index.html")
-                                     + __import__("glob").glob("books/*/index.html"))]
+                                     + [f for f in __import__("glob").glob("books/*/index.html")
+                                        if 'name="robots" content="noindex' not in (read(f) or "")])]
     if "noindex" not in (read("work-with-me/index.html") or "noindex"):
         urls.append(("/work-with-me/", ""))
     urls += [(p["url"], p["date"]) for p in posts] + [(p["url"], "") for p in pages]

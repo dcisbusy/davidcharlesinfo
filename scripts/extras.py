@@ -701,7 +701,7 @@ def load_books():
 
 
 def book_button(series_slug):
-    b = next((b for b in load_books() if b["series"] == series_slug), None)
+    b = next((b for b in load_books() if b["series"] == series_slug and not b.get("draft")), None)
     return f' <a class="button" href="/books/{esc(b["slug"])}/">Read it as a free ebook</a>' if b else ""
 
 
@@ -731,7 +731,9 @@ def build_books(series_list):
                 'adventure, nature and being human. Join the readers of my newsletter.</p><p><a class="button primary" '
                 'href="https://davidcharles.substack.com/subscribe">Subscribe free</a></p></aside>')
         write_if_changed(f"{d}/index.html", page(f'{b["title"]}: free ebook | David Charles', b["description"],
-                                                 f"/{d}/", body, image=f"/{d}/cover.jpg"))
+                                                 f"/{d}/", body, image=f"/{d}/cover.jpg", noindex=bool(b.get("draft"))))
+        if b.get("draft"):
+            continue
         cards.append(f'<li><a href="/{d}/"><img src="/{d}/cover-small.jpg" alt="" width="300" height="424" '
                      f'loading="lazy"><h3>{esc(b["title"])}</h3><p>{esc(b["subtitle"])}</p></a></li>')
     body = ('<h1>Books</h1><p class="intro muted">Free ebooks made from the stories on this site, to read on your '
