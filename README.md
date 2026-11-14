@@ -343,7 +343,7 @@ time.
 David reviewed a list of 40 flagged posts and pages (the "Website content review: November 2026" sheet). Done on 14 November 2026:
 
 - **Removed:** G-Verbs to Watch Girls Go By, Text me your number, Idiots' Idioms VI, Camber Sands ride details, and the old Hi!, Writing Services, Chalk + Charms, Contact David and Cycling to Syria (Strava) pages, with every link to them. `/about-me/` now redirects to the homepage, and links to it point there. Copies of the removed pages were sent to David; they are also in the repository's history.
-- **Edited:** She must be French (last line cut), Cycling to the Sahara: Two Coffee Cups (one line cut), Ksar Ghilane ("Tuareg for my old primary school classmates"), Diavata Camp ("weatherbeaten grandmas"), The Science of Psychedelics (study year corrected to 2015).
+- **Edited:** She must be French (last line cut), Cycling to the Sahara: Two Coffee Cups (one line cut), Ksar Ghilane ("Tuareg for my old primary school classmates"), Diavata Camp ("weatherbeaten grandmas"), The Science of Psychedelics (study year corrected to 2015; dated note on risks and UK law added at the top).
 - **Hidden from lists:** 16 duplicate newsletter issues (`data/hidden-issues.json`).
 - **Removed from the Substack export copy here:** David's personal email address in the August 2014 issue. It is still in the issue on Substack.
 
