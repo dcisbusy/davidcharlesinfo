@@ -137,7 +137,7 @@ makes no commit.
 | **Newsletter archive** | `/newsletter-archive/` | Every issue by year, with cover image, date, reading time and excerpt. Paid issues are labelled. Links go to Substack. |
 | **Blog archive** | `/blog-archive/` | Pages, the full category tree, years, and every post. |
 | **Start here** | `/start-here/` | Hand-picked stories from `data/start-here.json`. |
-| **Series** | `/series/` | 12 trails such as Cycling to the Sahara, defined in `data/series.json` by category or title pattern. Each post in a series shows a "Part n of N" box. |
+| **Series** | `/series/` | 12 trails such as Cycling to the Sahara and Thighs of Steel, defined in `data/series.json` by blog category, title pattern and/or an `include` list of individual blog or newsletter stories. Each part shows a photo, chosen automatically (skipping stock headers used across many posts), and each blog post in a series shows a "Part n of N" box. `cover` sets a series' main photo. |
 | **Map** | `/map/` | Story text is scanned for places in `data/places.json`. Common false alarms (Geneva Convention, Isaiah Berlin, HMS Belfast…) are excluded. Pins use OpenStreetMap tiles and a self-hosted copy of Leaflet. |
 | **On this day** | homepage panel | Stories published on today's date in earlier years, from `assets/on-this-day.json`. |
 | **20 years in numbers** | `/numbers/` | Posts and words per year, top places and more. Newsletter word counts come from the export, so issues after 10 October 2026 aren't counted until the export is refreshed. |
@@ -169,7 +169,7 @@ build runs by itself afterwards and the live site updates a couple of minutes la
   `data/story-overrides.json`.
 - **Mark a blog post as (not) a copy of a newsletter issue:** use `duplicates` /
   `not_duplicates` in `data/story-overrides.json`.
-- **Add or edit a series:** `data/series.json`.
+- **Add or edit a series:** `data/series.json`. Add a story with its address in `include`, remove one with `exclude`.
 - **Change the Start here picks:** `data/start-here.json`.
 - **Change colours or fonts:** `assets/site.css`. The colours are CSS variables at the top,
   with a separate dark block. After changing `site.css` or `site.js`, bump `CSS_VERSION`

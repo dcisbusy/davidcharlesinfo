@@ -17,7 +17,7 @@ import os
 import re
 from urllib.parse import quote
 
-from build import (MONTHS, SITE, SUBSTACK, chips, esc, file_for, nice, page, read, write_if_changed)
+from build import (MONTHS, SITE, SUBSTACK, TILE_COLOURS, chips, esc, file_for, nice, page, read, write_if_changed)
 
 STOP = set("""
 a about above after again against all am an and any are aren't as at be because been before being below between both
@@ -488,6 +488,47 @@ def thumb(src, srcset):
     return best[1] if best else src
 
 
+GENERIC_IMG = re.compile(r"(logo|avatar|icon|emoji|smiley|button|banner|header|subscribe-card|/twitter/|"
+                         r"\.gif$|\.svg$)", re.I)
+
+
+def photo_candidates(s):
+    """Usable photos for a story, best first: the newsletter cover, then decent images in the post."""
+    out = []
+    if s.get("source") == "newsletter" and s.get("image") and not GENERIC_IMG.search(s["image"]):
+        out.append(s["image"])
+    for t in re.findall(r"<img\b[^>]*>", s.get("html") or ""):
+        src = re.search(r'\ssrc="([^"]+)"', t)
+        if not src or GENERIC_IMG.search(src.group(1)):
+            continue
+        w = re.search(r'\swidth="(\d+)"', t)
+        ss = re.search(r'\ssrcset="([^"]+)"', t)
+        if w and int(w.group(1)) < 400 and not (ss and re.search(r"\s(?:[5-9]\d\d|\d{4})w", ss.group(1))):
+            continue
+        out.append(thumb(src.group(1), ss.group(1) if ss else ""))
+    img = s.get("image")
+    if img and (img.startswith("/") or img.startswith("https://")) and not GENERIC_IMG.search(img):
+        out.append(img)
+    return out
+
+
+def img_key(u):
+    return re.sub(r"-\d+x\d+(?=\.\w+$)", "", u.split("?")[0])
+
+
+def common_photos(stories):
+    """Images that turn up in more than two stories (stock headers, promo pictures) - not real story photos."""
+    c = collections.Counter()
+    for s in stories:
+        for k in {img_key(u) for u in photo_candidates(s)}:
+            c[k] += 1
+    return {k for k, n in c.items() if n > 2}
+
+
+def story_photo(s, common=frozenset()):
+    return next((u for u in photo_candidates(s) if img_key(u) not in common), None)
+
+
 def build_photos(stories):
     usage = collections.Counter()
     picks = []
@@ -582,25 +623,40 @@ def compute_related(stories, n=3):
 # ---------------------------------------------------------------- series
 
 def build_series_data(stories, entries):
+    """Series trails. A series collects stories by blog category, by a title pattern, and/or by an explicit
+    'include' list of story addresses (blog or newsletter); 'exclude' drops any. Oldest first."""
     conf = json.load(open("data/series.json", encoding="utf-8"))["series"]
     story_of_blog = {s["blog_url"]: s for s in stories if s.get("blog_url")}
+    by_url = {s["url"]: s for s in stories}
+    common = common_photos(stories)
     posts = [e for e in entries if e["type"] == "post"]
     out = []
     for sr in conf:
-        parts = [e for e in posts
-                 if (sr.get("category") and any(c["url"] == sr["category"] for c in e.get("cats", [])))
-                 or (sr.get("title") and re.search(sr["title"], e["title"], re.I))]
-        parts = [e for e in parts if (not sr.get("from") or e["date"] >= sr["from"]) and
-                 (not sr.get("to") or e["date"] <= sr["to"])]
-        seen, uniq = set(), []
-        for e in sorted(parts, key=lambda e: (e["date"], e["url"])):
-            k = re.sub(r"\W+", "", e["title"].lower())
-            if k not in seen:
-                seen.add(k)
-                uniq.append(e)
-        items = [{"title": e["title"], "date": e["date"], "blog_url": e["url"],
-                  "url": story_of_blog[e["url"]]["url"] if e["url"] in story_of_blog else e["url"],
-                  "source": story_of_blog[e["url"]]["source"] if e["url"] in story_of_blog else "blog"} for e in uniq]
+        chosen = []
+        for e in posts:
+            if ((sr.get("category") and any(c["url"] == sr["category"] for c in e.get("cats", [])))
+                    or (sr.get("title") and re.search(sr["title"], e["title"], re.I))):
+                st = story_of_blog.get(e["url"])
+                chosen.append(st or {"title": e["title"], "date": e["date"], "url": e["url"], "blog_url": e["url"],
+                                     "source": "blog", "image": e.get("image"), "excerpt": e.get("excerpt", ""),
+                                     "html": ""})
+        for u in sr.get("include", []):
+            st = by_url.get(u) or story_of_blog.get(u)
+            if st:
+                chosen.append(st)
+            else:
+                print(f"Note: series {sr['slug']}: no story at {u}")
+        drop = set(sr.get("exclude", []))
+        chosen = [x for x in chosen if x["url"] not in drop and x.get("blog_url") not in drop
+                  and (not sr.get("from") or x["date"] >= sr["from"]) and (not sr.get("to") or x["date"] <= sr["to"])]
+        seen, items = set(), []
+        for x in sorted(chosen, key=lambda x: (x["date"], x["url"])):
+            k = re.sub(r"\W+", "", x["title"].lower())
+            if k in seen or x["url"] in seen:
+                continue
+            seen.update({k, x["url"]})
+            items.append({"title": x["title"], "date": x["date"], "url": x["url"], "blog_url": x.get("blog_url"),
+                          "source": x["source"], "photo": story_photo(x, common), "excerpt": x.get("excerpt") or ""})
         if len(items) >= 2:
             out.append(dict(sr, items=items))
     return out
@@ -623,25 +679,45 @@ def series_box(series_list, blog_url):
 
 
 def build_series_pages(series_list):
+    def pic(it, cls=""):
+        if it.get("photo"):
+            return f'<img{cls} src="{esc(it["photo"])}" alt="" loading="lazy" decoding="async">'
+        colour = TILE_COLOURS[sum(map(ord, it["title"])) % len(TILE_COLOURS)]
+        return f'<span class="ph" style="background:{colour}" aria-hidden="true"></span>'
+
     for sr in series_list:
         rows = "".join(
-            f'<li><span class="num">{i + 1}</span><a href="{esc(it["url"])}">{esc(it["title"])}</a>'
+            f'<li><a href="{esc(it["url"])}">{pic(it)}<div><span class="num">Part {i + 1}</span>'
+            f'<h3>{esc(it["title"])}</h3>'
             f'<time datetime="{esc(it["date"])}">{esc(nice(it["date"]))}'
-            f'{" &middot; newsletter" if it["source"] == "newsletter" else ""}</time></li>'
+            f'{" &middot; newsletter" if it["source"] == "newsletter" else ""}</time>'
+            + (f'<p>{esc(it["excerpt"][:160].rsplit(" ", 1)[0] + "…" if len(it["excerpt"]) > 160 else it["excerpt"])}</p>'
+               if it["excerpt"] else "")
+            + '</div></a></li>'
             for i, it in enumerate(sr["items"]))
         first = sr["items"][0]
-        body = (f'<p class="meta crumbs"><a href="/series/">Series</a></p><h1>{esc(sr["name"])}</h1>\n'
+        cover = ({"photo": sr["cover"]} if sr.get("cover")
+                 else next((it for it in sr["items"] if it.get("photo")), None))
+        hero = (f'<figure class="series-hero"><img src="{esc(cover["photo"])}" alt=""></figure>' if cover else "")
+        years = f'{first["date"][:4]}–{sr["items"][-1]["date"][:4]}' if first["date"][:4] != sr["items"][-1]["date"][:4] \
+            else first["date"][:4]
+        body = (f'<p class="meta crumbs"><a href="/series/">Series</a></p>{hero}<h1>{esc(sr["name"])}</h1>\n'
                 f'<p class="intro">{esc(sr["description"])}</p>\n<p class="intro muted">{len(sr["items"])} parts, '
-                f'in order.</p>\n<div class="buttons"><a class="button primary" href="{esc(first["url"])}">Start at part 1</a>'
-                f'</div>\n<ol class="series-list">{rows}</ol>')
+                f'{years}, in order.</p>\n<div class="buttons"><a class="button primary" href="{esc(first["url"])}">'
+                f'Start at part 1</a></div>\n<ol class="series-cards">{rows}</ol>')
         write_if_changed(f'series/{sr["slug"]}/index.html', page(f'{sr["name"]} | David Charles', sr["description"],
-                                                                 f'/series/{sr["slug"]}/', body))
-    cards = "".join(
-        f'<li><a href="/series/{esc(sr["slug"])}/"><h3>{esc(sr["name"])}</h3><p>{esc(sr["description"])}</p>'
-        f'<span class="muted">{len(sr["items"])} parts &middot; {sr["items"][0]["date"][:4]}</span></a></li>'
-        for sr in series_list)
+                                                                 f'/series/{sr["slug"]}/', body,
+                                                                 image=cover["photo"] if cover else None))
+    cards = []
+    for sr in series_list:
+        cover = (dict(sr["items"][0], photo=sr["cover"]) if sr.get("cover")
+                 else next((it for it in sr["items"] if it.get("photo")), sr["items"][0]))
+        cards.append(
+            f'<li><a href="/series/{esc(sr["slug"])}/">{pic(cover)}<div><h3>{esc(sr["name"])}</h3>'
+            f'<p>{esc(sr["description"])}</p><span class="muted">{len(sr["items"])} parts &middot; '
+            f'{sr["items"][0]["date"][:4]}</span></div></a></li>')
     body = ('<h1>Series</h1>\n<p class="intro muted">Stories told in several parts, from bike rides to book '
-            f'clubs. Each one reads like a short book.</p>\n<ul class="cards">{cards}</ul>')
+            f'clubs. Each one reads like a short book.</p>\n<ul class="series-covers">{"".join(cards)}</ul>')
     write_if_changed("series/index.html", page("Series | David Charles", "Stories by David Charles told in parts.",
                                                "/series/", body, "/series/"))
 

@@ -1,29 +1,118 @@
 {
- "_note": "Series trails. Each series collects posts by blog category ('category') or by a pattern in the title ('title'), oldest first. 'from'/'to' limit the dates. Edit the descriptions freely.",
+ "_note": "Series trails. Each series collects posts by blog category ('category') or by a pattern in the title ('title'), oldest first. 'from'/'to' limit the dates. Edit the descriptions freely. 'include' adds any story by its address (blog path or Substack link); 'exclude' drops one. 'cover' picks the series' main photo.",
  "series": [
-  {"slug": "cycling-to-the-sahara", "name": "Cycling to the Sahara", "category": "/category/adventure/cycle-touring/cycling-to-the-sahara/", "to": "2012-12-31",
-   "description": "Spring 2012: 1,279 miles by bike from London to the Sahara, through France and post-revolution Tunisia."},
-  {"slug": "cycling-towards-syria", "name": "Cycling towards Syria", "category": "/category/adventure/cycle-touring/cycling-towards-syria/",
-   "description": "2016: a 3,000-mile bike ride from London following the routes of migration, reporting from the saddle."},
-  {"slug": "cycling-round-britain", "name": "Cycling Round Britain (Twice)", "category": "/category/adventure/cycle-touring/bike-around-britain/",
-   "description": "Two rides round the coast of Britain: 4,110 miles in 2011, and again in 2022 and 2023."},
-  {"slug": "thighs-of-steel", "name": "Thighs of Steel", "category": "/category/adventure/cycle-touring/thighs-of-steel/",
-   "description": "Riding to Athens with Thighs of Steel, the fundraising bike ride for refugee solidarity, in 2022 and 2023."},
-  {"slug": "sea-cycles", "name": "Sea Cycles", "category": "/category/adventure/cycle-touring/seacycles/",
-   "description": "Group rides from London to the seaside, 2016 and 2017."},
-  {"slug": "hitchhiking", "name": "Hitchhiking", "category": "/category/adventure/hitchhiking/",
-   "description": "Thumbing lifts around Britain, from London to Scotland and back."},
-  {"slug": "walking-home-for-christmas", "name": "Walking Home for Christmas", "category": "/category/adventure/walking/walking-home-for-christmas/",
-   "description": "Christmas 2010: walking 38 snowy miles from Heathrow to Cholsey."},
-  {"slug": "polyphasic-sleep", "name": "The Polyphasic Sleep Experiment", "category": "/category/how-to-be-human/polyphasing/",
-   "description": "March 2009: swapping a night's sleep for a day of short naps, and seeing what happens."},
-  {"slug": "no-supermarket", "name": "No Supermarket January", "title": "No Supermarket",
-   "description": "January 2011: a whole month of shopping without supermarkets."},
-  {"slug": "vipassana", "name": "Ten Days at Dhamma Dipa", "title": "Dhamma Dipa",
-   "description": "2010: a ten-day Vipassana meditation course in Herefordshire, what I did, what I didn't, and what I made of it."},
-  {"slug": "meditations-on-meditations", "name": "Meditations on Meditations", "title": "Meditations on Meditations",
-   "description": "2017: one passage at a time from Marcus Aurelius's Meditations."},
-  {"slug": "viktor-frankl-book-cult", "name": "The Viktor Frankl 5-a-Day Book Cult", "title": "(Viktor|Victor) Frankl 5-a-Day",
-   "description": "2018: reading Viktor Frankl's Man's Search for Meaning five pages a day, over 28 days."}
+  {
+   "slug": "cycling-to-the-sahara",
+   "name": "Cycling to the Sahara",
+   "category": "/category/adventure/cycle-touring/cycling-to-the-sahara/",
+   "to": "2012-12-31",
+   "description": "Spring 2012: 1,279 miles by bike from London to the Sahara, through France and post-revolution Tunisia."
+  },
+  {
+   "slug": "cycling-towards-syria",
+   "name": "Cycling towards Syria",
+   "category": "/category/adventure/cycle-touring/cycling-towards-syria/",
+   "description": "2016: a 3,000-mile bike ride from London following the routes of migration, reporting from the saddle."
+  },
+  {
+   "slug": "cycling-round-britain",
+   "name": "Cycling Round Britain (Twice)",
+   "category": "/category/adventure/cycle-touring/bike-around-britain/",
+   "description": "Two rides round the coast of Britain: 4,110 miles in 2011, and again in 2022 and 2023."
+  },
+  {
+   "slug": "thighs-of-steel",
+   "name": "Thighs of Steel",
+   "category": "/category/adventure/cycle-touring/thighs-of-steel/",
+   "description": "2017–2025 with Thighs of Steel, the relay bike ride for refugee solidarity: from first joining the crew for Ljubljana to Sofia, through core-team summers riding to Athens, lockdown rides and a world record attempt, to saying goodbye.",
+   "include": [
+    "https://davidcharles.substack.com/p/1396125_-22-thighs-of-steel",
+    "https://davidcharles.substack.com/p/3287633_-74-thighs-of-steel",
+    "https://davidcharles.substack.com/p/3292721_-76-thighs-",
+    "https://davidcharles.substack.com/p/3318321_-89-from-ljubljana-insha-allah-",
+    "https://davidcharles.substack.com/p/3321877_-90-from-timisoara",
+    "/adventure/cycle-touring/thighs-of-steel-ljubljana-to-sofia/",
+    "/adventure/delays-really/",
+    "/adventure/cycle-touring/thighs-of-steel-a-community-on-wheels/",
+    "https://davidcharles.substack.com/p/3342909_-100-happy-hundred-",
+    "https://davidcharles.substack.com/p/3377365_-115-tame-the-mane",
+    "https://davidcharles.substack.com/p/3402605_-127-thighs-foiled-more-audacity-holm-oak",
+    "/activism/no-borders/talk-migration-help-refugees/",
+    "https://davidcharles.substack.com/p/3440269_-136-summer-plans-",
+    "https://davidcharles.substack.com/p/3472369_-138-skipped-a-week-post-thighs-van-days",
+    "/activism/no-borders/why-mahmoud-wears-cologne/",
+    "https://davidcharles.substack.com/p/3537557_-143-paris-and-thighs-week-7",
+    "https://davidcharles.substack.com/p/3546369_-144-albania",
+    "/adventure/cycle-touring/thighs-of-steel-arrives-in-athens-all-together/",
+    "/activism/merry-thighsmas/",
+    "https://davidcharles.substack.com/p/early-bird-for-thighs",
+    "/adventure/cycle-touring/how-to-play-thighs-of-steel/",
+    "https://davidcharles.substack.com/p/breakdown",
+    "https://davidcharles.substack.com/p/thighsolation",
+    "https://davidcharles.substack.com/p/bespoke",
+    "/activism/no-borders/join-us-for-world-refugee-day/",
+    "https://davidcharles.substack.com/p/not-a-bike-ride",
+    "https://davidcharles.substack.com/p/no-more-hostile-environment",
+    "https://davidcharles.substack.com/p/we-identify-as-human-beings",
+    "https://davidcharles.substack.com/p/admin-or-admiration",
+    "https://davidcharles.substack.com/p/talking-politics-with-strangers",
+    "https://davidcharles.substack.com/p/lies-and-the-what-what-now-now",
+    "https://davidcharles.substack.com/p/the-3-or-4-species-of-happiness",
+    "https://davidcharles.substack.com/p/intrinsic-adventure",
+    "https://davidcharles.substack.com/p/leonard-cohen-janis-joplin-and-me",
+    "https://davidcharles.substack.com/p/enter-the-packing-room",
+    "https://davidcharles.substack.com/p/gaping-abundance",
+    "https://davidcharles.substack.com/p/760000-and-out"
+   ],
+   "cover": "/wp-content/uploads/2018/08/DSC_2027-768x432.jpg"
+  },
+  {
+   "slug": "sea-cycles",
+   "name": "Sea Cycles",
+   "category": "/category/adventure/cycle-touring/seacycles/",
+   "description": "Group rides from London to the seaside, 2016 and 2017."
+  },
+  {
+   "slug": "hitchhiking",
+   "name": "Hitchhiking",
+   "category": "/category/adventure/hitchhiking/",
+   "description": "Thumbing lifts around Britain, from London to Scotland and back."
+  },
+  {
+   "slug": "walking-home-for-christmas",
+   "name": "Walking Home for Christmas",
+   "category": "/category/adventure/walking/walking-home-for-christmas/",
+   "description": "Christmas 2010: walking 38 snowy miles from Heathrow to Cholsey."
+  },
+  {
+   "slug": "polyphasic-sleep",
+   "name": "The Polyphasic Sleep Experiment",
+   "category": "/category/how-to-be-human/polyphasing/",
+   "description": "March 2009: swapping a night's sleep for a day of short naps, and seeing what happens."
+  },
+  {
+   "slug": "no-supermarket",
+   "name": "No Supermarket January",
+   "title": "No Supermarket",
+   "description": "January 2011: a whole month of shopping without supermarkets."
+  },
+  {
+   "slug": "vipassana",
+   "name": "Ten Days at Dhamma Dipa",
+   "title": "Dhamma Dipa",
+   "description": "2010: a ten-day Vipassana meditation course in Herefordshire, what I did, what I didn't, and what I made of it."
+  },
+  {
+   "slug": "meditations-on-meditations",
+   "name": "Meditations on Meditations",
+   "title": "Meditations on Meditations",
+   "description": "2017: one passage at a time from Marcus Aurelius's Meditations."
+  },
+  {
+   "slug": "viktor-frankl-book-cult",
+   "name": "The Viktor Frankl 5-a-Day Book Cult",
+   "title": "(Viktor|Victor) Frankl 5-a-Day",
+   "description": "2018: reading Viktor Frankl's Man's Search for Meaning five pages a day, over 28 days."
+  }
  ]
 }

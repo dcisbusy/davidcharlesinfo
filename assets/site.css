@@ -320,3 +320,22 @@ svg.chart .s1, .legend .s1 { fill: var(--s1); background: var(--s1); }
 .cat-tree ul a { display: inline-block; padding: 3px 0; font: 15px/1.35 var(--ui); color: var(--accent); text-decoration: none; }
 .cat-tree a:hover { text-decoration: underline; }
 .cat-tree span { color: var(--muted); font-weight: 400; font-size: 13px; margin-left: 2px; }
+
+/* Series with pictures */
+.series-hero { margin: 8px 0 20px; }
+.series-hero img { display: block; width: 100%; max-height: 340px; object-fit: cover; border-radius: 10px; }
+ol.series-cards, ul.series-covers { list-style: none; margin: 24px 0 0; padding: 0; display: grid; gap: 14px; }
+ul.series-covers { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
+.series-cards a, .series-covers a { display: flex; gap: 14px; align-items: flex-start; color: var(--ink);
+  text-decoration: none; padding: 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.series-cards a:hover, .series-covers a:hover { border-color: var(--accent); }
+.series-cards img, .series-cards .ph { flex: 0 0 132px; width: 132px; height: 92px; object-fit: cover; border-radius: 6px; }
+.series-covers a { flex-direction: column; padding: 0; overflow: hidden; }
+.series-covers img, .series-covers .ph { width: 100%; height: 170px; object-fit: cover; display: block; }
+.series-covers a > div { padding: 4px 16px 16px; }
+.series-cards h3, .series-covers h3 { margin: 2px 0 4px; font: 600 17px/1.3 var(--ui); }
+.series-cards .num { font: 600 12px/1 var(--ui); color: var(--accent); text-transform: uppercase; letter-spacing: .04em; }
+.series-cards time, .series-covers .muted { font: 13px/1.4 var(--ui); color: var(--muted); }
+.series-cards p, .series-covers p { margin: 6px 0 0; font: 14px/1.45 var(--ui); color: var(--muted); }
+@media (max-width: 520px) { .series-cards img, .series-cards .ph { flex-basis: 92px; width: 92px; height: 72px; }
+  .series-cards p { display: none; } }
