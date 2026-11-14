@@ -1,0 +1,35 @@
+name: Check links
+
+# Finds dead outside links in old posts and records Internet Archive copies in data/dead-links.json.
+# Committing that file triggers "Build site", which points the dead links at the archived copies.
+on:
+  schedule:
+    - cron: "41 3 3 * *"      # 03:41 UTC on the 3rd of each month
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/linkcheck.py
+      - name: Commit results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/dead-links.json
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "Update dead links"
+          git pull --rebase -X theirs origin main && git push
+      - name: Rebuild the site with the archived links
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run build-site.yml --ref main

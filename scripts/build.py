@@ -301,6 +301,29 @@ def chips(items):
 
 
 CONTENT_RE = re.compile(r"<!--content:start-->(.*?)<!--content:end-->", re.S)
+
+# Dead outside links found by scripts/linkcheck.py, with Internet Archive copies
+try:
+    DEAD = {u: v["archive"] for u, v in json.load(open("data/dead-links.json", encoding="utf-8")).items()
+            if v.get("archive")}
+except (OSError, ValueError):
+    DEAD = {}
+
+
+def archive_links(content):
+    """Point dead links at their Wayback Machine copy (images use the raw-image form)."""
+    if not DEAD:
+        return content
+
+    def fix(m):
+        attr, url = m.group(1), m.group(2)
+        arc = DEAD.get(url.replace("&amp;", "&"))
+        if not arc:
+            return m.group(0)
+        if attr == "src":
+            arc = re.sub(r"(/web/\d+)(/)", r"\1im_\2", arc, count=1)
+        return f'{attr}="{esc(arc)}"'
+    return re.sub(r'\b(href|src)="(https?://[^"\s]+)"', fix, content)
 COMMENTS_RE = re.compile(r"<!--comments:start-->(.*?)<!--comments:end-->", re.S)
 
 
@@ -315,7 +338,7 @@ def wrap_entry(e, older, newer, extra=None):
     if not m:
         print("No <!--content:start--> marker in", path, "- left as it is")
         return
-    content = m.group(1)
+    content = archive_links(m.group(1))
     c = COMMENTS_RE.search(s)
     comments = c.group(1) if c else ""
 
