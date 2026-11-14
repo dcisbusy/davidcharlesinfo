@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>Tree map: Crystal Palace, Norwood, Beckenham, Sydenham | David Charles</title>
+<meta name="description" content="Every council-mapped tree around Crystal Palace, Upper and South Norwood, Penge, Beckenham, Sydenham and Forest Hill: species, size and how well it will cope with London's 2090 climate.">
+<link rel="canonical" href="https://davidcharles.info/trees/">
+<meta property="og:title" content="Tree map: Crystal Palace and around">
+<meta property="og:description" content="Tap any tree to find out what it is. Made for walkers around Crystal Palace, Norwood, Beckenham, Sydenham and Forest Hill.">
+<meta property="og:url" content="https://davidcharles.info/trees/">
+<meta property="og:type" content="website">
+<link rel="stylesheet" href="/assets/leaflet/leaflet.css">
+<script data-goatcounter="https://davidcharles.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<style>
+:root{
+  color-scheme: dark;
+  --ink:#161d24;
+  --ink-soft:#232d38;
+  --moss:#42604a;
+  --lichen:#9ab596;
+  --bone:#eae3d2;
+  --amber:#e2a13d;
+  --line:rgba(234,227,210,0.14);
+}
+*{box-sizing:border-box;}
+html,body{ margin:0; padding:0; height:100%; background:var(--ink); font-family:'Inter',-apple-system,sans-serif; }
+
+.topbar{
+  position:absolute; top:0; left:0; right:0; z-index:1000;
+  background:linear-gradient(to bottom, rgba(22,29,36,0.95), rgba(22,29,36,0));
+  padding:0.8rem 0.9rem 1.6rem;
+  display:flex; align-items:center; justify-content:space-between; gap:0.6rem;
+  pointer-events:none;
+}
+.topbar > *{ pointer-events:auto; }
+.back-link{
+  color:var(--bone);
+  text-decoration:none;
+  font-size:0.85rem;
+  background:rgba(22,29,36,0.85);
+  border:1px solid var(--line);
+  padding:0.5rem 0.8rem;
+  border-radius:8px;
+  white-space:nowrap;
+}
+.status-pill{
+  color:var(--bone);
+  font-family:'Space Mono',monospace;
+  font-size:0.68rem;
+  background:rgba(22,29,36,0.85);
+  border:1px solid var(--line);
+  padding:0.45rem 0.7rem;
+  border-radius:8px;
+  max-width:60vw;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+#map{ position:absolute; top:0; left:0; right:0; bottom:0; }
+
+/* Loading overlay while trees stream in */
+.load-overlay{
+  position:absolute; bottom:0.9rem; left:0.9rem; right:0.9rem; z-index:1000;
+  background:rgba(22,29,36,0.92);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:0.7rem 0.9rem;
+  color:var(--bone);
+  font-size:0.78rem;
+  display:none;
+}
+.load-overlay.visible{ display:block; }
+.load-bar{ height:4px; background:rgba(234,227,210,0.15); border-radius:2px; margin-top:0.4rem; overflow:hidden; }
+.load-bar-fill{ height:100%; width:0%; background:var(--amber); transition:width 0.2s; }
+
+/* Popup content styling */
+.leaflet-popup-content-wrapper{ background:var(--ink-soft); color:var(--bone); border-radius:10px; }
+.leaflet-popup-tip{ background:var(--ink-soft); }
+.tree-popup .name{ font-family:'Fraunces',serif; font-size:1.05rem; margin:0 0 0.2rem; }
+.tree-popup .sci{ font-style:italic; opacity:0.75; font-size:0.8rem; margin:0 0 0.5rem; }
+.tree-popup .row{ font-size:0.78rem; opacity:0.85; margin:0.15rem 0; }
+.tree-popup .id{ font-family:'Space Mono',monospace; font-size:0.68rem; opacity:0.6; margin-top:0.5rem; }
+
+.legend{
+  position:absolute; bottom:0.9rem; right:0.9rem; z-index:1000;
+  background:rgba(22,29,36,0.92);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:0.6rem 0.7rem;
+  color:var(--bone);
+  font-size:0.7rem;
+}
+.legend div{ display:flex; align-items:center; gap:0.4rem; margin:0.2rem 0; }
+.legend .dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+
+button.back-link{ font:inherit; font-size:0.85rem; cursor:pointer; margin-left:0.4rem; }
+.topbar .left{ display:flex; align-items:center; }
+.about{
+  position:absolute; top:3.6rem; left:0.9rem; right:0.9rem; z-index:1100; max-width:30rem;
+  background:rgba(22,29,36,0.97); border:1px solid var(--line); border-radius:10px;
+  padding:0.9rem 1rem; color:var(--bone); font-size:0.85rem; line-height:1.45;
+}
+.about h1{ font-family:'Fraunces',Georgia,serif; font-weight:500; font-size:1.2rem; margin:0 0 0.5rem; }
+.about p{ margin:0 0 0.6rem; }
+.about .small{ font-size:0.72rem; opacity:0.8; }
+.about a{ color:var(--lichen); }
+.user-dot{
+  width:16px; height:16px;
+  background:#4d9de0;
+  border:2px solid white;
+  border-radius:50%;
+  box-shadow:0 0 0 4px rgba(77,157,224,0.3);
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="left"><a href="/" class="back-link">← davidcharles.info</a>
+  <button class="back-link" id="aboutBtn" type="button" aria-expanded="false" aria-controls="about">About</button></div>
+  <div class="status-pill" id="statusPill">Loading trees…</div>
+</div>
+
+<div id="map"></div>
+
+<div class="load-overlay" id="loadOverlay">
+  <span id="loadText">Loading trees…</span>
+  <div class="load-bar"><div class="load-bar-fill" id="loadBarFill"></div></div>
+</div>
+
+<div class="legend">
+  <div><span class="dot" style="background:#e2a13d;"></span>Highways</div>
+  <div><span class="dot" style="background:#42604a;"></span>Parks</div>
+  <div><span class="dot" style="background:#9ab596;"></span>Housing</div>
+  <div><span class="dot" style="background:#8a8478;"></span>Other</div>
+</div>
+
+<div class="about" id="about" hidden>
+  <h1>Tree map</h1>
+  <p>Every tree the councils have mapped around Crystal Palace, Upper and South Norwood, Penge, Beckenham, Sydenham, Forest Hill and Dulwich: street trees, park trees and trees on estates. Tap a dot to find out what it is. Allow location and the map follows you on your walk.</p>
+  <p>Some places have far fewer trees than you'd expect,: the councils only record trees they look after, and some (Croydon especially) have mapped very few.</p>
+  <p class="small">Data: <a href="https://data.london.gov.uk/dataset/local-authority-maintained-trees">London Public Realm Trees</a>, Greater London Authority and the borough councils. Contains public sector information licensed under the <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence v3.0</a>. Map &copy; OpenStreetMap contributors.</p>
+  <button class="back-link" id="aboutClose" type="button">Close</button>
+</div>
+
+<script src="/assets/leaflet/leaflet.js"></script>
+<script src="/assets/leaflet/supercluster.min.js"></script>
+<script>
+const LOCATION_COLORS = {
+  'Highways': '#e2a13d',
+  'Parks': '#42604a',
+  'Housing': '#9ab596',
+  'Other': '#8a8478'
+};
+
+// Only 4 distinct icons ever needed (one per location category) -- build them
+// once and reuse, instead of creating a fresh divIcon object for every single
+// tree. With 160k+ trees this was the single biggest avoidable cost.
+const ICON_CACHE = {};
+function treeIcon(color){
+  if(ICON_CACHE[color]) return ICON_CACHE[color];
+  const icon = L.divIcon({
+    className: '',
+    html: `<div style="width:10px;height:10px;border-radius:50%;background:${color};border:1px solid rgba(255,255,255,0.4);"></div>`,
+    iconSize: [10,10],
+    iconAnchor: [5,5]
+  });
+  ICON_CACHE[color] = icon;
+  return icon;
+}
+
+const AREA = [51.383, -0.125, 51.458, 0.035];   // south, west, north, east: same as scripts/trees.py
+const map = L.map('map', { zoomControl: false }).setView([51.4215, -0.0700], 15);
+L.control.zoom({ position: 'bottomleft' }).addTo(map);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  maxZoom: 19
+}).addTo(map);
+
+// Trees are clustered with Supercluster (a KD-tree spatial index) instead of
+// Leaflet.markercluster. Leaflet.markercluster builds its cluster tree from
+// every single marker up front regardless of what's on screen, which is fine
+// up to tens of thousands of points but becomes the dominant cost at 160k+
+// (this was most of the old ~20s load). Supercluster builds its index once
+// (fast — it's just spatial math, no DOM/marker objects) and then only
+// Markers actually visible in the current viewport are constructed, via
+// index.getClusters(bbox, zoom) on every pan/zoom. Clustering stays accurate
+// at every zoom level (the index always covers all 160k trees) — panning
+// doesn't lose data, it's just computed on demand instead of all at once.
+let superIndex = null;
+let treeRows = null;
+let lookupData = null;
+const clusterLayer = L.layerGroup();
+
+function clusterIcon(count){
+  const size = count < 10 ? 30 : count < 100 ? 38 : count < 1000 ? 46 : 54;
+  return L.divIcon({
+    className: '',
+    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:rgba(66,96,74,0.88);border:2px solid rgba(234,227,210,0.55);display:flex;align-items:center;justify-content:center;color:#eae3d2;font-family:'Space Mono',monospace;font-size:${size>44?'0.82rem':'0.7rem'};font-weight:700;">${count.toLocaleString()}</div>`,
+    iconSize: [size,size],
+    iconAnchor: [size/2, size/2]
+  });
+}
+
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function buildPopupHtml(row){
+  const species = lookupData.species[row.speciesIdx];
+  const borough = lookupData.boroughs[row.boroughIdx];
+  const details = [];
+  if(row.height) details.push(`${row.height}m tall`);
+  if(row.canopy) details.push(`${row.canopy}m canopy`);
+  if(row.girth) details.push(`${row.girth}cm girth`);
+  return `<div class="tree-popup">
+    <div class="name">${esc(species)}</div>
+    <div class="row">${esc(row.cat)} · ${esc(borough)}</div>
+    ${details.length ? `<div class="row">${esc(details.join(', '))}</div>` : ''}
+    ${row.climate ? `<div class="row">2090 climate suitability: ${esc(row.climate)}</div>` : ''}
+    <div class="id">Tree ID ${esc(row.id)} (GLA London Datastore)</div>
+  </div>`;
+}
+
+// Re-renders only what's in the current viewport. Cheap enough (sub-frame)
+// to just clear and rebuild the layer every time rather than diffing.
+function updateClusters(){
+  if(!superIndex) return;
+  const b = map.getBounds();
+  const bbox = [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()];
+  const zoom = Math.round(map.getZoom());
+  const clusters = superIndex.getClusters(bbox, zoom);
+  clusterLayer.clearLayers();
+  for(const c of clusters){
+    const [lon, lat] = c.geometry.coordinates;
+    if(c.properties.cluster){
+      const count = c.properties.point_count;
+      const clusterId = c.properties.cluster_id;
+      const marker = L.marker([lat, lon], { icon: clusterIcon(count) });
+      marker.on('click', () => {
+        const expansionZoom = Math.min(superIndex.getClusterExpansionZoom(clusterId), 18);
+        map.setView([lat, lon], expansionZoom);
+      });
+      clusterLayer.addLayer(marker);
+    } else {
+      const row = treeRows[c.properties.i];
+      const marker = L.marker([lat, lon], { icon: treeIcon(LOCATION_COLORS[row.cat] || LOCATION_COLORS['Other']) });
+      marker.bindPopup(() => buildPopupHtml(row));
+      clusterLayer.addLayer(marker);
+    }
+  }
+}
+
+let userMarker = null;
+
+function initUserLocation(){
+  if(!navigator.geolocation) return;
+  navigator.geolocation.watchPosition(
+    pos => {
+      const latlng = [pos.coords.latitude, pos.coords.longitude];
+      if(!userMarker){
+        userMarker = L.marker(latlng, {
+          icon: L.divIcon({ className:'', html:'<div class="user-dot"></div>', iconSize:[16,16], iconAnchor:[8,8] }),
+          zIndexOffset: 1000
+        }).addTo(map);
+        const [s, w, n, e] = AREA;
+        if(latlng[0] >= s && latlng[0] <= n && latlng[1] >= w && latlng[1] <= e) map.setView(latlng, 16, { animate: false });
+      } else {
+        userMarker.setLatLng(latlng);
+      }
+    },
+    err => console.error('geolocation failed on map page', err),
+    { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 }
+  );
+}
+
+function parseCSV(text){
+  // Same parser as the main dashboard, for the same pipe-delimited format
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for(let i=0; i<text.length; i++){
+    const c = text[i];
+    if(c === '\n'){ row.push(field); rows.push(row); row = []; field=''; }
+    else if(c === '\r'){ /* skip */ }
+    else { field += c; }
+  }
+  if(field.length || row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r => r.length && r[0].length);
+}
+
+// Only extracts lat/lon/category (for the spatial index + dot color) plus a
+// row of the remaining fields (for lazy popup lookup by index) -- no Leaflet
+// Marker/Popup objects are constructed here at all. Batched via
+// requestAnimationFrame purely so the progress bar can paint and the page
+// stays responsive; the per-row work itself is cheap (no DOM/Leaflet object
+// construction), so this phase alone is a small fraction of the old load time.
+function parseTreesInBatches(lines, lookup, onProgress){
+  return new Promise(resolve => {
+    const points = new Array(lines.length);
+    const rows = new Array(lines.length);
+    const BATCH_SIZE = 8000;
+    let idx = 0, count = 0;
+
+    function processBatch(){
+      const end = Math.min(idx + BATCH_SIZE, lines.length);
+      for(; idx < end; idx++){
+        const p = lines[idx].split('|');
+        const lat = parseFloat(p[1]), lon = parseFloat(p[2]);
+        if(isNaN(lat) || isNaN(lon)) continue;
+        const cat = lookup.locations[+p[4]] || 'Other';
+        points[count] = { type:'Feature', properties:{ i: count }, geometry:{ type:'Point', coordinates:[lon, lat] } };
+        rows[count] = { id:p[0], speciesIdx:+p[3], cat, boroughIdx:+p[5], climate:p[6]||null, height:p[7]||null, canopy:p[8]||null, girth:p[9]||null };
+        count++;
+      }
+      onProgress(idx, lines.length);
+      if(idx < lines.length){
+        requestAnimationFrame(processBatch);
+      } else {
+        points.length = count;
+        rows.length = count;
+        resolve({ points, rows });
+      }
+    }
+    requestAnimationFrame(processBatch);
+  });
+}
+
+async function loadTrees(){
+  const statusEl = document.getElementById('statusPill');
+  const loadText = document.getElementById('loadText');
+  const loadBarFill = document.getElementById('loadBarFill');
+  document.getElementById('loadOverlay').classList.add('visible');
+  try{
+    const [dataText, lookup] = await Promise.all([
+      fetch('trees-data.txt').then(r => { if(!r.ok) throw new Error('http '+r.status); return r.text(); }),
+      fetch('trees-lookup.json').then(r => { if(!r.ok) throw new Error('http '+r.status); return r.json(); })
+    ]);
+    lookupData = lookup;
+    const lines = dataText.split('\n').filter(l => l.length);
+    statusEl.textContent = `${lines.length.toLocaleString()} trees`;
+
+    const { points, rows } = await parseTreesInBatches(lines, lookup, (done, total) => {
+      const pct = Math.round((done/total)*85);
+      loadBarFill.style.width = pct + '%';
+      loadText.textContent = `Reading trees… ${done.toLocaleString()} / ${total.toLocaleString()}`;
+    });
+    treeRows = rows;
+
+    loadText.textContent = 'Indexing trees…';
+    loadBarFill.style.width = '92%';
+    // maxZoom:17 matches the old disableClusteringAtZoom:17 -- points stop
+    // clustering and render individually beyond that zoom.
+    superIndex = new Supercluster({ radius: 60, maxZoom: 17 }).load(points);
+
+    loadBarFill.style.width = '100%';
+    map.addLayer(clusterLayer);
+    updateClusters();
+    setTimeout(() => document.getElementById('loadOverlay').classList.remove('visible'), 300);
+  }catch(e){
+    statusEl.textContent = 'Failed to load tree data';
+    console.error('tree map data load failed', e);
+    document.getElementById('loadOverlay').classList.remove('visible');
+  }
+}
+
+map.on('moveend', updateClusters);
+
+// If the dashboard passed coordinates via URL, centre there immediately
+// rather than waiting for this page's own (possibly slower) GPS fix.
+const params = new URLSearchParams(window.location.search);
+const qLat = parseFloat(params.get('lat'));
+const qLng = parseFloat(params.get('lng'));
+if(!isNaN(qLat) && !isNaN(qLng)){
+  map.setView([qLat, qLng], 15, { animate: false });
+}
+
+// Leaflet measures its container's pixel size at init time -- if the tab
+// isn't actually visible/composited yet at that moment (backgrounded tab,
+// PWA restored from background, etc.) it can cache a 0x0 size, which would
+// make updateClusters()'s getBounds() calls return a degenerate box and
+// silently show zero trees. Cheap enough to just always re-check on load
+// and whenever the tab becomes visible again.
+map.whenReady(() => map.invalidateSize());
+document.addEventListener('visibilitychange', () => {
+  if(!document.hidden) map.invalidateSize();
+});
+
+initUserLocation();
+loadTrees();
+
+document.getElementById('aboutBtn').addEventListener('click', () => {
+  const box = document.getElementById('about'); box.hidden = !box.hidden;
+  document.getElementById('aboutBtn').setAttribute('aria-expanded', String(!box.hidden));
+});
+document.getElementById('aboutClose').addEventListener('click', () => {
+  document.getElementById('about').hidden = true;
+  document.getElementById('aboutBtn').setAttribute('aria-expanded', 'false');
+});
+</script>
+</body>
+</html>
