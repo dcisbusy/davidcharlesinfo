@@ -13,6 +13,7 @@ import collections
 import datetime
 import html
 import json
+import math
 import os
 import re
 from urllib.parse import quote
@@ -162,6 +163,13 @@ def load_stories(issues, entries):
 
 # ---------------------------------------------------------------- places and the map
 
+def _km(la1, lo1, la2, lo2):
+    p = math.pi / 180
+    a = (math.sin((la2 - la1) * p / 2) ** 2
+         + math.cos(la1 * p) * math.cos(la2 * p) * math.sin((lo2 - lo1) * p / 2) ** 2)
+    return 12742 * math.asin(math.sqrt(a))
+
+
 def find_places(stories, over):
     gaz = json.load(open("data/places.json", encoding="utf-8"))
     places, broad, skip = gaz["places"], set(gaz["broad"]) | {"London"}, set(gaz["skip_words"])
@@ -178,12 +186,27 @@ def find_places(stories, over):
             s["place"] = over["places"][s["url"]] or None
             continue
         score = collections.Counter()
-        title, body = not_re.sub(" ", s["title"]), not_re.sub(" ", s["text"])
+        title, body = (not_re.sub(" ", t.replace("İ", "I").replace("ı", "i")) for t in (s["title"], s["text"]))
         for n in any_re.findall(title) + ctx_re.findall(title):
             score[n] += 6
         if re.search(r"(?:^|[\s:,–-])(" + "|".join(re.escape(n) for n in skip) + r")\s*[–:,-]", title + ":"):
             for n in re.findall(r"(?:^|[\s:,–-])(" + "|".join(re.escape(n) for n in skip) + r")(?=\s*[–:,-])", title + ":"):
                 score[n] += 6
+        # "Greetings from Perth", "a warm welcome from Thessaloniki", "coming to you live from Paris": where the
+        # story was written from. A named place there almost always wins; "the Palace" is home (Crystal Palace),
+        # a weaker hint because those issues are often about somewhere else.
+        g = re.search(r"(?i)\b(?:greetings|welcome|hello|writing|dispatch(?:es)?|postcard|coming to you(?: live)?)"
+                      r"(?:,)?\s+(?:\w+\s+){0,2}?from\b(.{0,90})", body[:400])
+        where = re.split(r"[.;:!?(—–]", g.group(1))[0] if g else ""
+        if re.search(r"(?i)\b(?:train|carriage|drive|flight|plane|bus|road|ferry)\b", where):
+            where = ""                                     # "a train rushing to London" says nothing
+        opened = set()
+        if where:
+            opened = set(body_re.findall(where) + ctx_re.findall(" in " + where))
+            for n in opened:
+                score[n] += 12
+            if re.match(r"\s+the Palace\b(?! of)", where) and "Crystal Palace" in places:
+                score["Crystal Palace"] += 3
         lead = body[:700]
         for n in body_re.findall(lead) + ctx_re.findall(lead):
             score[n] += 2
@@ -191,10 +214,24 @@ def find_places(stories, over):
             score[n] += 1
         for n, c in score.items():
             mentions[n] += 1
-        specific = [(c, n) for n, c in score.items() if n not in broad]
+        # A place gains half the score of every other mentioned place within 200 km (countries and regions
+        # included), so a story full of Scottish places isn't pinned to one passing mention of Amsterdam.
+        def cluster(n):
+            la, lo = places[n]
+            near = sum(c for m, c in score.items() if m != n and m in places and m != "London"
+                       and _km(la, lo, *places[m]) <= 200)
+            return score[n] + near / 2
+        specific = [(cluster(n), score[n], n) for n in score if n not in broad and n in places]
+        specific = [(cl, n) for cl, own, n in specific if own >= 3]
         general = [(c, n) for n, c in score.items() if n in broad]
         best = max(specific) if specific else None
-        if best and best[0] >= 3:
+        # A country or region the story is plainly about beats a passing mention of a specific place
+        # ("My Albanian Love Affair" is about Albania, not the one line about Dartmoor).
+        if best and general:
+            gbest = max(general)
+            if (gbest[1] != "London" or gbest[1] in opened) and gbest[0] >= 8 and score[best[1]] < 6 and gbest[0] >= 3 * score[best[1]]:
+                best = None
+        if best:
             s["place"] = best[1]
         elif general and max(general)[0] >= 6:
             s["place"] = max(general)[1]

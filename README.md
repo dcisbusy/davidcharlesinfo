@@ -140,7 +140,7 @@ makes no commit.
 | **Blog archive** | `/blog-archive/` | Pages, the full category tree, years, and every post. |
 | **Start here** | `/start-here/` | Hand-picked stories from `data/start-here.json`. |
 | **Series** | `/series/` | 12 trails such as Cycling to the Sahara and Thighs of Steel, defined in `data/series.json` by blog category, title pattern and/or an `include` list of individual blog or newsletter stories. Each part shows a photo, chosen automatically (skipping stock headers used across many posts), and each blog post in a series shows a "Part n of N" box. `cover` sets a series' main photo. |
-| **Map** | `/map/` | Story text is scanned for places in `data/places.json`. Common false alarms (Geneva Convention, Isaiah Berlin, HMS Belfast…) are excluded. Pins use OpenStreetMap tiles and a self-hosted copy of Leaflet. |
+| **Map** | `/map/` | Story text is scanned for places in `data/places.json`. Each place scores points: a mention in the title (6), in the "Greetings from…" / "coming to you live from…" opener (12; "from the Palace" counts as Crystal Palace, weakly), in the first paragraphs (2) and anywhere else (1). A place also gets half the points of other places within 200 km, so a story full of Scottish places isn't pinned to one passing mention of Amsterdam. A country or region the story is plainly about beats a single passing mention of a town. Common false alarms (Geneva Convention, Isaiah Berlin, HMS Belfast…) are excluded. Pins use OpenStreetMap tiles and a self-hosted copy of Leaflet. |
 | **On this day** | homepage panel | Stories published on today's date in earlier years, from `assets/on-this-day.json`. |
 | **20 years in numbers** | `/numbers/` | Posts and words per year, top places and more. Newsletter word counts come from the export, so issues after 10 October 2026 aren't counted until the export is refreshed. |
 | **Photo wall** | `/photos/` | One photo per story, linking to the story. |
@@ -178,7 +178,9 @@ build runs by itself afterwards and the live site updates a couple of minutes la
   from another post.
 - **Fix a wrong map pin:** add the phrase to `not_places` or `skip_words` in
   `data/places.json`, or add a per-story correction under `places` in
-  `data/story-overrides.json`.
+  `data/story-overrides.json` (story address → place name, or `""` to keep it off the
+  map). A place that isn't in the gazetteer yet needs adding to `places.json` first.
+  The November 2026 check corrected about 70 pins this way and with the scoring rules.
 - **Mark a blog post as (not) a copy of a newsletter issue:** use `duplicates` /
   `not_duplicates` in `data/story-overrides.json`.
 - **Add or edit a series:** `data/series.json`. Add a story with its address in `include`, remove one with `exclude`.
@@ -312,7 +314,7 @@ build runs by itself afterwards and the live site updates a couple of minutes la
 - A few very old posts link to images or files on services that no longer exist (e.g.
   Windows Live file storage). They show as broken images or dead links.
 - Map pins come from automatic text matching, so the odd wrong pin may still turn up. Fix
-  it via `data/places.json`.
+  it via `data/places.json` or `data/story-overrides.json` (see above).
 - "Listen" quality varies with the device's built-in voices.
 - GitHub Pages can't send custom security headers. The site has no forms or logins, so the
   risk is small.
