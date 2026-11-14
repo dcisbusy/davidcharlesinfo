@@ -102,7 +102,15 @@ NAV = [("/start-here/", "Start here"), ("/newsletter-archive/", "Newsletter"), (
        ("/series/", "Series"), ("/map/", "Map"), ("/photos/", "Photos"), ("/search/", "Search")]
 
 
-def page(title, description, path, body, current=None, image=None, kind="website", noindex=False):
+# Search Console: paste the content="..." code Google gives for the HTML-tag method here.
+GOOGLE_VERIFICATION = ""
+BING_VERIFICATION = ""
+PERSON = {"@type": "Person", "name": "David Charles", "url": SITE + "/",
+          "sameAs": [SUBSTACK, "https://twitter.com/dcisbusy"]}
+
+
+def page(title, description, path, body, current=None, image=None, kind="website", noindex=False,
+         published=None, schema=None):
     nav = "".join(
         f'<a href="{u}"{" aria-current=" + chr(34) + "page" + chr(34) if u == current else ""}>{esc(t)}</a>'
         for u, t in NAV)
@@ -139,6 +147,32 @@ def page(title, description, path, body, current=None, image=None, kind="website
                  '<meta name="twitter:card" content="summary_large_image">']
     if noindex:
         head.append('<meta name="robots" content="noindex">')
+    if GOOGLE_VERIFICATION and path == "/":
+        head.append(f'<meta name="google-site-verification" content="{esc(GOOGLE_VERIFICATION)}">')
+    if BING_VERIFICATION and path == "/":
+        head.append(f'<meta name="msvalidate.01" content="{esc(BING_VERIFICATION)}">')
+    # Structured data (schema.org) so search engines understand what each page is
+    card_url = f"{SITE}/{card}" if os.path.exists(card) else (
+        (image if image.startswith("http") else SITE + image) if image else None)
+    if schema is None and kind == "article":
+        schema = {"@context": "https://schema.org", "@type": "BlogPosting",
+                  "headline": re.sub(r" \| David Charles$", "", title)[:110], "description": description,
+                  "url": SITE + path, "mainEntityOfPage": SITE + path, "author": PERSON, "publisher": PERSON,
+                  "inLanguage": "en-GB"}
+        if published:
+            schema["datePublished"] = published
+        if card_url:
+            schema["image"] = card_url
+    elif schema is None and path == "/":
+        schema = {"@context": "https://schema.org", "@graph": [
+            {"@type": "WebSite", "name": "David Charles", "url": SITE + "/", "inLanguage": "en-GB",
+             "author": PERSON,
+             "potentialAction": {"@type": "SearchAction", "target": SITE + "/search/?q={search_term_string}",
+                                 "query-input": "required name=search_term_string"}},
+            dict(PERSON, description=description)]}
+    if schema and not noindex:
+        js = json.dumps(schema, ensure_ascii=False).replace("</", "<\\/")
+        head.append(f'<script type="application/ld+json">{js}</script>')
     if GOATCOUNTER:
         head.append(f'<script data-goatcounter="https://{GOATCOUNTER}.goatcounter.com/count" async '
                     'src="//gc.zgo.at/count.js"></script>')
@@ -332,6 +366,34 @@ except (OSError, ValueError):
     DEAD = {}
 
 
+# Image descriptions (alt text) for photos that had none, from data/alt-text.json: {image src: description}
+try:
+    ALT_TEXT = json.load(open("data/alt-text.json", encoding="utf-8"))
+except (OSError, ValueError):
+    ALT_TEXT = {}
+
+
+def add_alt_text(content):
+    """Give images with a missing or filename-style alt their description from data/alt-text.json."""
+    if not ALT_TEXT:
+        return content
+
+    def fix(m):
+        tag = m.group(0)
+        src = re.search(r'\ssrc="([^"]+)"', tag)
+        if not src or src.group(1) not in ALT_TEXT:
+            return tag
+        alt = re.search(r'\salt="([^"]*)"', tag)
+        stem = os.path.splitext(os.path.basename(src.group(1)))[0].lower()
+        current = alt.group(1).strip() if alt else ""
+        if current and not (re.sub(r"[\W_]+", "", current.lower()) in re.sub(r"[\W_]+", "", stem)
+                            or current.lower() in ("image", "photo", "picture")):
+            return tag                        # already has a real description
+        new = f' alt="{esc(ALT_TEXT[src.group(1)])}"'
+        return tag.replace(alt.group(0), new, 1) if alt else tag.replace("<img", "<img" + new, 1)
+    return re.sub(r"<img\b[^>]*>", fix, content)
+
+
 def archive_links(content):
     """Point dead links at their Wayback Machine copy: images use the raw-image form (im_), embedded
     players the frame form (if_), ordinary links the normal page. Safe to run again on its own output."""
@@ -370,7 +432,7 @@ def wrap_entry(e, older, newer, extra=None):
     if not m:
         print("No <!--content:start--> marker in", path, "- left as it is")
         return
-    content = archive_links(m.group(1))
+    content = add_alt_text(archive_links(m.group(1)))
     c = COMMENTS_RE.search(s)
     comments = c.group(1) if c else ""
 
@@ -418,7 +480,8 @@ def wrap_entry(e, older, newer, extra=None):
     body.append("</article>")
     description = e.get("excerpt") or e["title"]
     write_if_changed(path, page(f'{e["title"]} | David Charles', description, e["url"], "\n".join(body),
-                                image=e.get("image"), kind="article" if e["type"] == "post" else "website"))
+                                image=e.get("image"), kind="article" if e["type"] == "post" else "website",
+                                published=(e.get("date") or "")[:10] or None))
 
 
 def build_blog(entries, ctx=None):

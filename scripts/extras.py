@@ -17,7 +17,7 @@ import os
 import re
 from urllib.parse import quote
 
-from build import (MONTHS, SITE, SUBSTACK, TILE_COLOURS, chips, esc, file_for, nice, page, read, write_if_changed)
+from build import (MONTHS, PERSON, SITE, SUBSTACK, TILE_COLOURS, chips, esc, file_for, nice, page, read, write_if_changed)
 
 STOP = set("""
 a about above after again against all am an and any are aren't as at be because been before being below between both
@@ -730,8 +730,14 @@ def build_books(series_list):
                 '<aside class="newsletter-box"><h2>Liked it?</h2><p>Every Friday I send a short story about '
                 'adventure, nature and being human. Join the readers of my newsletter.</p><p><a class="button primary" '
                 'href="https://davidcharles.substack.com/subscribe">Subscribe free</a></p></aside>')
+        book_schema = {"@context": "https://schema.org", "@type": "Book", "name": b["title"],
+                       "alternativeHeadline": b["subtitle"], "description": b["description"],
+                       "author": PERSON, "url": f"{SITE}/{d}/", "image": f"{SITE}/{d}/cover.jpg",
+                       "inLanguage": "en-GB", "isAccessibleForFree": True, "bookFormat": "https://schema.org/EBook",
+                       "offers": {"@type": "Offer", "price": "0", "priceCurrency": "GBP"}}
         write_if_changed(f"{d}/index.html", page(f'{b["title"]}: free ebook | David Charles', b["description"],
-                                                 f"/{d}/", body, image=f"/{d}/cover.jpg", noindex=bool(b.get("draft"))))
+                                                 f"/{d}/", body, image=f"/{d}/cover.jpg", noindex=bool(b.get("draft")),
+                                                 schema=book_schema))
         if b.get("draft"):
             continue
         cards.append(f'<li><a href="/{d}/"><img src="/{d}/cover-small.jpg" alt="" width="300" height="424" '

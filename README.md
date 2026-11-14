@@ -159,6 +159,8 @@ makes no commit.
 | **Work with me** | `/work-with-me/` | Words in `data/work-with-me.html`. Hidden from search engines and unlinked while its first line says DRAFT. |
 | **Dead links** | old posts | `scripts/linkcheck.py` runs monthly on GitHub (*Actions → Check links*). Dead outside links get their Internet Archive copy, listed in `data/dead-links.json`; delete an entry to have it rechecked. |
 | **Share cards** | every post and page | A 1200×630 picture (the story's photo with its title, or a cream card when there's no photo) shown when a link is shared on WhatsApp, Bluesky, Facebook, LinkedIn and so on. Made by `scripts/make_cards.py` and kept in `cards/`; the build uses a page's card when one exists. Run `python3 scripts/make_cards.py` after adding pages or changing titles (it only redraws what changed). |
+| **Image descriptions** | old posts | Over 800 photos that had no description now have one (alt text), read aloud by screen readers and used by search engines. Written by looking at each photo alongside its post and caption. Kept in `data/alt-text.json` (image address → description); the build adds them to any image with a missing or filename-style description. Edit a description there. |
+| **Search engines** | every page | `sitemap.xml` and `robots.txt`; canonical links; schema.org structured data (articles, the site and its author, free books); share cards. Changed pages are reported to Bing and other IndexNow engines after each build (`scripts/indexnow.py`, key file `<key>.txt` in the root). Search Console verification codes go in `GOOGLE_VERIFICATION` / `BING_VERIFICATION` at the top of `scripts/build.py`. |
 | **Old comments** | old posts | Shown as they were. New comments aren't possible; readers are pointed to Substack. |
 
 ---
@@ -266,6 +268,9 @@ build runs by itself afterwards and the live site updates a couple of minutes la
 ## 9. Outstanding questions and to-dos
 
 **For David to do (needs your logins):**
+
+- **Google Search Console** (search.google.com/search-console): add the property `https://davidcharles.info` using the **URL prefix** method and the **HTML tag** option; copy the code from `content="…"` into `GOOGLE_VERIFICATION` in `scripts/build.py` (or send it to Claude); then press Verify and submit `https://davidcharles.info/sitemap.xml` under Sitemaps. Once HTTPS is enforced, use the https address.
+- **Bing Webmaster Tools** (bing.com/webmasters): sign in and choose *Import from Google Search Console*. No code needed.
 
 1. **Ask GitHub Support to purge cached data** from the history rewrites (November 2026). GitHub keeps
    rewritten commits reachable by ID until Support removes them. Use their "remove

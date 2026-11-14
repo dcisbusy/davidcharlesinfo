@@ -39,6 +39,9 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Note where we started
+        run: echo "START=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
       - name: Build the site
         run: python scripts/build.py
 
@@ -62,3 +65,11 @@ jobs:
             git commit -m "Rebuild site"
             git pull --rebase -X theirs origin main && git push
           fi
+
+      - name: Tell search engines about changed pages (IndexNow)
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          OLD="$START"
+          if [ -n "$BEFORE" ] && git cat-file -e "$BEFORE" 2>/dev/null; then OLD="$BEFORE"; fi
+          python scripts/indexnow.py "$OLD" HEAD || true
