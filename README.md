@@ -149,6 +149,13 @@ makes no commit.
 | **Listen to this post** | posts over ~150 words | The browser's own text-to-speech, preferring a British voice. Nothing is sent anywhere. Hidden on browsers that can't do it. |
 | **RSS feed** | `/feed.xml` | The latest 40 stories (newsletter and blog, without duplicates). |
 | **Analytics** | everywhere | [GoatCounter](https://www.goatcounter.com): no cookies, no personal data. See §9: the account still needs creating. |
+| **Free ebooks** | `/books/` | Series turned into EPUB and PDF books by `scripts/make_ebook.py` (run by hand, not nightly), with details in `data/books.json`. The first is *Cycling to the Sahara*. |
+| **Twenty-year timeline** | `/timeline/` | Each year's milestones (`data/timeline.json`), series that began, story counts and up to three photos. |
+| **Pick me a story** | `/random-story/` | Choose a reading time (2, 5, 10, 20+ minutes) and a topic; picks from `assets/stories.json`. Homepage links like `/random-story/?m=5` preselect a time. |
+| **Carry on reading** | series pages, homepage | Remembers the furthest part of each series you've read, in your own browser only. |
+| **Sign-up box** | end of posts | "Subscribe free" opens Substack's own form in place; nothing loads from Substack until it's tapped. Shows the latest issue from `assets/latest.json`. Links carry `utm_source=davidcharles.info` so Substack's stats show sign-ups from the archive. |
+| **Work with me** | `/work-with-me/` | Words in `data/work-with-me.html`. Hidden from search engines and unlinked while its first line says DRAFT. |
+| **Dead links** | old posts | `scripts/linkcheck.py` runs monthly on GitHub (*Actions → Check links*). Dead outside links get their Internet Archive copy, listed in `data/dead-links.json`; delete an entry to have it rechecked. |
 | **Old comments** | old posts | Shown as they were. New comments aren't possible; readers are pointed to Substack. |
 
 ---
@@ -171,6 +178,9 @@ build runs by itself afterwards and the live site updates a couple of minutes la
   `not_duplicates` in `data/story-overrides.json`.
 - **Add or edit a series:** `data/series.json`. Add a story with its address in `include`, remove one with `exclude`.
 - **Change the Start here picks:** `data/start-here.json`.
+- **Add timeline milestones:** `data/timeline.json`. Keep a photo off the timeline, photo wall and series pages by adding a word from its file name to `skip_photos`.
+- **Make another ebook:** add an entry to `data/books.json` (copy the Sahara one), then run `python3 scripts/make_ebook.py <slug>` on a computer with pandoc and Google Chrome, and commit the `books/<slug>/` folder.
+- **Publish the Work with me page:** edit `data/work-with-me.html` and delete the word DRAFT from its first line.
 - **Change colours or fonts:** `assets/site.css`. The colours are CSS variables at the top,
   with a separate dark block. After changing `site.css` or `site.js`, bump `CSS_VERSION`
   in `scripts/build.py` so browsers fetch the new file.

@@ -324,19 +324,29 @@ except (OSError, ValueError):
 
 
 def archive_links(content):
-    """Point dead links at their Wayback Machine copy (images use the raw-image form)."""
+    """Point dead links at their Wayback Machine copy: images use the raw-image form (im_), embedded
+    players the frame form (if_), ordinary links the normal page. Safe to run again on its own output."""
     if not DEAD:
         return content
 
-    def fix(m):
-        attr, url = m.group(1), m.group(2)
-        arc = DEAD.get(url.replace("&amp;", "&"))
-        if not arc:
-            return m.group(0)
-        if attr == "src":
-            arc = re.sub(r"(/web/\d+)(/)", r"\1im_\2", arc, count=1)
-        return f'{attr}="{esc(arc)}"'
-    return re.sub(r'\b(href|src)="(https?://[^"\s]+)"', fix, content)
+    def fix_tag(t):
+        tag = t.group(1).lower()
+
+        def fix(m):
+            attr, url = m.group(1), m.group(2).replace("&amp;", "&")
+            arc_m = re.match(r"https://web\.archive\.org/web/(\d+)(?:im_|if_)?/(https?://.+)$", url)
+            orig = arc_m.group(2) if arc_m else url
+            arc = DEAD.get(orig)
+            if not arc:
+                return m.group(0)
+            if attr == "src":
+                flag = "im_" if tag == "img" else "if_" if tag in ("iframe", "embed") else ""
+                arc = re.sub(r"(/web/\d+)(?:im_|if_)?(/)", r"\1" + flag + r"\2", arc, count=1)
+            return f'{attr}="{esc(arc)}"'
+        return re.sub(r'\b(href|src)="(https?://[^"\s]+)"', fix, t.group(0))
+    return re.sub(r"<(\w+)\b[^>]*>", fix_tag, content)
+
+
 COMMENTS_RE = re.compile(r"<!--comments:start-->(.*?)<!--comments:end-->", re.S)
 
 
