@@ -1,15 +1,18 @@
 name: Review photo sheets (one-off)
 on: workflow_dispatch
 permissions:
-  contents: read
+  contents: write
 jobs:
   sheets:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
       - run: pip install pillow && mkdir review-sheets && python .github/review/sheets.py
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
-        with:
-          name: review-sheets
-          path: review-sheets/
-          retention-days: 3
+      - name: Put the sheets on a throwaway branch
+        run: |
+          cd review-sheets
+          git init -q -b review-sheets
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add . && git commit -qm "Photo sheets for review (throwaway)"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" review-sheets
