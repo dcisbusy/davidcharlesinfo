@@ -35,7 +35,7 @@ os.chdir(ROOT)
 SITE = "https://davidcharles.info"
 SUBSTACK = "https://davidcharles.substack.com"
 GOATCOUNTER = "davidcharles"    # GoatCounter site code (davidcharles.goatcounter.com). Set to "" to switch stats off.
-CSS_VERSION = "13"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
+CSS_VERSION = "14"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
 
 NEWSLETTER_DATA = "newsletter-archive/posts.json"
 BLOG_DATA = "blog-archive/index.json"
@@ -185,8 +185,11 @@ def page(title, description, path, body, current=None, image=None, kind="website
         js = json.dumps(schema, ensure_ascii=False).replace("</", "<\\/")
         head.append(f'<script type="application/ld+json">{js}</script>')
     if GOATCOUNTER:
-        head.append(f'<script data-goatcounter="https://{GOATCOUNTER}.goatcounter.com/count" async '
-                    'src="//gc.zgo.at/count.js"></script>')
+        # Visitor stats, except in a browser where the site editor is switched on: that keeps David's own
+        # visits out of the stats and keeps any outside script away from the editor's GitHub key.
+        head.append("<script>try{if(!localStorage.getItem('dc-edit-token')){var g=document.createElement('script');"
+                    f"g.async=true;g.src='//gc.zgo.at/count.js';g.dataset.goatcounter='https://{GOATCOUNTER}.goatcounter.com/count';"
+                    "document.head.appendChild(g);}}catch(e){}</script>")
     return ("\n".join(head) + "\n</head>\n<body>\n<main>\n"
             f'<nav class="top"><a class="name" href="/">David Charles</a>{nav}'
             '<button class="theme-toggle" type="button">Dark</button></nav>\n'
@@ -612,7 +615,7 @@ def build_home(issues, posts, extra="", minutes=None):
         with open(INTRO, "w", encoding="utf-8") as f:
             f.write("<!-- Edit the words below. This becomes the top of the homepage. -->\n"
                     "<h1>Hello, I'm David Charles</h1>\n<p>Write something here.</p>\n")
-    intro = re.sub(r"<!--.*?-->\s*", "", read(INTRO), flags=re.S).strip()
+    intro = re.sub(r"<!--(?!content:).*?-->\s*", "", read(INTRO), flags=re.S).strip()   # keep the editor markers
     h1 = re.search(r"<h1>(.*?)</h1>", intro, re.S)
     rest = intro.replace(h1.group(0), "", 1).strip() if h1 else intro
     hero = (f'<header class="sh-hero home-hero"><img src="{HOME_HERO}" alt="" fetchpriority="high">'
@@ -631,7 +634,7 @@ def build_home(issues, posts, extra="", minutes=None):
         f'<li><a href="{u}"><img src="{img}" alt="" loading="lazy" decoding="async">'
         f'<span class="label">{esc(t)}</span></a></li>' for u, t, img in HOME_DOORS if os.path.exists(img.lstrip("/")))
     body = (hero + "\n"
-            f'<div class="intro home-intro">\n{rest}\n</div>\n'
+            f'<div class="intro home-intro" data-edit-file="{INTRO}">\n{rest}\n</div>\n'
             + latest + "\n"
             f'<ul class="sh-doors home-doors">{doors}</ul>\n'
             '<aside class="continue-home" hidden><h2 class="section">Carry on reading</h2><ul></ul></aside>\n'

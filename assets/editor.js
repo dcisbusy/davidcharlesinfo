@@ -11,7 +11,8 @@
   var token;
   try { token = localStorage.getItem("dc-edit-token"); } catch (e) { return; }
   if (!token) return;
-  var host = document.querySelector(".entry-content");
+  // a post's story, or a block that names its own source file (the homepage intro: data-edit-file)
+  var host = document.querySelector("[data-edit-file]") || document.querySelector(".entry-content");
   if (!host) return;
 
   function markers() {
@@ -27,8 +28,9 @@
 
   var path = decodeURIComponent(location.pathname).replace(/^\/+/, "");
   if (path && !/\/$/.test(path)) path += "/";
-  var file = path + "index.html";
-  var title = (document.querySelector(".entry-head h1") || document.querySelector("h1") || {}).textContent || file;
+  var file = host.getAttribute("data-edit-file") || path + "index.html";
+  var title = host.hasAttribute("data-edit-file") ? "homepage intro" :
+    ((document.querySelector(".entry-head h1") || document.querySelector("h1") || {}).textContent || file);
 
   // ---------- Look ----------
   var css = document.createElement("style");
