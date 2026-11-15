@@ -138,7 +138,7 @@ makes no commit.
 
 | Feature | Where | How it works |
 |---|---|---|
-| **Homepage** | `/` | A big photo (`HOME_HERO` in `scripts/build.py`) with your headline from `home-intro.html` and the Subscribe / Start here buttons; then the rest of your intro, the latest issue as a feature card, eight photo tiles into the site (`HOME_DOORS`: address, label, photo), the time picker, headline figures, On this day and every newsletter issue. |
+| **Homepage** | `/` | A big photo (`HOME_HERO` in `scripts/build.py`) with your headline from `home-intro.html` and the Subscribe / Start here buttons; then the rest of your intro, the latest issue as a feature card, eight photo tiles into the site (`HOME_DOORS`: address, label, photo), the time picker, headline figures, On this day (up to six stories from this date in past years, as photo cards; stories with no photo show their year) and every newsletter issue. |
 | **Newsletter archive** | `/newsletter-archive/` | Every issue by year, with cover image, date, reading time and excerpt. Paid issues are labelled. Links go to Substack. |
 | **Blog archive** | `/blog-archive/` | Pages, the full category tree, years, and every post. |
 | **Start here** | `/start-here/` | Hand-picked stories from `data/start-here.json`, laid out as a doorway: a big photo (`hero`), one photo tile per theme, then each theme's picks as photo cards with year and reading time, and tiles for the series, maps, timeline, story picker and ebooks. Photos come from each story automatically; add `"photo"` to an item or theme to choose one. Its share card uses the hero photo. |
