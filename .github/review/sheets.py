@@ -14,6 +14,9 @@ for it in items:
             im = Image.open(io.BytesIO(data)).convert("RGB"); break
         except Exception as e:
             print("fail", it["id"], t[:80], e)
+    if im:
+        import os; os.makedirs("review-sheets/photos", exist_ok=True)
+        t2 = im.copy(); t2.thumbnail((640, 640)); t2.save(f"review-sheets/photos/{it['id']}.jpg", quality=72)
     cells.append((it["id"], im))
 W, H, COLS, ROWS = 400, 300, 4, 4
 for n in range(0, len(cells), COLS * ROWS):
