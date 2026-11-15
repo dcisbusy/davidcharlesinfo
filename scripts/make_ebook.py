@@ -7,6 +7,7 @@ it runs on your own computer, not in the nightly build. Output goes to books/<sl
 like any other file. The build then makes the /books/ pages from data/books.json.
 """
 import html
+import html.entities
 import json
 import os
 import re
@@ -79,7 +80,46 @@ def cut_sections(c, pattern):
     return "".join(out)
 
 
-def clean(content, stock, book):
+LOCAL_COPY = re.compile(r"(?:davidcharles\.info|cyclingtosyria\.com)/(wp-content/uploads/[^?\s]+?)(?:\?|$)")
+BLOCK = re.compile(r"(<h3\b.*?</h3>|<p\b.*?</p>|<figure\b.*?</figure>|<blockquote\b.*?</blockquote>|<ul\b.*?</ul>|"
+                   r"<ol\b.*?</ol>|<img\b[^>]*>|<hr\s*/?>|<table\b.*?</table>|<pre\b.*?</pre>|<h4\b.*?</h4>)", re.S)
+
+
+def img_key(src):
+    return os.path.basename(html.unescape(src).split("?")[0])[:80]
+
+
+def plain(h):
+    return " ".join(html.unescape(re.sub(r"<[^>]+>", " ", h)).split())
+
+
+def apply_edits(body, edit):
+    """Cut the paragraphs and phrases listed for this chapter in data/book-edits.json."""
+    cuts = [c["text"] for c in edit.get("cut", []) if c.get("text")]   # whole text, or its first 70 characters
+    parts = BLOCK.split(body)
+    body = "".join(p for p in parts if not (BLOCK.fullmatch(p.strip() or "x") and plain(p)
+                                            and any(plain(p) == c or (len(c) >= 70 and plain(p).startswith(c))
+                                                    for c in cuts)))
+    for phrase in edit.get("cut_text", []):
+        # the phrase as plain text; in the HTML a character may be an entity and tags may sit between words
+        def ch(c):
+            if c.isalnum() or c == " ":
+                return re.escape(c)
+            alts = [re.escape(c), f"&#{ord(c)};", f"&#x{ord(c):x};"]
+            if ord(c) in html.entities.codepoint2name:
+                alts.append(f"&{html.entities.codepoint2name[ord(c)]};")
+            return "(?:" + "|".join(alts) + ")"
+        gap = r"(?:\s|&nbsp;|&#160;|\xa0|<[^>]+>)+"
+        pat = r"\s?" + gap.join("".join(ch(c) for c in w) + r"(?:<[^>]+>)*" for w in phrase.split())
+        new = re.sub(pat, "", body, count=1)
+        if new == body:
+            print(f"  edit not found: {phrase[:60]}")
+        body = new
+    body = re.sub(r"<p>\s*</p>", "", body)
+    return body
+
+
+def clean(content, stock, book, cut_imgs=frozenset()):
     c = content
     c = re.sub(r"<span id=\"more-\d+\"></span>", "", c)
     # Substack furniture: buttons, icons, sign-up and share widgets, embeds
@@ -111,6 +151,11 @@ def clean(content, stock, book):
         alt = alt.group(1) if alt else ""
         if any(w in s for w in stock):
             return ""
+        if img_key(s) in cut_imgs:
+            return ""                       # a photo cut in data/book-edits.json
+        lm = LOCAL_COPY.search(s)           # an old WordPress photo we still have on disk
+        if lm and os.path.exists(re.sub(r"-\d+x\d+(?=\.\w+$)", "", lm.group(1))):
+            s = "/" + re.sub(r"-\d+x\d+(?=\.\w+$)", "", lm.group(1))
         if s.startswith(("http://", "https://")):
             local = fetch_image(s)
             return f'<img src="{local}" alt="{alt}">' if local else ""
@@ -119,6 +164,8 @@ def clean(content, stock, book):
             s = full
         if not s.startswith("/") or not os.path.exists(s.lstrip("/")):
             return ""                       # lost image
+        if img_key(s) in cut_imgs:
+            return ""
         return f'<img src="{os.path.abspath(s.lstrip("/"))}" alt="{alt}">'
     c = re.sub(r"<img\b[^>]*>", img, c)
     # unwrap image links
@@ -139,6 +186,24 @@ def clean(content, stock, book):
     return c.strip()
 
 
+def chapter_source(it, st):
+    """A chapter's HTML: the newsletter issue, unless the blog post is the fuller telling. Some 2016 issues
+    were only a teaser ('a short video…') for a blog post; the blog post is the story."""
+    def words(h):
+        return len(re.sub(r"<[^>]+>", " ", h or "").split())
+    blog = None
+    if it.get("blog_url") or not (st and st.get("html")):
+        try:
+            m = build.CONTENT_RE.search(open(build.file_for(it.get("blog_url") or it["url"]), encoding="utf-8").read())
+            blog = m.group(1) if m else None
+        except OSError:
+            blog = None
+    news = st.get("html") if st else None
+    if news and (not blog or words(news) >= 0.6 * words(blog)):
+        return news
+    return blog or news or ""
+
+
 def main(slug):
     books = json.load(open("data/books.json", encoding="utf-8"))["books"]
     book = next(b for b in books if b["slug"] == slug)
@@ -149,25 +214,31 @@ def main(slug):
     stock = book.get("skip_images", [])
     by_url = {s["url"]: s for s in stories}
     skip = set(book.get("skip_chapters", []))
+    # chapter-by-chapter edits (cut paragraphs, phrases, photos, whole chapters), applied once approved
+    try:
+        ed = json.load(open("data/book-edits.json", encoding="utf-8")).get(slug, {})
+    except OSError:
+        ed = {}
+    edits = ed.get("chapters", {}) if ed.get("approved") else {}
 
     chapters = []
     for it in sr["items"]:
         if it["url"] in skip or it.get("blog_url") in skip:
             continue
-        st = by_url.get(it["url"])
-        if st and st.get("html"):
-            content = st["html"]
-        else:
-            m = build.CONTENT_RE.search(open(build.file_for(it["blog_url"] or it["url"]), encoding="utf-8").read())
-            content = m.group(1)
+        edit = edits.get(it["url"], {})
+        if edit.get("drop"):
+            continue
+        content = chapter_source(it, by_url.get(it["url"]))
         title = re.sub(book["strip_prefix"], "", it["title"]) if book.get("strip_prefix") else it["title"]
-        title = re.sub(r"^#\d+:\s*", "", title)
-        body = clean(content, stock, book)
+        title = re.sub(r"^#\d+:?\s*", "", title)
+        body = clean(content, stock, book, {c["img"] for c in edit.get("cut", []) if c.get("img")})
         # newsletter issues repeat their own title as the first heading
         body = re.sub(r"^\s*<h3>\s*(?:<strong>)?" + re.escape(html.escape(it["title"], quote=False)) + r"(?:</strong>)?\s*</h3>",
                       "", body)
         body = re.sub(r"^\s*<h3>\s*" + re.escape(it["title"]) + r"\s*</h3>", "", body)
-        chapters.append((dict(it, title=title), body))
+        if edit:
+            body = apply_edits(body, edit)
+        chapters.append((dict(it, title=edit.get("title") or title), body))
 
     out = f"books/{slug}"
     os.makedirs(out, exist_ok=True)

@@ -1,0 +1,1902 @@
+{
+ "_about": "Chapter-by-chapter edits for the ebooks, made by scripts/make_ebook.py once a book's 'approved' is true. Keyed by chapter URL: drop (whole chapter, with the reason), title (new title from David's own words), cut (paragraphs by their opening words, photos by file name), cut_text (phrases cut inside a kept paragraph). Review pages: claude.ai artifacts 'Cycling towards Syria – proposed edit' and 'Thighs of Steel – proposed edit'.",
+ "cycling-towards-syria": {
+  "approved": false,
+  "chapters": {
+   "/adventure/cycle-touring/cycling-towards-syria/cycling-towards-syria/": {
+    "cut": [
+     {
+      "text": "( Link to Google Map of the route. )"
+     },
+     {
+      "text": "About Me"
+     },
+     {
+      "img": "Cycle-to-Charing-with-Claire-2015-08-01-026.jpg"
+     },
+     {
+      "text": "As you may know, I am a freelance writer with extensive cycle touring "
+     },
+     {
+      "text": "I’ve been writing and taking action on migration issues in Calais and "
+     },
+     {
+      "text": "I feel incredibly lucky to be able to take on a journey such as this b"
+     },
+     {
+      "text": "This will be my most ambitious story-telling expedition to date, and d"
+     },
+     {
+      "text": "Help!"
+     },
+     {
+      "text": "If this ride is going to be a success, then I’m going to need a lot of"
+     },
+     {
+      "text": "Encouragement: Follow me on Twitter , say hi, share this page, and the"
+     },
+     {
+      "text": "Logistics: I will be taking camping equipment, but would also love to "
+     },
+     {
+      "text": "If you or anyone you know lives on, or even remotely near the route, t"
+     },
+     {
+      "text": "Technology: The success of the story-telling element of this trip depe"
+     },
+     {
+      "text": "iPhone 5 or better (64gb minimum) iPod Touch 6 (64gb minimum) Front pa"
+     },
+     {
+      "text": "Even if you’re not sure how helpful you can be, please do get in touch"
+     }
+    ]
+   },
+   "/adventure/cycle-touring/cycling-towards-syria/grande-synthe-calais-compare-and-contrast/": {
+    "cut": [
+     {
+      "img": "Krakadorn-6-June-2015-FOX.jpg"
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/1230653_-snap-cooking-sudanese-halla-with-the-school-bus-project": {
+    "cut": [
+     {
+      "text": "Listen to Kate talk about her educational philosophy and the work The "
+     },
+     {
+      "text": "You can watch us making halla , a Sudanese beef stew, with the Darfuri"
+     }
+    ]
+   },
+   "/adventure/cycle-touring/story-of-the-day-23-an-unexpected-hill/": {
+    "cut": [
+     {
+      "img": "DSCF4205.jpg"
+     }
+    ]
+   },
+   "/adventure/cycle-touring/cycling-towards-syria/story-of-the-day-24-industrial-germany/": {
+    "cut": [
+     {
+      "img": "Krakadorn-6-June-2015-FOX.jpg"
+     }
+    ]
+   },
+   "/adventure/cycle-touring/cycling-towards-syria/25-heidelberg-helps/": {
+    "drop": "Retold, with the same people and quotes, in 'From containers to computers' a week later"
+   },
+   "/adventure/cycle-touring/cycling-towards-syria/on-the-walls-of-zollamtsstrasse-refugee-camp/": {
+    "cut": [
+     {
+      "img": "Krakadorn-6-June-2015-FOX.jpg"
+     }
+    ]
+   }
+  }
+ },
+ "thighs-of-steel": {
+  "approved": false,
+  "chapters": {
+   "https://davidcharles.substack.com/p/1396125_-22-thighs-of-steel": {
+    "title": "On the road",
+    "cut": [
+     {
+      "text": "THEME: CHALLENGE ANNEKA"
+     },
+     {
+      "text": "Happy Friday! Sunday! EXCUSES Sorry for missing my own Friday deadline"
+     },
+     {
+      "text": "IN THE MIND Over the last fifteen months, the idea of self-administere"
+     },
+     {
+      "img": "012eccf4-97c6-47f0-a443-92b3f628ac1f_640x360.png"
+     },
+     {
+      "text": "James Fadiman and Sophia Korb present their results to MAPS. 1 hour vi"
+     },
+     {
+      "text": "POSITIVE CONSTRAINTS: AN UPDATE A positive constraint is a conscious c"
+     },
+     {
+      "text": "NO EGO I've just completed the first ten (free) lessons on Headspace. "
+     },
+     {
+      "text": "NO SHAMPOO I haven't used shampoo for a couple of weeks. My hair doesn"
+     },
+     {
+      "text": "NO PANTS I did this once this week. A metal zip does not a pleasant fi"
+     },
+     {
+      "text": "All of us do these little experiments, you don't have to call them pos"
+     }
+    ],
+    "cut_text": [
+     "Stay tuned (or hook up with their news channels IG / FB ) for more info on how you can cheer them on their oily way. (Or just go straight on and sponsor the 80-odd cyclists!)"
+    ]
+   },
+   "https://davidcharles.substack.com/p/3287633_-74-thighs-of-steel": {
+    "cut": [
+     {
+      "text": "Happy Friday!"
+     },
+     {
+      "text": "PUBLIC SERVICE ANNOUNCEMENT This newsletter goes out to 118 beautiful "
+     },
+     {
+      "text": "If you'd rather not receive it - and that's cool, I unsubscribe from c"
+     },
+     {
+      "text": "SELF-DESTRUCT THIS EMAIL"
+     },
+     {
+      "img": "fd66a72a-6215-4e60-8169-53709bb9907e_639x1000.jpeg"
+     },
+     {
+      "text": "If you still haven't read Man's Search for Meaning by Victor Frankl, t"
+     },
+     {
+      "img": "ec306ed9-b67d-4f4f-abab-6fd3340b3b7c_1024x434.jpeg"
+     },
+     {
+      "text": "It's an aeriel photograph from the early 20th century - taken by a bir"
+     },
+     {
+      "text": "OUTPUT >> As you may have noticed, this mailing list is the engine roo"
+     },
+     {
+      "text": "It's a wonderful life - isn't it? (April) The Foiled Diaries: Everyone"
+     },
+     {
+      "text": "...COMING UP..."
+     },
+     {
+      "text": "More Psychedelic Breathwork on Monday Wednesday is the Champions Leagu"
+     },
+     {
+      "text": "LIKE WHAT YOU SEE? If you enjoy reading these weekly newsletters, then"
+     },
+     {
+      "text": "SHARE WITH A FRIEND"
+     },
+     {
+      "text": "Have excellent weekends, one and all - and try to find time for a fela"
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/3292721_-76-thighs-": {
+    "cut": [
+     {
+      "text": "Happy Friday!"
+     },
+     {
+      "text": "PUBLIC SERVICE ANNOUNCEMENT This newsletter goes out to 106 beautiful "
+     },
+     {
+      "text": "If you'd rather not receive it - and that's cool, I unsubscribe from c"
+     },
+     {
+      "text": "SELF-DESTRUCT THIS EMAIL"
+     },
+     {
+      "text": "OUTPUT >> As you may have noticed, this mailing list is the engine roo"
+     },
+     {
+      "text": "The Victor Frankl 5-a-day Book Club (May) Cycling to Syria – Back in t"
+     },
+     {
+      "text": "...COMING UP... After last weekend was officially anointed 'The Best W"
+     },
+     {
+      "text": "EUROVISION on Saturday. The very first Bike Project Social Cycle on Su"
+     }
+    ],
+    "cut_text": [
+     "Machynlleth Comedy Festival. Next year. Go. Mind you, it probably wouldn't have been nearly as much fun if there hadn't been a heatwave. Or, indeed, if there had been sufficient public transport for the thousands of festival goers who, come midnight, stampeded the entire cavalcade of hackney carriages in Western Wales (about 5). Other highlights included the contortionist comedy of Jordan Brookes , the thousand faces of Adam Scott-Rowley , and, naturellement, The Leak with Foiled producer Tom Price, James Acaster, Kiri Pritchard-Mclean and the ghost of Tom Allen. Oh and some jokes by me and Beth. But that's the past! What's coming up? I hear you bawl.",
+     "If you want to contribute some of your hard-earned to this cause , then you will have my undying gratitude. Thanks to a generous donation from Dave Charms, we're already 53% of the way towards raising my target of £1,000 and every penny goes straight to the library, language centre, kitchen, legal advice centre, music school and roof garden of Khora. If you'd rather not, then that's fine too. We all have our own concerns and cares. I'm just grateful that I can share mine with you here and I hope you enjoy my stories of the cycle this summer. I truly appreciate your eyeballs! Thank you!"
+    ]
+   },
+   "https://davidcharles.substack.com/p/3318321_-89-from-ljubljana-insha-allah-": {
+    "cut": [
+     {
+      "text": "Happy Friday!"
+     },
+     {
+      "img": "7f2f1a75-20f4-4d46-bc3a-47216e4e69f1_647x363.jpeg"
+     },
+     {
+      "text": ">> INPUT"
+     },
+     {
+      "text": "Buddhists in love by Lisa Feldman Barrett (Aeon). Big fan of hers. She"
+     },
+     {
+      "text": "OUTPUT >>"
+     },
+     {
+      "text": "Diavata Camp, Thessaloniki (August) How travel works on the mind (Augu"
+     },
+     {
+      "text": "...COMING UP..."
+     },
+     {
+      "text": "THIGHS OF STEEEEEEEL! I'll be cycling from Sunday to Friday, from Ljub"
+     },
+     {
+      "img": "f0b8fb79-a37b-49d8-a34b-33d8121fc3a3_1024x576.jpeg"
+     },
+     {
+      "text": "Catch up on Episode 1 here Catch Episode 2 on Monday 18:30 BST on BBC "
+     }
+    ],
+    "cut_text": [
+     "If you haven't already, now's the time to join us in supporting Khora with bear coin. Donors will be spared a whiff of my cycling shorts. The rest of you - I can't guarantee what you might find under your pillow one day ;)"
+    ]
+   },
+   "https://davidcharles.substack.com/p/3321877_-90-from-timisoara": {
+    "cut": [
+     {
+      "text": ">> INPUT"
+     },
+     {
+      "text": "Carbohydrates. Water (insufficient quantities). Trip in Bali, No Drugs"
+     },
+     {
+      "text": "OUTPUT >>"
+     },
+     {
+      "text": "The Victor Frankl 5-a-Day Book Cult: Day 15 (August) Abu Falafel (Augu"
+     },
+     {
+      "text": "...COMING UP..."
+     },
+     {
+      "text": "A heck of a lot of cycling. Everything's Queues, Episode 3 of Foiled ,"
+     },
+     {
+      "img": "e778c498-f31a-402d-bffa-dbce2551ad23_1024x576.jpeg"
+     },
+     {
+      "text": "Catch up on Episode 1 here Catch up on Episode 2 here Catch Episode 3 "
+     }
+    ],
+    "cut_text": [
+     "Thanks SO MUCH to everyone who has put money into the Khora pot ."
+    ]
+   },
+   "https://davidcharles.substack.com/p/3342909_-100-happy-hundred-": {
+    "cut": [
+     {
+      "img": "cbadf9c7-693c-41e4-a82d-bb755c67cf71_1024x683.jpeg"
+     },
+     {
+      "text": "Happy Friday!"
+     },
+     {
+      "text": "And welcome to the 100th weekly edition of this newsletter! Firstly, I"
+     },
+     {
+      "text": "I write this newsletter for a few different reasons, but one stands ou"
+     },
+     {
+      "text": "But what about the future? Where will the next 100 Happy Fridays take "
+     },
+     {
+      "text": "Part of my motivation for making these themes monthly is that I hope w"
+     },
+     {
+      "text": "So this week will be the last of my weekly rambles. There'll still be "
+     }
+    ],
+    "cut_text": [
+     "If you know of any humans who would be interested in becoming part of the Thighs adventure story, please get in touch by replying to this email."
+    ]
+   },
+   "https://davidcharles.substack.com/p/3377365_-115-tame-the-mane": {
+    "cut": [
+     {
+      "img": "181ff56e-991d-40ea-b006-e0f0be7e2d74_1000x668.jpeg"
+     },
+     {
+      "text": "Happy Friday!"
+     },
+     {
+      "img": "bfeb7eb1-d1d2-48ef-81b6-c323f20d52bf_1002x157.png"
+     },
+     {
+      "img": "19811723-f2c7-4608-b471-77bc7c416596_685x528.png"
+     },
+     {
+      "text": "I've published 5 books, including stories of hitch-hiking from London "
+     },
+     {
+      "img": "2f6b2595-6ff7-4ada-8997-4bbb2dd58a45_372x526.jpeg"
+     },
+     {
+      "text": "This morning, my friend and fellow round Britain cyclist Anna Hughes l"
+     },
+     {
+      "text": "Right! I'm off to finish editing something VERY EXCITING. Smashing Sun"
+     },
+     {
+      "text": "Much love, - dc"
+     },
+     {
+      "img": "6c2088c6-ae62-4673-b8c6-1503fb378a6d_180x180.jpeg"
+     }
+    ],
+    "cut_text": [
+     "If you fancy joining me, applications open for London-Athens at the end of March. Follow Thighs on Facebook , Instagram or join their mailing list for updates, training rides, and the booking form when the fateful moment arrives."
+    ]
+   },
+   "https://davidcharles.substack.com/p/3402605_-127-thighs-foiled-more-audacity-holm-oak": {
+    "cut": [
+     {
+      "text": "oh merde it's a FUNDRAISING LAUNCH!!"
+     },
+     {
+      "text": "+++ There's still time to join this year's ride. Maybe London to Paris"
+     }
+    ],
+    "cut_text": [
+     "Click here to cut the crap and go straight to my Help Refugees donation page...",
+     "If you think that helping refugees is a generally good idea, then I'd be super grateful if you could donate whatever you can afford. Click this link to make that happen.",
+     "(I've published a lot of these stories on my blog - drop me a line if you want a direct link.) Thank you in advance for being so generous! And stay tuned because your donation will get you free entry to a very exciting thingy that we're planning for the start of July.... Oh now you're interested! (Donate by card or Paypal...)"
+    ]
+   },
+   "/activism/no-borders/talk-migration-help-refugees/": {
+    "cut": [
+     {
+      "text": "If you want to support Help Refugees, then you could do a lot worse th"
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/3440269_-136-summer-plans-": {
+    "drop": "Summer plans: Foiled, public speaking and holidays, with only passing mentions of the ride"
+   },
+   "https://davidcharles.substack.com/p/3472369_-138-skipped-a-week-post-thighs-van-days": {
+    "cut": [
+     {
+      "text": "If you like this sort of thing, then you'll probably also like my back"
+     },
+     {
+      "text": "I am currently stationed in Napoli, alternating the forno of the stree"
+     },
+     {
+      "img": "61f3fac5-8e2d-48d7-bd09-7ba1cf2e667d_180x180.jpeg"
+     }
+    ]
+   },
+   "/activism/no-borders/why-mahmoud-wears-cologne/": {
+    "cut": [
+     {
+      "text": "If you want to help…"
+     },
+     {
+      "text": "If you have any trouble donating, let me know – the website isn’t alwa"
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/3537557_-143-paris-and-thighs-week-7": {
+    "title": "So here we are – Dubrovnik",
+    "cut": [
+     {
+      "text": "Happy Friday! Saturday!"
+     },
+     {
+      "text": "If you like this sort of thing, then you'll probably also like my back"
+     },
+     {
+      "text": "Finally, reader, I have an update. Remember a couple of weeks ago, I w"
+     },
+     {
+      "img": "be5a0604-8959-4809-9403-e7a3ae8cb5cd_1000x563.jpeg"
+     },
+     {
+      "img": "16a8b39e-9aeb-4750-b67b-28f7a6f2093f_180x180.jpeg"
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/3546369_-144-albania": {
+    "cut": [
+     {
+      "text": "Happy Friday! Saturday!"
+     },
+     {
+      "text": "If you like this sort of thing, then you'll probably also like my back"
+     },
+     {
+      "img": "ed5b56f1-b050-4dcf-8a66-87e1c0ed641b_180x180.jpeg"
+     }
+    ],
+    "cut_text": [
+     "Until Athens, much love, - dc"
+    ]
+   },
+   "https://davidcharles.substack.com/p/early-bird-for-thighs": {
+    "drop": "Sign-up promotion for the 2020 route (cancelled by Covid); 'How to play' is its own chapter; the Brownsea birds story isn't about the ride"
+   },
+   "/adventure/cycle-touring/how-to-play-thighs-of-steel/": {
+    "cut": [
+     {
+      "text": "Signups open for real on Sunday 1 March, but you can get early bird ac"
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/breakdown": {
+    "cut": [
+     {
+      "text": "Thanks for stopping for a read — especially if you’re new around here."
+     },
+     {
+      "img": "DSC_5270.JPG"
+     },
+     {
+      "text": "Whosoever plants a tree, winks at immortality. Earlier today, I plante"
+     },
+     {
+      "text": "People are working to have this absurdity overthrown in the UK. You ca"
+     },
+     {
+      "text": "More likely is that we can continue to show faith in humanity. Sign a "
+     },
+     {
+      "text": "If you think that helping refugees is a generally good idea, then ther"
+     },
+     {
+      "text": "If cycling is your cup of tea, join us! We are three-quarters full, bu"
+     },
+     {
+      "text": "Thank you."
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/thighsolation": {
+    "drop": "Nothing about the ride: habits, phone calls, tree climbing and Foiled in the first lockdown"
+   },
+   "https://davidcharles.substack.com/p/bespoke": {
+    "cut": [
+     {
+      "text": "So, the big ask:"
+     },
+     {
+      "text": "Do you agree with us that getting meals out to refugees in lockdown is"
+     },
+     {
+      "text": "If you answered yes to two or more of these questions, I’d be thrilled"
+     },
+     {
+      "text": "If you don’t, can’t or won’t, it’s fine. I still love you. We’re all i"
+     },
+     {
+      "text": "If you do donate, though — thank you! I will send you exciting bespoke"
+     },
+     {
+      "text": "This is assuming I can work out who you are from your donation. If you"
+     },
+     {
+      "text": "Finally: if you’d like to join us by fundraising and riding/running/ro"
+     },
+     {
+      "text": "Any more for any more?"
+     },
+     {
+      "text": "The London Migration Film Festival has opened up an amazing vault of f"
+     },
+     {
+      "text": "That’s all this time round. I hope you find a moment this weekend to w"
+     },
+     {
+      "text": "Much love, dc:"
+     },
+     {
+      "text": "p.s.: Happy birthday dad!"
+     }
+    ]
+   },
+   "/activism/no-borders/join-us-for-world-refugee-day/": {
+    "cut": [
+     {
+      "text": "They say that every dog has its day—and some marketing departments tak"
+     },
+     {
+      "text": "A quick scan of the internet tells me that Tuesday was Bloomsday (I’m "
+     },
+     {
+      "text": "Today is World Sickle Cell Day. A sprinkling of sickle cell facts: sic"
+     },
+     {
+      "text": "But tomorrow is World Refugee Day. Ah—that explains my headline!"
+     },
+     {
+      "text": "I’m asking—nay begging—for your support. As cyclists, as donors, as me"
+     },
+     {
+      "text": "🚴🏿 If you or your friends would like to join us for the day, then you "
+     },
+     {
+      "text": "💚 Or you can easily join in without setting up your own page by sendin"
+     },
+     {
+      "text": "The theme for this year’s World Refugee Day is Every Action Counts. Wh"
+     },
+     {
+      "text": "It’s only one day of the year, but your contribution tomorrow could ma"
+     },
+     {
+      "text": "Imagine…"
+     },
+     {
+      "text": "I’ll finish with this little poem from Lemn Sissay , which the legends"
+     },
+     {
+      "text": "I will not limit myself I will not be afraid If it were not imagined H"
+     },
+     {
+      "text": "If it can be imagined, it can be made. Another world is possible."
+     },
+     {
+      "text": "This isn’t the world we want to live in, and we are working to change "
+     },
+     {
+      "text": "Join us. Thank you."
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/not-a-bike-ride": {
+    "title": "This is not a bike ride",
+    "cut": [
+     {
+      "text": "And welcome to this—actually what is this? This newsletter woke up thi"
+     },
+     {
+      "text": "This one doesn’t. This newsletter doesn’t promise to make you happier,"
+     },
+     {
+      "text": "This week’s long read"
+     },
+     {
+      "text": "This is not a bike ride: Cycling around Britain again ?"
+     },
+     {
+      "img": "c68c0c25-9f08-40ea-9daf-9f514a44180d_1000x750.jpeg"
+     },
+     {
+      "text": "Above: A soft day on the Thames"
+     },
+     {
+      "text": "So back in April I promised myself that I would do Something Else. I d"
+     },
+     {
+      "text": "Top of the list was to cycle around Britain. Again."
+     },
+     {
+      "text": "~"
+     },
+     {
+      "text": "2011 was the year of the Arab Spring. Barack Obama was in the White Ho"
+     },
+     {
+      "text": "On 17 July that year, a few days after my nan’s funeral, I left home o"
+     },
+     {
+      "text": "Next Friday, exactly nine years later, I’m leaving home on my bike aga"
+     },
+     {
+      "text": "I’m not expecting anything. I’ll board my bike, fully laden with campi"
+     },
+     {
+      "text": "~"
+     },
+     {
+      "text": "At the time of writing, cycling and camping in England is deemed safe "
+     },
+     {
+      "text": "2020 is not 2011."
+     },
+     {
+      "text": "It could be that the government, the virus or I decide that one day’s "
+     },
+     {
+      "text": "It could be that I enjoy cycling for a week, coasting between friends "
+     },
+     {
+      "text": "It could be that I cycle on through East Anglia, pursuing the old road"
+     },
+     {
+      "text": "If Covid-19 has taught us anything, it’s to hold the future lightly. A"
+     },
+     {
+      "text": "~"
+     },
+     {
+      "text": "Under ‘pacing’ in my report card from 2011 you’ll find the words ‘coul"
+     },
+     {
+      "text": "This year I’m taking the pace right down, concentrating more on the st"
+     },
+     {
+      "text": "The energy for this bike ride does not come from the physical challeng"
+     },
+     {
+      "text": "What has lockdown done to our communities? What are we learning? What "
+     },
+     {
+      "text": "I hope to hear all kinds of interesting perspectives from people I mee"
+     },
+     {
+      "text": "Although Covid-19 has made planning a last minute affair, I have been "
+     },
+     {
+      "text": "There will certainly be words; there may also be video and audio. What"
+     },
+     {
+      "text": "~"
+     },
+     {
+      "text": "Finally: huge thanks to everyone who is helping to make this ride feel"
+     },
+     {
+      "text": "I know this mailing list is full of awesome people. If you’d like to o"
+     },
+     {
+      "text": "If you’d like to catch up on the story of my first cycle around Britai"
+     },
+     {
+      "text": "May we all lead responsibly adventurous lives."
+     },
+     {
+      "text": "Insha’allah and praise be to science-based risk assessments."
+     },
+     {
+      "text": "~"
+     },
+     {
+      "text": "Any more for any more?"
+     },
+     {
+      "img": "91a69c1d-65de-4f1a-b6e0-f873e06d0c5d_780x520.jpeg"
+     },
+     {
+      "text": "Playing Out is a great campaign led by parents who want their kids to "
+     },
+     {
+      "text": "There are so many reasons why this is a brilliant idea, helping childr"
+     },
+     {
+      "text": "Right. That’s it! I’m going to try making a vegan chocolate mousse wit"
+     },
+     {
+      "text": "Big love, dc:"
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/no-more-hostile-environment": {
+    "cut": [
+     {
+      "text": "A lot has happened since the unexpectedly late running of edition 271 "
+     },
+     {
+      "text": "Join us any time—12 June to 26 September"
+     },
+     {
+      "text": "If you would like to join Spell It Out as a fundraising cyclist, then "
+     },
+     {
+      "text": "If you would like to show your support, then please share the website "
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/we-identify-as-human-beings": {
+    "cut": [
+     {
+      "text": "Oddly enough, the thirteenth day of the month is most likely to occur "
+     },
+     {
+      "text": "Maths."
+     },
+     {
+      "text": "Read this story on my website"
+     },
+     {
+      "text": "Join us, if you can."
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/admin-or-admiration": {
+    "cut": [
+     {
+      "text": "I swear, two nights ago, I dreamt that Philip Schofield agreed to sign"
+     }
+    ],
+    "cut_text": [
+     "Schofield, aside,"
+    ]
+   },
+   "https://davidcharles.substack.com/p/talking-politics-with-strangers": {
+    "cut": [
+     {
+      "text": "As the headline suggests, I usually publish this newsletter on a Frida"
+     },
+     {
+      "text": "Thighs of Steel finish our world record attempt on 18 September, so ex"
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/the-magic-cobbler-and-more-philoxenia": {
+    "cut": [
+     {
+      "text": "👋 My name is David and I’m a writer, outdoor instructor and cyclist-at"
+     },
+     {
+      "text": "At least that’s what I normally do."
+     },
+     {
+      "text": "But for the next couple of months I’m actually cycling to Athens, as p"
+     },
+     {
+      "text": "5,000km, a hundred people, through ten countries, over nine weeks give"
+     },
+     {
+      "text": "So I’m afraid that this newsletter will be a little more sporadic than"
+     },
+     {
+      "text": "Today I happened to wake up at 5am — so here we all are!"
+     },
+     {
+      "text": "You can follow the ride on the Thighs Instagram , Facebook or my own p"
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/carpocratian-touring": {
+    "cut": [
+     {
+      "text": "So please accept my sincere apologies for not writing to you the last "
+     },
+     {
+      "text": "👋 My name is David and I’m a writer, outdoor instructor and cyclist-at"
+     },
+     {
+      "text": "That was the turning point of Paris to Lyon. And, if you want the rule"
+     },
+     {
+      "text": "Every penny made from all new subscribers will go into our MASS Action"
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/not-a-charity-auction": {
+    "cut": [
+     {
+      "text": "👋 My name is David and I’m a writer, outdoor instructor and cyclist-at"
+     },
+     {
+      "text": "Today’s story is about what Thighs of Steel does in the world (hint: i"
+     },
+     {
+      "text": "If you want to connect to this story, then my fundraising page is stil"
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/lies-and-the-what-what-now-now": {
+    "cut": [
+     {
+      "text": "And greetings from a wood-built house improbably homed beneath the lar"
+     },
+     {
+      "text": "When I look out of the window, my view runs right into the massif, fou"
+     },
+     {
+      "text": "Waterfall dumps ice. Pine seeds clouds. Woman runs dog."
+     },
+     {
+      "text": "It’s a lot."
+     },
+     {
+      "img": "78fd933e-46e4-4a3b-9da4-f5f30a87950b_1200x518.jpeg"
+     },
+     {
+      "text": "👋 My name is David and I’m a writer, outdoor instructor and cyclist-at"
+     },
+     {
+      "text": "Today’s story is about lies and the what now."
+     },
+     {
+      "text": "We have now raised £96,964 and if you want to help us join the dots to"
+     },
+     {
+      "text": "I know times are tough for pretty much everyone right now, but every d"
+     },
+     {
+      "text": "£10 buys 20kg of fresh fruit and veg to serve at the Khora community k"
+     },
+     {
+      "text": "But now, sitting improbably beneath a glacier, I’ve come to that other"
+     },
+     {
+      "text": "The What What Now Now"
+     },
+     {
+      "text": "Well, the immediate what what now now is that I need to get to a secre"
+     },
+     {
+      "text": "But once the mechanics have been called, once the vehicle has been rec"
+     },
+     {
+      "text": "Projects like Thighs of Steel take everything you’ve got, all thrown i"
+     },
+     {
+      "text": "During this grisly process, something powerful and enduring is created"
+     },
+     {
+      "text": "In the meantime, while livers and kidneys and stem cells are doing the"
+     },
+     {
+      "text": "The answer is I don’t know know now now."
+     },
+     {
+      "text": "But I do have some ideas, generated from a grid I made, which I’ll sha"
+     },
+     {
+      "text": "To avoid jinxing all my nascent plans, here’s an empty one, drawn in t"
+     },
+     {
+      "img": "a95d92c7-ea89-4208-913c-e2c6836e8cfe_1200x675.jpeg"
+     },
+     {
+      "text": "Get stuck in. Add or change the columns and rows until you have your o"
+     },
+     {
+      "text": "~"
+     },
+     {
+      "text": "Thanks to everyone involved, to Fen and the tortoise, also to Tim Ten "
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/the-3-or-4-species-of-happiness": {
+    "drop": "An essay on happiness and fungi; the ride gets three sentences"
+   },
+   "https://davidcharles.substack.com/p/intrinsic-adventure": {
+    "title": "Friday 9 September",
+    "cut": [
+     {
+      "text": "According to numerologists, the number 333 is a message from your guar"
+     },
+     {
+      "text": "If arcane numerology’s not your cup of tea, then how about this: today"
+     },
+     {
+      "text": "Imagine — roads empty, bikes and rollerskates abound, drivers pulled o"
+     },
+     {
+      "text": "Or rather, don’t imagine: watch this utter joy of a video, coming to y"
+     },
+     {
+      "text": "Critical Mass eat your heart out!"
+     },
+     {
+      "text": "For those of you new to these pages, hello 👋 My name is David and I’m "
+     },
+     {
+      "text": "Today’s story is about all those green and blue circles that I’ve prin"
+     },
+     {
+      "text": "Enjoy."
+     },
+     {
+      "text": "A Big Year"
+     },
+     {
+      "text": "I always knew this was going to be a big year: I was scheduled to spen"
+     },
+     {
+      "text": "Days of Adventure are not necessarily biased towards these kind of exo"
+     },
+     {
+      "text": "But there’s no question that this big year owes much to the relaxation"
+     },
+     {
+      "text": "In fact, there was so much adventuring going on that I had no time to "
+     },
+     {
+      "text": "Yay."
+     },
+     {
+      "text": "(Seriously, I mean that: yay 🥳)"
+     },
+     {
+      "text": "Although my definition of adventure is flexible enough to encompass al"
+     },
+     {
+      "text": "(Besides the fact most people wouldn’t want to!)"
+     },
+     {
+      "text": "100 days in a year is ambitious. 113 days (and counting) is straight-u"
+     },
+     {
+      "text": "For some reason, tracking my Days of Adventure is really working for m"
+     },
+     {
+      "text": "It’s a story that begins with a cautionary tale."
+     },
+     {
+      "text": "Goals Are Dangerous"
+     },
+     {
+      "text": "My old philosophy tutor told us of a friend of his who had a long-time"
+     },
+     {
+      "text": "(I think the label was some 1970s Americana psychedelic weirdness, but"
+     },
+     {
+      "text": "This was back in the days before eBay and Amazon so tracking down the "
+     },
+     {
+      "text": "There were only about twenty records to find, but the search took him "
+     },
+     {
+      "text": "By the late-nineties, we were told, he had found all but one of the re"
+     },
+     {
+      "text": "Then he found it."
+     },
+     {
+      "text": "What a moment. What a feeling that must have been, after so many years"
+     },
+     {
+      "text": "To our tutor’s enduring incredulity, his friend never bought that last"
+     },
+     {
+      "text": "He picked it up in the shop, flipped it over and read the sleeve notes"
+     },
+     {
+      "text": "That’s the cautionary part of the tale: even an extremely difficult go"
+     },
+     {
+      "text": "And then what? Emptiness."
+     },
+     {
+      "text": "Once he’d found the final piece, there was nothing more for our collec"
+     },
+     {
+      "text": "That’s the danger of goal-setting — and that could be the danger inher"
+     },
+     {
+      "text": "But there’s something different with the design of that game, a differ"
+     },
+     {
+      "text": "The Country Game"
+     },
+     {
+      "text": "Back in the early 2000s, I had a friendly competition with pals to see"
+     },
+     {
+      "text": "(Okay, it wasn’t always friendly — Monaco and the Vatican really got p"
+     },
+     {
+      "text": "The only rule was that the visit had to include at least one overnight"
+     },
+     {
+      "text": "It was a great game because I was usually winning (especially after ma"
+     },
+     {
+      "text": "And therein lies the problem with this game: the joy, for me, was in w"
+     },
+     {
+      "text": "Contrast this with the DOA project: I didn’t even notice that I had ‘w"
+     },
+     {
+      "text": "It wasn’t that I took The Country Game particularly seriously, but the"
+     },
+     {
+      "text": "To the spitting jealousy of the others, one competitor snared six coun"
+     },
+     {
+      "text": "Intrinsic Adventure"
+     },
+     {
+      "text": "In contrast, there’s no way to ‘game’ the DOA project without lying to"
+     },
+     {
+      "text": "I can’t score if I haven’t been outdoors for a significant chunk of th"
+     },
+     {
+      "text": "That kind of point-scoring is all about experience: it’s a reward that"
+     },
+     {
+      "text": "The problem with The Country Game is that its rewards were extrinsic, "
+     },
+     {
+      "text": "Quite simply, the reward of visiting a new country was to score one po"
+     },
+     {
+      "text": "And after that?"
+     },
+     {
+      "text": "Visit another country, score another point."
+     },
+     {
+      "text": "And after that?"
+     },
+     {
+      "text": "Visit another country, score another point."
+     },
+     {
+      "text": "And after that?"
+     },
+     {
+      "text": "Visit another country, score another point."
+     },
+     {
+      "text": "And so on until there is no more ‘And after that?’, only the emptiness"
+     },
+     {
+      "text": "Protect and Prioritise"
+     },
+     {
+      "text": "I know I’m lucky to work the jobs I do, but over the past two years, m"
+     },
+     {
+      "text": "Even this year, even with those 49 days (technically hard at work) wit"
+     },
+     {
+      "text": "The DOA project has made damn sure I protect time for my priorities."
+     },
+     {
+      "text": "It’s taken me outdoors when outdoors seemed a long way distant — parti"
+     },
+     {
+      "text": "And That’s The Point"
+     },
+     {
+      "text": "Since the first day of this year, hiking the double stone row at Hurst"
+     },
+     {
+      "text": "That’s what the Days of Adventure have brought me since 2021, a consta"
+     },
+     {
+      "text": "There are 57 days left in the year. I plan to spend at least 13 of the"
+     },
+     {
+      "text": "Are you putting your time where your heart is? What’s stopping you fro"
+     },
+     {
+      "text": "BONUS CONTENT: 17 Stories of Adventure"
+     },
+     {
+      "text": "Adventures make me think. And when I think I often write. Here are the"
+     },
+     {
+      "text": "New Year’s hiking the double stone row at Hurston Ridge on Dartmoor 6 "
+     },
+     {
+      "text": "Postscript…"
+     },
+     {
+      "text": "*It was Calypso’s fifth time supporting the ride all the way to Athens"
+     },
+     {
+      "text": "Do you know anyone who might have a long wheelbase high top van they w"
+     },
+     {
+      "text": "I Put These Buttons Here Every Week :)"
+     },
+     {
+      "text": "The stories I write are totally free to read and always have been."
+     },
+     {
+      "text": "It’s almost unbelievable, then, that there’s a growing band of humans "
+     },
+     {
+      "text": "Heartfelt thanks to Andy, Claire, Tudor, John, Harri, Becky, Illia, Jo"
+     },
+     {
+      "text": "If you’d like to join them and chip in with an annual or monthly contr"
+     },
+     {
+      "text": "I’m also motivated to an unhealthy degree by in-group approval. Every "
+     },
+     {
+      "text": "Any comments or questions to hurl my way? You can reply to this email "
+     },
+     {
+      "text": "Thank you 🙏"
+     },
+     {
+      "text": "#1 Make Life Wonderful"
+     },
+     {
+      "text": "This week I finished reading Nonviolent Communication by Marshall B. R"
+     },
+     {
+      "text": "I was pretty much knocked over by this simple sentence:"
+     },
+     {
+      "text": "[W]hen the sole energy that motivates us is simply to make life wonder"
+     },
+     {
+      "text": "Actually, not even the whole sentence. Just those three words: Make Li"
+     },
+     {
+      "text": "#2 Why Is The [News] Media So Negative?"
+     },
+     {
+      "text": "Freakonomics Radio produced this excellent podcast exploring why journ"
+     },
+     {
+      "text": "One of the interesting discoveries for me was that, although negativit"
+     },
+     {
+      "text": "According to the linked study by Jonah Berger and Katherine Milkman, p"
+     },
+     {
+      "text": "We want the good stuff."
+     },
+     {
+      "text": "Compare that finding with the research in this Forbes article , which "
+     },
+     {
+      "text": "Don’t let them win."
+     },
+     {
+      "text": "#3 Slow Ways Swarm 5-13 November"
+     },
+     {
+      "text": "Walk, run or wheel and then review your nearby Slow Ways route(s) , he"
+     },
+     {
+      "text": "Slow Ways is an awesome citizen project that I still haven’t got invol"
+     },
+     {
+      "text": "That’s it for this week — thank you for reading."
+     },
+     {
+      "text": "Tomorrow night I’m going to see Bob Dylan playing, incongruously, the "
+     },
+     {
+      "text": "After that, I’m off to Wales for a few days of rambling and foraging i"
+     },
+     {
+      "text": "Big love, dc:"
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/make-space-for-others-to-shine": {
+    "cut": [
+     {
+      "text": "And a warm welcome from a squatted perch overlooking the ocean."
+     },
+     {
+      "text": "Following on from last week’s appeal for healthy habitual alternatives"
+     },
+     {
+      "text": "Inspired by a 2017 article by physical therapist Carrie Williamson , t"
+     },
+     {
+      "text": "Since December 2019, I have recorded 772 at-home yoga sessions, at an "
+     },
+     {
+      "text": "I’ve been amazed at what a difference this investment of 1 percent of "
+     },
+     {
+      "text": "The fact that I can get into the Asian squat position is a minor mirac"
+     },
+     {
+      "text": "Start from where you are, and start today."
+     },
+     {
+      "text": "For those of you new to these pages, hello 👋 My name is David and I’m "
+     },
+     {
+      "text": "I sometimes write about poo."
+     },
+     {
+      "text": "Sorry, did somebody say ‘this summer’s ride’?"
+     },
+     {
+      "text": "Hell yeah."
+     },
+     {
+      "text": "Once again, we’ll be facilitating the highlight of your summer, starti"
+     },
+     {
+      "text": "We open for signups on Friday 17 February at 6pm — but ONLY if you’re "
+     },
+     {
+      "text": "The most popular weeks sell out minutes after going live, so get on it"
+     },
+     {
+      "text": "Making Refugees Welcome: A World Record Breaking GPS Story On Bikes"
+     },
+     {
+      "text": "5pm Sunday"
+     },
+     {
+      "text": "In 2021, 63 thighs cyclists rode 2,208km across southern England on a "
+     },
+     {
+      "text": "But what did Radio New Zealand, celebrity chef Gordon Ramsey, and infa"
+     },
+     {
+      "text": "Register here to join me and Georgie on Zoom"
+     },
+     {
+      "img": "ef0d1eb4-615c-4562-9adf-b114789fe3a6_4032x3024.jpeg"
+     },
+     {
+      "text": "Set your Zooms for thighs o’clock and see ya there! 💚"
+     },
+     {
+      "text": "Dismantling The Patriarchy One Group Ride At A Time"
+     },
+     {
+      "text": "Until there’s a group ride happening every night of the week, there’s "
+     },
+     {
+      "text": "The New Forest Off Road Club show us how."
+     },
+     {
+      "text": "Cistercian Numerals"
+     },
+     {
+      "img": "802cb2f2-0d69-4185-bb54-9a1fa27c5655_30x44.png"
+     },
+     {
+      "text": "800 years ago, a Leicester-based monk from an influential order of Cat"
+     },
+     {
+      "img": "75f996d5-85fb-4709-9e82-cac413a49f6a_377x300.png"
+     },
+     {
+      "text": "Not especially useful, but you can’t deny it’s clever."
+     },
+     {
+      "text": "The Safest Decade In The World… EVER!"
+     },
+     {
+      "text": "This mind-scrambling graph was shared in the latest Future Crunch news"
+     },
+     {
+      "img": "a95dd7a8-845d-417f-a69c-4bd48a86a4d0_2000x1412.png"
+     },
+     {
+      "text": "If you’re ever feeling like things aren’t going your way in the news m"
+     },
+     {
+      "text": "I highly recommend searching the annual archives for your home country"
+     },
+     {
+      "text": "Searching for the UK in 2022 turns up 25 matches, including:"
+     },
+     {
+      "text": "£15 billion of new offshore wind farms announced at record-low power p"
+     },
+     {
+      "text": "Or browsing last year’s archives for ‘vaccine’ pulls up 30 matches, am"
+     },
+     {
+      "text": "Ebola has been defeated thanks to vaccines and effective clinical trea"
+     },
+     {
+      "text": "I mean. Talk about impact."
+     },
+     {
+      "text": "That’s all for this week. Thanks for reading and I hope you found some"
+     },
+     {
+      "text": "This newsletter is supported directly by readers like you. Join ‘em wi"
+     },
+     {
+      "text": "Big love, dc:"
+     }
+    ]
+   },
+   "/adventure/cycle-touring/remember-that-time-we-cycled-2200km-across-britain-on-a-route-that-spelled-out-refugees-welcome-oh-yeah/": {
+    "drop": "The page is only a video (now gone from the ebook), with no words"
+   },
+   "https://davidcharles.substack.com/p/leonard-cohen-janis-joplin-and-me": {
+    "title": "Still not your average cycling crew",
+    "cut": [
+     {
+      "text": "And welcome from the other side of International Women’s Day."
+     },
+     {
+      "text": "There are still a few places on this year’s Athens ride: we’d love you"
+     },
+     {
+      "text": "For those of you new to these pages, hello 👋 My name is David and I’m "
+     },
+     {
+      "text": "Sometimes, like this week, I write about songs."
+     },
+     {
+      "text": "I Remember You Well"
+     },
+     {
+      "text": "This is a story about two songs, both written by men about women they "
+     },
+     {
+      "text": "(Before you switch off, I’ve also included one of the women’s side of "
+     },
+     {
+      "text": "The Chelsea is famous for its residents and the work they created ther"
+     },
+     {
+      "text": "Leonard Cohen Meets Janis Joplin"
+     },
+     {
+      "text": "In the late night spring of 1968, Leonard Cohen and Janis Joplin met i"
+     },
+     {
+      "text": "Cohen gathered his courage and asked if she was looking for someone :"
+     },
+     {
+      "text": "She said ‘Yes, I’m looking for Kris Kristofferson.’ I said, ‘Little la"
+     },
+     {
+      "text": "By the time the lift reached the fourth floor, the love affair was on,"
+     },
+     {
+      "text": "The next day, Joplin tracked down that handsome devil Kris Kristoffers"
+     },
+     {
+      "text": "It took a couple of years for Janis Joplin to record her bootshaking v"
+     },
+     {
+      "text": "Three days later, she was dead."
+     },
+     {
+      "text": "Shortly after, Leonard Cohen started writing a new song, which he even"
+     },
+     {
+      "text": "Here’s how it opens:"
+     },
+     {
+      "text": "I remember you well in the Chelsea Hotel, you were talking so brave an"
+     },
+     {
+      "text": "Now, to be fair to Leonard Cohen, the story he tells is more complex t"
+     },
+     {
+      "text": "Jeffrey Lewis Meets A Woman In Glasses"
+     },
+     {
+      "text": "In 2001, New York antifolk songwriter Jeffrey Lewis released his first"
+     },
+     {
+      "text": "Before you get too excited, this is not a song about oral sex. As Jeff"
+     },
+     {
+      "text": "Life doesn’t work out the way it does in old songs That’s why we sing "
+     },
+     {
+      "text": "So what really went on?"
+     },
+     {
+      "text": "Well, if Jeff Lewis will allow me to summarise his seven minute master"
+     },
+     {
+      "text": "Late one night, ‘tired and alone’, Jeff is walking past the Chelsea Ho"
+     },
+     {
+      "text": "That’s it. That’s the entirety of the narrative action: they never saw"
+     },
+     {
+      "text": "The song is three times as long as the encounter it describes."
+     },
+     {
+      "text": "What About The Oral Sex?"
+     },
+     {
+      "text": "In that two minute conversation, the woman in glasses told Jeff Lewis "
+     },
+     {
+      "text": "Right about then I should have asked if she knew What the Chelsea char"
+     },
+     {
+      "text": "But he didn’t. He got shy, waved goodbye, went home and wrote this son"
+     },
+     {
+      "text": "Don’t get me wrong, I’m glad he did write this song — for two reasons,"
+     },
+     {
+      "text": "The first reason is, quite simply, this, the greatest rhyming couplet "
+     },
+     {
+      "text": "If I was Leonard Cohen or some other song writing master I’d know to f"
+     },
+     {
+      "text": "The second reason I’m glad he wrote this song is because the narrative"
+     },
+     {
+      "text": "‘For The Love Of Other Folks That They Barely Knew’"
+     },
+     {
+      "text": "In those last two minutes, Jeff Lewis turns his gaze onto the audience"
+     },
+     {
+      "text": "In Jeff’s words, it means something wonderful:"
+     },
+     {
+      "text": "That all around the world there may be folks singing tunes For the lov"
+     },
+     {
+      "text": "This bit of the song usually gets a laugh because it’s so ridiculous. "
+     },
+     {
+      "text": "Except they do. The woman in glasses would laugh at this bit too — the"
+     },
+     {
+      "text": "And we can enjoy that same note of giddy recognition for ourselves rig"
+     },
+     {
+      "text": "Remember You Remember Me Well Too"
+     },
+     {
+      "text": "Think of all the people you’ve ever interacted with. Go on: all of the"
+     },
+     {
+      "text": "Okay, okay — too much. How about just the ones who made you ‘sing’?"
+     },
+     {
+      "text": "If you’re like me (and Jeff), they’ll fall into two camps:"
+     },
+     {
+      "text": "There’ll be people still in your life who already know that you rememb"
+     },
+     {
+      "text": "Firstly: make a note to go and tell everyone in Camp 1 exactly what th"
+     },
+     {
+      "text": "Now turn your attention to the people in Camp 2. This is where the mag"
+     },
+     {
+      "text": "Look at your list and ponder: there must be hundreds of fleeting momen"
+     },
+     {
+      "text": "Take a moment to acknowledge the ripples in the water, stones skipped "
+     },
+     {
+      "text": "Now flip it around in Jeff’s next lines:"
+     },
+     {
+      "text": "[…] the next time you’re feeling kinda lonesome and blue Just think th"
+     },
+     {
+      "text": "A laugh again: fantastically unlikely. But it isn’t."
+     },
+     {
+      "text": "If you remember a hundreds strangers well, remember that a hundred mor"
+     },
+     {
+      "text": "When you realise how even a brief interaction can connect and change u"
+     },
+     {
+      "text": "The Other Side"
+     },
+     {
+      "text": "Okay — reality check!"
+     },
+     {
+      "text": "Songwriters like Leonard Cohen and Jeffrey Lewis are really good at tu"
+     },
+     {
+      "text": "It’s a beautiful defence mechanism — transmuting their personal vulner"
+     },
+     {
+      "text": "As Jeff Lewis says, it’s much easier to write a song than it is to ris"
+     },
+     {
+      "text": "You might think that vulnerability to rejection doesn’t apply to Leona"
+     },
+     {
+      "text": "We’ll probably never know what story Jeff Lewis’s woman in glasses wou"
+     },
+     {
+      "text": "This is what she made of that same one night stand with Leonard Cohen "
+     },
+     {
+      "text": "Sometimes you’re with someone and you’re convinced that they have some"
+     },
+     {
+      "text": "🤣"
+     },
+     {
+      "text": "Be Both"
+     },
+     {
+      "text": "Leonard Cohen and Jeffrey Lewis would seem to offer two different appr"
+     },
+     {
+      "text": "either we are courageous enough to stop and feel out the depths of the"
+     },
+     {
+      "text": "But it’s not a choice: we can be both."
+     },
+     {
+      "text": "As Jeff says:"
+     },
+     {
+      "text": "Life doesn’t work out the way it does in old songs That’s why we sing "
+     },
+     {
+      "text": "So let’s sing a new song: a song where we enjoy both Leonard Cohen’s e"
+     },
+     {
+      "text": "Let’s recognise that any connection with a stranger, in the lift, on t"
+     },
+     {
+      "text": "We might flex our courage and take things further, but, when we don’t "
+     },
+     {
+      "text": "And occasionally, occasionally, a connection that we didn’t explore, y"
+     },
+     {
+      "text": "Then we are both."
+     },
+     {
+      "text": "I’ll leave the last word to Jeff Lewis:"
+     },
+     {
+      "text": "So who knows if I’ll ever see her again? Maybe we’ll see This whole ti"
+     },
+     {
+      "text": "~"
+     },
+     {
+      "text": "ps: Just as I was finishing the final read-through on this piece, a wo"
+     },
+     {
+      "text": "I turned around with a thump and realised she was talking on the phone"
+     },
+     {
+      "text": "Thanks to Leonard Cohen, Janis Joplin, Jeffrey Lewis and CW for showin"
+     },
+     {
+      "text": "Muddle #1"
+     },
+     {
+      "text": "If you haven’t yet read EM Forster’s A Room With A View, please do. If"
+     },
+     {
+      "text": "You are inclined to get muddled […] Let yourself go. Pull out from the"
+     },
+     {
+      "text": "Beware of muddle, people. Don’t stay confused or uncertain: connect an"
+     },
+     {
+      "text": "Muddle #2"
+     },
+     {
+      "text": "In this delightful piece, Robin Sloan shows how JRR Tolkein wrote The "
+     },
+     {
+      "text": "Tolkien, for all his vaunted designs, only got to The Good Stuff when "
+     },
+     {
+      "text": "The One Ring To Rule Them All was originally conceived as just one of "
+     },
+     {
+      "text": "In early drafts, Aragorn, son of Arathorn, was replaced by a ranger ho"
+     },
+     {
+      "text": "The analogy is clear, and hugely heartening: if Tolkien can find his w"
+     },
+     {
+      "text": "When you come across a muddle — and you will — persist with it until i"
+     },
+     {
+      "text": "Muddle #3"
+     },
+     {
+      "img": "c002d00e-db20-45e8-9017-e88eb2f5e2f5_1000x667.jpeg"
+     },
+     {
+      "text": "That’s all for this week. I feel very lucky that I get to sit here and"
+     },
+     {
+      "text": "Thank you for reading and I hope you found something to take away with"
+     },
+     {
+      "text": "Don’t forget that this newsletter is community supported. It’s easy fo"
+     },
+     {
+      "text": "There’s also a tier where you can pay £50 or more. Whatever you choose"
+     },
+     {
+      "text": "Big love, dc:"
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/enter-the-packing-room": {
+    "cut": [
+     {
+      "text": "And a warm welcome from after eight."
+     },
+     {
+      "img": "3afb21d4-9ae0-4186-9366-e1e60802c130_1500x794.jpeg"
+     },
+     {
+      "text": "It’s not often that I get to write to you from so late an hour — I’m s"
+     },
+     {
+      "text": "Ooh, remember them?"
+     },
+     {
+      "text": "Composer Igor Stravinsky once wrote:"
+     },
+     {
+      "text": "My freedom will be so much the greater and more meaningful the more na"
+     },
+     {
+      "text": "So here we are."
+     },
+     {
+      "text": "I wonder: what constraints do you have on your life and work, and do y"
+     },
+     {
+      "text": "Answers on a postcard. Or email. Or even in the comments (did you even"
+     },
+     {
+      "text": "Sometimes I don’t have much time to write a newsletter."
+     },
+     {
+      "text": "You can add your heft to the hew by donating here . Thank you."
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/not-a-miracle": {
+    "cut": [
+     {
+      "text": "If you would like to donate and join the 2,225 people already supporti"
+     },
+     {
+      "text": "If you’re a UK taxpayer, then you can also choose to add Gift Aid and "
+     },
+     {
+      "text": "Sometimes I’m so busy supporting Europe’s longest charity bike ride th"
+     },
+     {
+      "text": "And so, with sincere apologies for my five-week absence, you are very "
+     },
+     {
+      "text": "Until next time, big love, dc:"
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/a-midpoint": {
+    "cut": [
+     {
+      "text": "You can donate with love and gratitude here."
+     },
+     {
+      "text": "You’d be joining 2,726 other supporters who, collectively, have donate"
+     },
+     {
+      "text": "Thank you."
+     },
+     {
+      "text": "And that’s where I’ll leave this update. I’m sorry I couldn’t be more "
+     },
+     {
+      "text": "Big love, dc:"
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/together-through-the-flood": {
+    "cut": [
+     {
+      "text": "And a warm welcome from the back of a 2005 Ford Transit called Beryl, "
+     },
+     {
+      "text": "Sometimes I spend too long in the back of a Ford Transit."
+     },
+     {
+      "text": "If you believe in free movement, or even free-er movement for people h"
+     },
+     {
+      "text": "We’ve now raised over £90,000 for grassroots refugee solidarity projec"
+     },
+     {
+      "text": "2,908 people have already donated to the main page, anything from £5 a"
+     },
+     {
+      "text": "Thank YOU for all your donations and your sharing of our stories. This"
+     },
+     {
+      "text": "Thank you for caring. Thank you to every person reading this."
+     },
+     {
+      "text": "100 percent of your donation (more if you Gift Aid) will be redistribu"
+     },
+     {
+      "text": "Every pound you donate makes the world a richer place . 🙏This is happe"
+     },
+     {
+      "text": "Big love, dc:"
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/gaping-abundance": {
+    "title": "2024: Gaping Abundance",
+    "cut": [
+     {
+      "text": "Happy Friday!"
+     },
+     {
+      "text": "And a warm welcome, just generally. This has been a week punctuated by"
+     },
+     {
+      "img": "b71344eb-766b-4818-a7f8-3097b37ab332_1000x563.jpeg"
+     },
+     {
+      "text": "I don’t say this enough, but I’m feeling sentimental so: to those of y"
+     },
+     {
+      "text": "73 percent of this newsletter is based on books I read, digest and sub"
+     },
+     {
+      "text": "And it’s cool that a couple of you made the most of the PayPal link th"
+     },
+     {
+      "text": "Sometimes I watch the stars. (Usually for about five seconds before my"
+     },
+     {
+      "img": "752c0445-941f-48ce-bf5f-6d9e9e089df1_1000x563.jpeg"
+     },
+     {
+      "text": "As well as crapping my pants about not having anything to do (nor any "
+     },
+     {
+      "text": "Quite apart from all those Thighs of Steel bullet points, my life has "
+     },
+     {
+      "text": "In other words: six years is a lot of lifetime and there is no reason "
+     },
+     {
+      "text": "If you thought childhood was wasted on the young, just wait until you "
+     },
+     {
+      "text": "This time we have on earth is damnful of promise. If an hour when you "
+     },
+     {
+      "text": "That’s why it seems like our six year segments only get richer and ric"
+     },
+     {
+      "text": "Time might seem to pass more quickly now we’re older and, sure, part o"
+     },
+     {
+      "text": "Now I’m an adult, I’ll be devilled black and blue if I’m going to spen"
+     },
+     {
+      "text": "This year, I have signed up to study for something called The Certific"
+     },
+     {
+      "text": "Big scary title."
+     },
+     {
+      "text": "But, if my experience is anything to go by (not to mention the experie"
+     },
+     {
+      "text": "Unlike the pell-mell of what seems like everything else, nature is the"
+     },
+     {
+      "text": "Nature is there. Always there*. Simply there. Abundantly there. Quietl"
+     },
+     {
+      "text": "—"
+     },
+     {
+      "text": "* Not necessarily always there if we fuck it up too much. Still: by an"
+     },
+     {
+      "img": "775320a1-c2ca-433d-8e2e-c4abd07605dc_1000x563.jpeg"
+     },
+     {
+      "text": "You Can’t Do Everything; Stop Trying"
+     },
+     {
+      "text": "2023 will forever be remembered (by no one at all) as The Year I Read "
+     },
+     {
+      "text": "Below are three links to three short-ish articles by the aforementione"
+     },
+     {
+      "text": "I am aware of the contradiction: more content to remind us to reserve "
+     },
+     {
+      "text": "So while you could open all these links in new tabs to join the serrie"
+     },
+     {
+      "text": "Instead, gently ponder my compression of the articles into sentence-le"
+     },
+     {
+      "text": "Ringfence 3-4 hours of focussed ‘deep’ work per day (AND NO MORE) You "
+     },
+     {
+      "img": "7c9d5626-a774-4c85-b05b-19b241099eeb_1000x563.jpeg"
+     },
+     {
+      "text": "If you enjoyed this story, then please remember that I have NO WAY OF "
+     },
+     {
+      "text": "Thanks for your eyeballs, thanks for your support."
+     },
+     {
+      "text": "Big love, dc:"
+     }
+    ]
+   },
+   "https://davidcharles.substack.com/p/760000-and-out": {
+    "cut": [
+     {
+      "text": "And a warm welcome from The Ness, where the sea is loud and the beach "
+     },
+     {
+      "img": "c13dbc3c-82e7-4645-a759-bf637bcbb71f_4624x2604.jpeg"
+     },
+     {
+      "text": "Yes, that is too many hats."
+     },
+     {
+      "text": "In this newsletter, I write stories that help you and me understand th"
+     },
+     {
+      "text": "In 2026, this newsletter will undergo a quiet metamorphosis: a butterf"
+     },
+     {
+      "text": "But, for now, we’re still here in good ol’ 2025."
+     },
+     {
+      "text": "It’s been a wonderful year in my life for new beginnings. But also a r"
+     },
+     {
+      "text": "Thank You"
+     },
+     {
+      "text": "Huge thanks to all the paying subscribers who helped make this story p"
+     },
+     {
+      "text": "If you enjoyed this one, then go ahead and tell me. It’s the only way "
+     },
+     {
+      "text": "If you’re not into the whole Substack subscription thing, then you can"
+     },
+     {
+      "text": "As always, thank you for your eyeballs and thanks for your support."
+     },
+     {
+      "text": "diwyc , dc:"
+     },
+     {
+      "text": "1"
+     },
+     {
+      "text": "That wonderful mission triplet is borrowed from New Forest Off Road Cl"
+     }
+    ]
+   }
+  }
+ }
+}
