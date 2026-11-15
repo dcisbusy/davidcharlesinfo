@@ -315,15 +315,17 @@ words, so the odd pin may be in the wrong place.</p>"""
 
 def build_on_this_day(stories):
     days = collections.defaultdict(list)
+    common = common_photos(stories)
     for s in stories:
         if len(s["date"]) >= 10:
-            days[s["date"][5:10]].append([int(s["date"][:4]), s["title"], s["url"]])
+            photo = re.sub(r"w_\d+,h_\d+,c_fill", "w_160,h_160,c_fill", story_photo(s, common) or "")   # small thumbnails
+            days[s["date"][5:10]].append([int(s["date"][:4]), s["title"], s["url"], photo])
     for k in days:
         days[k].sort()
     write_if_changed("assets/on-this-day.json", json.dumps(days, ensure_ascii=False, separators=(",", ":"), sort_keys=True))
     return """<section class="on-this-day" id="on-this-day" hidden>
 <h2 class="section" id="otd-title">On this day</h2>
-<ul class="posts" id="otd-list"></ul>
+<ul class="otd" id="otd-list"></ul>
 </section>
 <script>
 (function(){
@@ -340,9 +342,14 @@ def build_on_this_day(stories):
     items.sort(function(a,b){return b[0]-a[0];});
     var ul=document.getElementById('otd-list');
     items.slice(0,6).forEach(function(x){
-      var li=document.createElement('li'), t=document.createElement('time'), a=document.createElement('a');
-      t.textContent=(year-x[0])+(year-x[0]===1?' year ago':' years ago'); a.href=x[2]; a.textContent=x[1];
-      li.appendChild(t); li.appendChild(a); ul.appendChild(li);
+      var li=document.createElement('li'), a=document.createElement('a'), pic, div=document.createElement('div'),
+          t=document.createElement('time'), b=document.createElement('span');
+      if(x[3]){pic=document.createElement('img');pic.src=x[3];pic.alt='';pic.loading='lazy';
+        pic.onerror=function(){this.replaceWith(Object.assign(document.createElement('span'),{className:'ph',textContent:x[0]}));};}
+      else{pic=Object.assign(document.createElement('span'),{className:'ph',textContent:x[0]});}
+      t.textContent=(year-x[0])+(year-x[0]===1?' year ago':' years ago')+' \u00b7 '+x[0];
+      b.className='t'; b.textContent=x[1]; a.href=x[2];
+      div.appendChild(t); div.appendChild(b); a.appendChild(pic); a.appendChild(div); li.appendChild(a); ul.appendChild(li);
     });
     document.getElementById('otd-title').textContent=title;
     document.getElementById('on-this-day').hidden=false;
