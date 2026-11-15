@@ -962,6 +962,62 @@ def build_series_pages(series_list):
 
 # ---------------------------------------------------------------- Start here
 
+def build_editor_setup():
+    """/edit/: switches on the in-place post editor (assets/editor.js) in this browser. Not linked or indexed."""
+    body = """<h1>Site editor</h1>
+<p>This turns on an <strong>Edit</strong> button on every post, in this browser only. Tap it, change the words,
+press Save, and the website updates in about three minutes. Every save is recorded on GitHub, so nothing is
+ever lost.</p>
+<h2 class="section">1. Make a key on GitHub (once)</h2>
+<ol>
+<li>Open <a href="https://github.com/settings/personal-access-tokens/new">GitHub's new fine-grained token page</a>
+(signed in as dcisbusy).</li>
+<li><strong>Token name:</strong> Site editor. <strong>Expiration:</strong> a year (GitHub will remind you).</li>
+<li><strong>Repository access:</strong> Only select repositories &rarr; <em>dcisbusy/davidcharlesinfo</em>.</li>
+<li><strong>Permissions &rarr; Repository permissions &rarr; Contents:</strong> Read and write. Leave everything else.</li>
+<li>Press <strong>Generate token</strong> and copy it (it starts <code>github_pat_</code>). GitHub shows it only once.</li>
+</ol>
+<h2 class="section">2. Paste it here (once per phone or computer)</h2>
+<form id="ed-form" autocomplete="off">
+<p><label for="ed-token">Token</label><br>
+<input id="ed-token" type="password" spellcheck="false" autocapitalize="off" style="width:100%;max-width:32em;font:15px/1.4 var(--ui);padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)"></p>
+<p class="buttons"><button class="button primary" type="submit">Save and test</button>
+<button class="button" type="button" id="ed-remove">Turn the editor off here</button></p>
+<p id="ed-status" role="status" class="muted"></p>
+</form>
+<h2 class="section">3. Edit</h2>
+<p>Open any post on the site and tap <strong>Edit</strong> at the bottom right. Bold, italic and links are on the
+toolbar; Undo and Cancel are there if something goes wrong. Titles, dates and photos aren't editable here: ask Claude
+for those.</p>
+<p class="muted small">The key stays in this browser's storage. If your phone is lost, delete the token on GitHub
+(Settings &rarr; Developer settings &rarr; Fine-grained tokens) and it stops working at once.</p>
+<script>
+(function(){
+  var st=document.getElementById('ed-status'), inp=document.getElementById('ed-token');
+  function have(){try{return localStorage.getItem('dc-edit-token');}catch(e){return null;}}
+  st.textContent=have()?'The editor is on in this browser.':'The editor is off in this browser.';
+  document.getElementById('ed-form').addEventListener('submit',function(e){
+    e.preventDefault(); var t=inp.value.trim(); if(!t){st.textContent='Paste the token first.';return;}
+    st.textContent='Checking with GitHub\u2026';
+    fetch('https://api.github.com/repos/dcisbusy/davidcharlesinfo',{headers:{'Authorization':'Bearer '+t,'Accept':'application/vnd.github+json'}})
+      .then(function(r){return r.json().then(function(j){return [r.status,j];});})
+      .then(function(x){
+        if(x[0]!==200){st.textContent='GitHub didn\u2019t accept that token ('+x[0]+'). Check it was copied whole and gives access to davidcharlesinfo.';return;}
+        if(x[1].permissions&&!x[1].permissions.push){st.textContent='That token can read the site but not save to it: set Contents to \u201cRead and write\u201d.';return;}
+        try{localStorage.setItem('dc-edit-token',t);}catch(e){st.textContent='This browser won\u2019t store the token (private browsing?).';return;}
+        inp.value=''; st.textContent='Done: the editor is on in this browser. Open any post and tap Edit.';
+      }).catch(function(){st.textContent='Couldn\u2019t reach GitHub. Check your connection.';});
+  });
+  document.getElementById('ed-remove').addEventListener('click',function(){
+    try{localStorage.removeItem('dc-edit-token');}catch(e){}
+    st.textContent='The editor is off in this browser. (The token still exists on GitHub until you delete it there.)';
+  });
+})();
+</script>"""
+    write_if_changed("edit/index.html", page("Site editor | David Charles", "Turn on the in-place post editor.",
+                                             "/edit/", body, noindex=True))
+
+
 def build_work_with_me():
     """/work-with-me/ from data/work-with-me.html. Hidden (noindex, unlinked) while its first comment says DRAFT."""
     src = read("data/work-with-me.html")
@@ -1214,6 +1270,7 @@ def build_pages(ctx, entries):
     build_picker(stories, entries)
     build_timeline(stories, ctx["series"])
     build_work_with_me()
+    build_editor_setup()
     build_start_here(stories, entries, ctx["series"])
     search_records(stories, entries)
     print(f"Map: {sum(1 for s in stories if s.get('place'))} stories placed; photo wall: {n} photos; "

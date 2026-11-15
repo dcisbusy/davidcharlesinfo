@@ -149,3 +149,14 @@
   stop.addEventListener("click", reset);
   window.addEventListener("pagehide", function () { synth.cancel(); });
 })();
+
+// ---------- Site editor: only in a browser where David has set it up at /edit/ ----------
+(function () {
+  try {
+    if (localStorage.getItem("dc-edit-token") && document.querySelector(".entry-content")) {
+      var s = document.createElement("script");
+      s.src = "/assets/editor.js?v=1";
+      document.head.appendChild(s);
+    }
+  } catch (e) {}
+})();
