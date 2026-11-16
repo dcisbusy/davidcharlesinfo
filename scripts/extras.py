@@ -19,7 +19,7 @@ import re
 import sys
 from urllib.parse import quote
 
-from build import (MONTHS, PERSON, SITE, SUBSTACK, TILE_COLOURS, chips, esc, file_for, nice, page, read, write_if_changed)
+from build import (MONTHS, PERSON, SITE, SUBSTACK, TILE_COLOURS, TIP_LINE, chips, esc, file_for, nice, page, read, write_if_changed)
 
 STOP = set("""
 a about above after again against all am an and any are aren't as at be because been before being below between both
@@ -907,7 +907,7 @@ def build_books(series_list):
                 + (f'<a href="/series/{esc(b["series"])}/">Read it here as a series</a>.' if sr else "")
                 + '</p></div></div>'
                 f'<aside class="newsletter-box"><h2>Liked it?</h2><p{st_attrs}>{st_text}</p><p><a class="button primary" '
-                'href="https://davidcharles.substack.com/subscribe">Subscribe free</a></p></aside>')
+                'href="https://davidcharles.substack.com/subscribe">Subscribe free</a></p>' + TIP_LINE + '</aside>')
         book_schema = {"@context": "https://schema.org", "@type": "Book", "name": b["title"],
                        "alternativeHeadline": b["subtitle"], "description": b["description"],
                        "author": PERSON, "url": f"{SITE}/{d}/", "image": f"{SITE}/{d}/cover.jpg",

@@ -35,7 +35,7 @@ os.chdir(ROOT)
 SITE = "https://davidcharles.info"
 SUBSTACK = "https://davidcharles.substack.com"
 GOATCOUNTER = "davidcharles"    # GoatCounter site code (davidcharles.goatcounter.com). Set to "" to switch stats off.
-CSS_VERSION = "17"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
+CSS_VERSION = "18"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
 
 NEWSLETTER_DATA = "newsletter-archive/posts.json"
 BLOG_DATA = "blog-archive/index.json"
@@ -223,6 +223,11 @@ def page_text(key, default):
 _SH, _SHA = page_text("subscribe-heading", "Enjoyed this? There are more stories in the newsletter.")
 _ST, _STA = page_text("subscribe-text", "I write a free newsletter about adventure, nature and how to be human. "
                                         "Join the readers who get it in their inbox.")
+TIP_URL = "https://www.paypal.me/dcisbusy"    # PayPal tip link, shown at the end of posts, long pages and ebook pages
+_TT, _TTA = page_text("tip-text", "If a story really made your day, you can leave me a tip.")
+_TB, _TBA = page_text("tip-button", "Tip on PayPal")
+TIP_LINE = (f'<p class="tip"><span{_TTA}>{_TT}</span> <a class="tip-link" href="{TIP_URL}" rel="noopener" '
+            f'data-goatcounter-click="tip-paypal"><span{_TBA}>{_TB}</span> &rarr;</a></p>')
 _BP, _BPA = page_text("books-plug", "Or take a story with you: free ebooks and paperbacks.")
 SUBSCRIBE_BOX = (
     f'<aside class="newsletter-box subscribe-box"><h2{_SHA}>{_SH}</h2>'
@@ -233,6 +238,7 @@ SUBSCRIBE_BOX = (
     '<a class="button secondary" href="/newsletter-archive/">Read past issues</a></div>'
     '<div class="subscribe-embed"></div>'
     f'<p class="books-plug"><a href="/books/"><span{_BPA}>{_BP}</span> &rarr;</a></p>'
+    + TIP_LINE +
     '</aside>')
 
 
