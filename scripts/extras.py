@@ -808,8 +808,14 @@ def build_books(series_list):
         sr = next((x for x in series_list if x["slug"] == b["series"]), None)
         d = f'books/{b["slug"]}'
         size = lambda f: f'{max(1, round(os.path.getsize(f"{d}/{f}") / 1048576))} MB'
-        parts = f'{len(sr["items"])} chapters' if sr else ""
-        words = f', about {b["words"]:,} words' if b.get("words") else ""
+        try:   # written by make_ebook.py, so the counts match the book after its edits
+            st = json.load(open(f"{d}/stats.json", encoding="utf-8"))
+        except OSError:
+            st = {}
+        n = st.get("chapters") or (len(sr["items"]) if sr else 0)
+        w = round(st["words"], -3) if st.get("words") else b.get("words")
+        parts = f'{n} chapters' if n else ""
+        words = f', about {w:,} words' if w else ""
         body = (f'<p class="meta crumbs"><a href="/books/">Books</a></p>'
                 f'<div class="book"><img class="book-cover" src="/{d}/cover-small.jpg" alt="Cover of {esc(b["title"])}" '
                 f'width="300" height="424"><div><h1>{esc(b["title"])}</h1><p class="intro"><em>{esc(b["subtitle"])}</em></p>'

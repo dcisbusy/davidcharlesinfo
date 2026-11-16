@@ -355,6 +355,9 @@ a {{ color: inherit; text-decoration: none; }}
     for f in (f"{slug}.epub", f"{slug}.pdf"):
         print(f"{out}/{f}: {os.path.getsize(f'{out}/{f}') // 1024} KB")
     print(f"{len(chapters)} chapters, {words:,} words")
+    with open(f"{out}/stats.json", "w", encoding="utf-8") as f:   # the book page shows these
+        json.dump({"chapters": len(chapters), "words": words}, f)
+        f.write("\n")
     return words
 
 
