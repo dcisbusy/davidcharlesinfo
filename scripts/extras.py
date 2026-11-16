@@ -871,11 +871,25 @@ def build_books(series_list):
                      f'loading="lazy"><h3>{esc(b["title"])}</h3><p>{esc(b["subtitle"])}</p></a></li>')
     intro, attrs = page_text("books", "Free ebooks made from the stories on this site, to read on your phone, "
                                        "e-reader or paper.")
-    body = (f'<h1>Books</h1><p class="intro muted"><span{attrs}>{intro}</span> For my published books, see '
-            '<a href="/shop/">the shop</a>.</p>'
-            f'<ul class="book-grid">{"".join(cards)}</ul>')
-    write_if_changed("books/index.html", page("Free ebooks | David Charles",
-                                              "Free ebooks by David Charles, made from his travel stories.",
+    # Books for sale (this replaced the old /shop/ page): same cards, linking to each book's own page
+    try:
+        other = json.load(open("data/books.json", encoding="utf-8")).get("other_books", [])
+    except OSError:
+        other = []
+    other_cards = "".join(
+        f'<li><a href="{esc(o["url"])}"><img src="{esc(o["cover"])}" alt="" width="{o["size"][0]}" '
+        f'height="{o["size"][1]}" loading="lazy"><h3>{esc(o["title"])}</h3><p'
+        f'{editable("data/books.json", ["other_books", i, "subtitle"])}>{esc(o["subtitle"])}</p>'
+        f'<p class="format">{esc(o["format"])}</p></a></li>' for i, o in enumerate(other))
+    o_intro, o_attrs = page_text("books-for-sale", "Paperbacks and pay-what-you-like ebooks. Tap a cover for more "
+                                                   "details and ordering.")
+    body = (f'<h1>Books</h1><p class="intro muted"{attrs}>{intro}</p>'
+            f'<ul class="book-grid">{"".join(cards)}</ul>'
+            + (f'<h2 class="section" id="other-books">Books to buy</h2><p class="muted"{o_attrs}>{o_intro}</p>'
+               f'<ul class="book-grid">{other_cards}</ul>' if other_cards else ""))
+    write_if_changed("books/index.html", page("Books | David Charles",
+                                              "Free ebooks by David Charles, made from his travel stories, "
+                                              "plus his paperbacks and pay-what-you-like ebooks.",
                                               "/books/", body))
 
 

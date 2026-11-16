@@ -91,5 +91,68 @@
    "end_html": "<p>All of David’s stories, including the other long rides, are free to read at <a href=\"{SITE}/series/\">davidcharles.info/series</a>.</p><p>David writes short stories about adventure, nature and being human for readers of his newsletter. To join them, visit <a href=\"https://davidcharles.substack.com/subscribe\">davidcharles.substack.com</a>.</p><p>This book is free to read and share. If you enjoyed it, the best thing you can do is tell a friend.</p>",
    "words": 44000
   }
- ]
+ ],
+ "other_books": [
+  {
+   "slug": "life-to-the-lees",
+   "title": "Life to the Lees",
+   "url": "/life-to-the-lees-cycling-around-britain/",
+   "subtitle": "Cycling around Britain",
+   "format": "Paperback",
+   "cover": "/books/other/life-to-the-lees.jpg",
+   "size": [
+    300,
+    449
+   ]
+  },
+  {
+   "slug": "the-soles-of-my-shoes",
+   "title": "The Soles of My Shoes",
+   "url": "/the-soles-of-my-shoes-book/",
+   "subtitle": "A hitch-hiking travelogue",
+   "format": "Paperback",
+   "cover": "/books/other/the-soles-of-my-shoes.jpg",
+   "size": [
+    300,
+    459
+   ]
+  },
+  {
+   "slug": "hate-lycra",
+   "title": "How To Cycle 4,000 Miles When You HATE Lycra",
+   "url": "/cycle-4000-miles-when-you-hate-lycra/",
+   "subtitle": "Tips and tricks on how to cycle an awfully long way",
+   "format": "Paperback and pay-what-you-like ebook",
+   "cover": "/books/other/hate-lycra.jpg",
+   "size": [
+    300,
+    414
+   ]
+  },
+  {
+   "slug": "elevate-10",
+   "title": "Elevate #10",
+   "url": "/elevate-10/",
+   "subtitle": "The tenth edition of Elevate",
+   "format": "Paperback and pay-what-you-want ebook",
+   "cover": "/books/other/elevate-10.jpg",
+   "size": [
+    300,
+    436
+   ]
+  },
+  {
+   "slug": "elevate-open-everything",
+   "title": "Elevate: Open Everything?",
+   "url": "/elevate-open-everything/",
+   "subtitle": "Elevate 2013, with the theme “Open Everything?”",
+   "format": "Paperback and pay-what-you-like ebook",
+   "cover": "/books/other/elevate-open-everything.jpg",
+   "size": [
+    300,
+    446
+   ]
+  }
+ ],
+ "_other_books": "Books for sale, shown under the free ebooks on /books/ (this replaced the old /shop/ page). Each card links to the book's own page, where the ordering links are. Covers are 300px copies in books/other/."
 }

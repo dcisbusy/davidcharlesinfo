@@ -35,7 +35,7 @@ os.chdir(ROOT)
 SITE = "https://davidcharles.info"
 SUBSTACK = "https://davidcharles.substack.com"
 GOATCOUNTER = "davidcharles"    # GoatCounter site code (davidcharles.goatcounter.com). Set to "" to switch stats off.
-CSS_VERSION = "15"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
+CSS_VERSION = "16"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
 
 NEWSLETTER_DATA = "newsletter-archive/posts.json"
 BLOG_DATA = "blog-archive/index.json"
@@ -194,6 +194,10 @@ def page(title, description, path, body, current=None, image=None, kind="website
             f'<nav class="top"><a class="name" href="/">David Charles</a>{nav}'
             '<button class="theme-toggle" type="button">Dark</button></nav>\n'
             f"{body}\n</main>\n<script src=\"/assets/site.js?v={CSS_VERSION}\" defer></script>\n</body>\n</html>\n")
+
+
+# Old pages folded into newer ones: the old address forwards to the new place
+MOVED = {"/shop/": "/books/#other-books"}
 
 
 def redirect_page(to):
@@ -705,6 +709,9 @@ if __name__ == "__main__":
         write_if_changed("assets/latest.json", json.dumps({"title": latest["title"], "url": latest["url"],
                                                             "date": latest["date"]}, ensure_ascii=False) + "\n")
     entries = json.load(open(BLOG_DATA, encoding="utf-8"))
+    entries = [e for e in entries if e["url"] not in MOVED]
+    for old, new in MOVED.items():
+        write_if_changed(old.strip("/") + "/index.html", redirect_page(new))
     sys.modules["build"] = sys.modules[__name__]      # let extras.py share these helpers
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import extras

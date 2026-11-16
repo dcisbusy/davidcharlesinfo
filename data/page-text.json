@@ -1,9 +1,10 @@
 {
- "_note": "Short lines of text on the site that aren't in a post: the newsletter box at the end of every post and book page, and the intros on Books, Series, Search and Pick me a story. Edit here, or tap Edit on any post and change the box there.",
+ "_note": "Short lines of text on the site that aren't in a post: the newsletter box at the end of every post and book page, and the intros on Books (and its \\u201cBooks to buy\\u201d line), Series, Search and Pick me a story. Edit here, or tap Edit on any post and change the box there.",
  "books": "Free ebooks made from the stories on this site, to read on your phone, e-reader or paper.",
  "series": "Stories told in several parts, from bike rides to book clubs. Each one reads like a short book.",
  "random-story": "How long have you got? I’ll find you something from twenty years of stories.",
  "search": "Search every newsletter issue, blog post and page.",
  "subscribe-heading": "Enjoyed this? There are more stories in the newsletter.",
- "subscribe-text": "I write a free newsletter about adventure, nature and how to be human. Join the 800+ readers who get it in their inbox."
+ "subscribe-text": "I write a free newsletter about adventure, nature and how to be human. Join the 800+ readers who get it in their inbox.",
+ "books-for-sale": "Paperbacks and pay-what-you-like ebooks. Tap a cover for more details and ordering."
 }

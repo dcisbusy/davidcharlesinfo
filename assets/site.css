@@ -350,6 +350,8 @@ ul.book-grid { list-style: none; padding: 0; margin: 24px 0 0; display: grid; ga
 .book-grid img { width: 100%; height: auto; border-radius: 4px; box-shadow: 0 4px 16px rgba(0,0,0,.15); }
 .book-grid h3 { margin: 10px 0 2px; font: 600 17px/1.3 var(--ui); }
 .book-grid p { margin: 0; font: 14px/1.4 var(--ui); color: var(--muted); }
+.book-grid p.format { margin-top: 4px; font-size: 13px; }
+ul.book-grid { align-items: start; }
 @media (max-width: 600px) { .book { grid-template-columns: 1fr; } .book-cover { max-width: 220px; } }
 
 /* Sign-up box, story picker, carry on reading */
