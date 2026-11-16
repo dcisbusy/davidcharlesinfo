@@ -825,6 +825,8 @@ def build_books(series_list):
     books = load_books()
     if not books:
         return
+    st_text, st_attrs = page_text("subscribe-text", "I write a free newsletter about adventure, nature and how to be "
+                                                    "human. Join the readers who get it in their inbox.")
     cards = []
     for b in books:
         sr = next((x for x in series_list if x["slug"] == b["series"]), None)
@@ -853,8 +855,7 @@ def build_books(series_list):
                 f'Kindle, send it to your Kindle with Amazon’s Send to Kindle. Prefer reading online? '
                 + (f'<a href="/series/{esc(b["series"])}/">Read it here as a series</a>.' if sr else "")
                 + '</p></div></div>'
-                '<aside class="newsletter-box"><h2>Liked it?</h2><p>Every Friday I send a short story about '
-                'adventure, nature and being human. Join the readers of my newsletter.</p><p><a class="button primary" '
+                f'<aside class="newsletter-box"><h2>Liked it?</h2><p{st_attrs}>{st_text}</p><p><a class="button primary" '
                 'href="https://davidcharles.substack.com/subscribe">Subscribe free</a></p></aside>')
         book_schema = {"@context": "https://schema.org", "@type": "Book", "name": b["title"],
                        "alternativeHeadline": b["subtitle"], "description": b["description"],

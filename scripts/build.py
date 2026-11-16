@@ -206,10 +206,22 @@ def redirect_page(to):
 SUBSCRIBE = f'<a class="button primary" href="{SUBSTACK}/subscribe">Subscribe on Substack</a>'
 # The sign-up box at the end of posts. "Subscribe free" opens Substack's own sign-up form in place (site.js);
 # nothing loads from Substack until someone taps it. The latest issue is filled in from /assets/latest.json.
+def page_text(key, default):
+    """A line of site text from data/page-text.json, with the attributes that let the site editor change it."""
+    try:
+        t = json.load(open("data/page-text.json", encoding="utf-8")).get(key)
+    except OSError:
+        t = None
+    attrs = f' data-edit-json="data/page-text.json" data-edit-key="{html.escape(json.dumps([key]))}"'
+    return html.escape(t if t is not None else default, quote=False), attrs
+
+
+_SH, _SHA = page_text("subscribe-heading", "Enjoyed this? There are more stories in the newsletter.")
+_ST, _STA = page_text("subscribe-text", "I write a free newsletter about adventure, nature and how to be human. "
+                                        "Join the readers who get it in their inbox.")
 SUBSCRIBE_BOX = (
-    '<aside class="newsletter-box subscribe-box"><h2>Enjoyed this? There’s a new story every Friday.</h2>'
-    '<p>These days I write a free weekly newsletter about adventure, nature and how to be human. '
-    'Join the readers who get it in their inbox.</p>'
+    f'<aside class="newsletter-box subscribe-box"><h2{_SHA}>{_SH}</h2>'
+    f'<p{_STA}>{_ST}</p>'
     '<p class="latest" hidden>Latest issue: <a href="/newsletter-archive/"></a></p>'
     f'<div class="buttons"><a class="button primary subscribe-open" href="{SUBSTACK}/subscribe?utm_source='
     'davidcharles.info&amp;utm_medium=archive&amp;utm_campaign=post-end">Subscribe free</a>'
