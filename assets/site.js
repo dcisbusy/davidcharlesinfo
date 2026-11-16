@@ -153,9 +153,9 @@
 // ---------- Site editor: only in a browser where David has set it up at /edit/ ----------
 (function () {
   try {
-    if (localStorage.getItem("dc-edit-token") && document.querySelector(".entry-content, [data-edit-file]")) {
+    if (localStorage.getItem("dc-edit-token") && document.querySelector(".entry-content, [data-edit-file], [data-edit-json]")) {
       var s = document.createElement("script");
-      s.src = "/assets/editor.js?v=2";
+      s.src = "/assets/editor.js?v=3";
       document.head.appendChild(s);
     }
   } catch (e) {}

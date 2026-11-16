@@ -145,9 +145,11 @@ button.back-link{ font:inherit; font-size:0.85rem; cursor:pointer; margin-left:0
 
 <div class="about" id="about" hidden>
   <h1>Tree map</h1>
+  <div data-edit-file="trees/index.html"><!--content:start-->
   <p>Every tree the councils have mapped around Crystal Palace, Upper and South Norwood, Penge, Beckenham, Sydenham, Forest Hill and Dulwich: street trees, park trees and trees on estates. Tap a dot to find out what it is. Allow location and the map follows you on your walk.</p>
-  <p>Some places have far fewer trees than you'd expect,: the councils only record trees they look after, and some (Croydon especially) have mapped very few.</p>
+  <p>Some places have far fewer trees than you'd expect: the councils only record trees they look after, and some (Croydon especially) have mapped very few.</p>
   <p class="small">Data: <a href="https://data.london.gov.uk/dataset/local-authority-maintained-trees">London Public Realm Trees</a>, Greater London Authority and the borough councils. Contains public sector information licensed under the <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence v3.0</a>. Map &copy; OpenStreetMap contributors.</p>
+  <!--content:end--></div>
   <button class="back-link" id="aboutClose" type="button">Close</button>
 </div>
 
@@ -402,6 +404,9 @@ document.getElementById('aboutClose').addEventListener('click', () => {
   document.getElementById('about').hidden = true;
   document.getElementById('aboutBtn').setAttribute('aria-expanded', 'false');
 });
+</script>
+<script>/* the site editor, for whoever has set it up at /edit/ */
+try { if (localStorage.getItem("dc-edit-token")) { var es = document.createElement("script"); es.src = "/assets/editor.js?v=3"; document.head.appendChild(es); } } catch (e) {}
 </script>
 </body>
 </html>

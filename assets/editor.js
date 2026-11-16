@@ -1,21 +1,25 @@
-/* davidcharles.info: edit a post in place, from any browser, and save it straight to GitHub.
+/* davidcharles.info: edit a page in place, from any browser, and save it straight to GitHub.
 
    Only loads for someone who has set up a GitHub token at /edit/ (site.js checks for it).
-   It edits just the story itself: the part of the page file between <!--content:start--> and
-   <!--content:end-->. Saving commits that one file to the main branch; the "Build site" workflow
-   then republishes the site within a few minutes. Every save is a normal commit, so any edit can
-   be undone from the repository's history. */
+   It edits the words on a page where they are kept:
+   - a post or page: the part of its file between <!--content:start--> and <!--content:end-->
+   - a block with data-edit-file: the same markers, in the file it names (the homepage intro, Work with me)
+   - text with data-edit-json + data-edit-key: one line in a data file (book and series descriptions,
+     Start here notes, timeline milestones, short page intros in data/page-text.json)
+   Saving commits each changed file to the main branch; the "Build site" workflow then republishes the
+   site within a few minutes. Every save is a normal commit, so any edit can be undone from the history. */
 (function () {
   "use strict";
   var REPO = "dcisbusy/davidcharlesinfo", BRANCH = "main", API = "https://api.github.com/repos/" + REPO + "/contents/";
   var token;
   try { token = localStorage.getItem("dc-edit-token"); } catch (e) { return; }
   if (!token) return;
-  // a post's story, or a block that names its own source file (the homepage intro: data-edit-file)
-  var host = document.querySelector("[data-edit-file]") || document.querySelector(".entry-content");
-  if (!host) return;
 
-  function markers() {
+  var path = decodeURIComponent(location.pathname).replace(/^\/+/, "");
+  if (path && !/\/$/.test(path)) path += "/";
+  var pageTitle = ((document.querySelector(".entry-head h1") || document.querySelector("h1") || {}).textContent || path).trim();
+
+  function markers(host) {
     var s = null, e = null;
     for (var n = host.firstChild; n; n = n.nextSibling) {
       if (n.nodeType === 8 && n.data === "content:start") s = n;
@@ -23,14 +27,20 @@
     }
     return s && e ? [s, e] : null;
   }
-  var m = markers();
-  if (!m) return;
 
-  var path = decodeURIComponent(location.pathname).replace(/^\/+/, "");
-  if (path && !/\/$/.test(path)) path += "/";
-  var file = host.getAttribute("data-edit-file") || path + "index.html";
-  var title = host.hasAttribute("data-edit-file") ? "homepage intro" :
-    ((document.querySelector(".entry-head h1") || document.querySelector("h1") || {}).textContent || file);
+  // ---------- Find everything editable on this page ----------
+  var regions = [];
+  Array.prototype.forEach.call(document.querySelectorAll("[data-edit-file], .entry-content"), function (host) {
+    if (host.matches(".entry-content") && host.closest("[data-edit-file]")) return;
+    if (!markers(host)) return;
+    regions.push({ kind: "file", host: host, file: host.getAttribute("data-edit-file") || path + "index.html" });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-edit-json]"), function (el) {
+    var keys;
+    try { keys = JSON.parse(el.getAttribute("data-edit-key")); } catch (e) { return; }
+    regions.push({ kind: "json", host: el, file: el.getAttribute("data-edit-json"), keys: keys });
+  });
+  if (!regions.length) return;
 
   // ---------- Look ----------
   var css = document.createElement("style");
@@ -46,7 +56,7 @@
     ".dc-bar button:disabled{opacity:.5}" +
     ".dc-bar .dc-msg{flex:1 1 100%;font-size:13px;opacity:.9}" +
     ".dc-bar .dc-gap{flex:1}" +
-    ".dc-editing{outline:2px dashed #e2a13d;outline-offset:8px;border-radius:2px;min-height:2em}" +
+    ".dc-editing{outline:2px dashed #e2a13d;outline-offset:6px;border-radius:2px;min-height:1.2em;cursor:text}" +
     ".dc-editing:focus{outline-style:solid}" +
     "body.dc-on{padding-bottom:140px}";
   document.head.appendChild(css);
@@ -55,10 +65,10 @@
   btn.type = "button";
   btn.className = "dc-edit-btn";
   btn.textContent = "Edit";
-  btn.setAttribute("aria-label", "Edit this post");
+  btn.setAttribute("aria-label", "Edit this page");
   document.body.appendChild(btn);
 
-  var bar, msg, wrap, original;
+  var bar, msg, editing = false, focused = null;
 
   function el(tag, cls, text) {
     var x = document.createElement(tag);
@@ -67,64 +77,83 @@
     return x;
   }
   function say(t) { if (msg) msg.textContent = t; }
-
   function tool(label, aria, fn) {
     var b = el("button", "", label);
     b.type = "button";
     b.setAttribute("aria-label", aria);
-    // keep the text selection when a button is pressed
-    b.addEventListener("mousedown", function (e) { e.preventDefault(); });
+    b.addEventListener("mousedown", function (e) { e.preventDefault(); });   // keep the text selection
     b.addEventListener("click", fn);
     return b;
   }
   function cmd(name, value) {
-    return function () { wrap.focus(); document.execCommand(name, false, value || null); };
+    return function () {
+      if (!focused || focused.kind !== "file") { say("Bold, italic and links work in the main text only."); return; }
+      focused.wrap.focus();
+      document.execCommand(name, false, value || null);
+    };
   }
+  function current(r) { return r.kind === "file" ? r.wrap.innerHTML : r.host.textContent.replace(/\s+/g, " ").trim(); }
+  function changed() { return regions.filter(function (r) { return current(r) !== r.original; }); }
+
+  // while editing, tapping text inside a link edits it instead of following the link
+  document.addEventListener("click", function (e) {
+    if (editing && e.target.closest && e.target.closest(".dc-editing")) e.preventDefault();
+  }, true);
 
   function start() {
     if (bar) bar.remove();
-    m = markers();
-    if (!m) return;
-    wrap = el("div", "dc-editing");
-    host.insertBefore(wrap, m[1]);
-    while (m[0].nextSibling && m[0].nextSibling !== wrap) wrap.appendChild(m[0].nextSibling);
-    original = wrap.innerHTML;
-    wrap.contentEditable = "true";
+    regions.forEach(function (r) {
+      if (r.kind === "file") {
+        var m = markers(r.host);
+        if (!m) return;
+        r.wrap = el("div", "dc-editing");
+        r.host.insertBefore(r.wrap, m[1]);
+        while (m[0].nextSibling && m[0].nextSibling !== r.wrap) r.wrap.appendChild(m[0].nextSibling);
+        r.target = r.wrap;
+      } else {
+        r.target = r.host;
+        r.host.classList.add("dc-editing");
+        r.saved = r.host.innerHTML;
+      }
+      r.original = current(r);
+      r.target.contentEditable = "true";
+      r.target.addEventListener("paste", plainPaste);
+      r.target.addEventListener("focus", function () { focused = r; });
+      if (r.kind === "json") r.target.addEventListener("keydown", noEnter);
+    });
     try { document.execCommand("styleWithCSS", false, false); } catch (e) {}
-    wrap.addEventListener("paste", plainPaste);
+    editing = true;
 
     bar = el("div", "dc-bar");
     bar.setAttribute("role", "toolbar");
-    bar.setAttribute("aria-label", "Editing this post");
+    bar.setAttribute("aria-label", "Editing this page");
     var bold = tool("B", "Bold", cmd("bold")); bold.style.fontWeight = "800";
     var ital = tool("I", "Italic", cmd("italic")); ital.style.fontStyle = "italic";
     bar.appendChild(bold);
     bar.appendChild(ital);
     bar.appendChild(tool("Link", "Add a link", function () {
+      if (!focused || focused.kind !== "file") { say("Links work in the main text only."); return; }
       var u = prompt("Link address (https://…)");
-      if (u) { wrap.focus(); document.execCommand("createLink", false, u.trim()); }
+      if (u) { focused.wrap.focus(); document.execCommand("createLink", false, u.trim()); }
     }));
     bar.appendChild(tool("Unlink", "Remove a link", cmd("unlink")));
-    bar.appendChild(tool("Undo", "Undo", cmd("undo")));
+    bar.appendChild(tool("Undo", "Undo", function () { document.execCommand("undo"); }));
     bar.appendChild(el("span", "dc-gap"));
     bar.appendChild(tool("Cancel", "Cancel and throw away changes", cancel));
-    var save = tool("Save", "Save to the website", function () { saveIt(save); });
+    var save = tool("Save", "Save to the website", function () { saveAll(save); });
     save.className = "dc-save";
     bar.appendChild(save);
-    msg = el("div", "dc-msg", "Tap into the text to change it. Save publishes it in a few minutes.");
+    msg = el("div", "dc-msg", "Tap any outlined text to change it. Save publishes it in a few minutes.");
     msg.setAttribute("role", "status");
     bar.appendChild(msg);
     document.body.appendChild(bar);
     document.body.classList.add("dc-on");
     btn.hidden = true;
     window.addEventListener("beforeunload", guard);
-    wrap.focus();
   }
 
-  function guard(e) {
-    if (wrap && wrap.innerHTML !== original) { e.preventDefault(); e.returnValue = ""; }
-  }
-
+  function noEnter(e) { if (e.key === "Enter") e.preventDefault(); }   // a data line is one paragraph
+  function guard(e) { if (changed().length) { e.preventDefault(); e.returnValue = ""; } }
   function plainPaste(e) {
     // paste words only, never the styling of wherever they were copied from
     e.preventDefault();
@@ -132,20 +161,33 @@
     document.execCommand("insertText", false, t);
   }
 
+  function finishOne(r, keep) {
+    if (!r.target) return;
+    if (!keep) {
+      if (r.kind === "file") r.wrap.innerHTML = r.original; else r.host.innerHTML = r.saved;
+    }
+    r.target.removeAttribute("contenteditable");
+    r.target.removeEventListener("paste", plainPaste);
+    r.target.removeEventListener("keydown", noEnter);
+    if (r.kind === "file") {
+      while (r.wrap.firstChild) r.host.insertBefore(r.wrap.firstChild, r.wrap);
+      r.wrap.remove();
+      r.wrap = null;
+    } else {
+      r.host.classList.remove("dc-editing");
+    }
+    r.target = null;
+  }
   function finish(keep) {
-    if (!keep) wrap.innerHTML = original;
-    wrap.removeAttribute("contenteditable");
-    wrap.removeEventListener("paste", plainPaste);
-    while (wrap.firstChild) host.insertBefore(wrap.firstChild, wrap);
-    wrap.remove();
-    wrap = null;
+    regions.forEach(function (r) { finishOne(r, keep); });
+    editing = false;
+    focused = null;
     window.removeEventListener("beforeunload", guard);
     document.body.classList.remove("dc-on");
     btn.hidden = false;
   }
-
   function cancel() {
-    if (wrap.innerHTML !== original && !confirm("Throw away your changes?")) return;
+    if (changed().length && !confirm("Throw away your changes?")) return;
     bar.remove();
     finish(false);
   }
@@ -161,7 +203,7 @@
     for (var i = 0; i < bytes.length; i += CH) out += String.fromCharCode.apply(null, bytes.subarray(i, i + CH));
     return btoa(out);
   }
-  function gh(method, body) {
+  function gh(file, method, body) {
     return fetch(API + file.split("/").map(encodeURIComponent).join("/") + (method === "GET" ? "?ref=" + BRANCH : ""), {
       method: method,
       headers: { "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json",
@@ -172,34 +214,69 @@
       return r.json().catch(function () { return {}; }).then(function (j) { j._status = r.status; return j; });
     });
   }
-  // the story as a browser reads it, so the version on GitHub can be compared with what was opened
-  function normalise(html) {
+  function normalise(html) {   // the HTML as a browser reads it, to compare GitHub's version with what was opened
     var t = document.createElement("template");
     t.innerHTML = html;
     return t.innerHTML;
   }
+  function getKey(obj, keys) {
+    return keys.reduce(function (o, k) { return o == null ? undefined : o[k]; }, obj);
+  }
 
-  function saveIt(save) {
-    var html = wrap.innerHTML.replace(/&nbsp;/g, "\u00a0");   // keep the file as it was written
-    if (wrap.innerHTML === original) { say("No changes to save."); return; }
+  // change one file's text for all the regions of this page kept in it
+  function apply(text, rs) {
+    rs.forEach(function (r) {
+      if (r.kind === "file") {
+        var a = "<!--content:start-->", z = "<!--content:end-->", i = text.indexOf(a), j = text.indexOf(z);
+        if (i < 0 || j < i) throw new Error("This page can't be edited here: its markers are missing.");
+        if (normalise(text.slice(i + a.length, j)) !== normalise(r.original)) {
+          throw new Error("This page changed on GitHub since you opened it. Copy your changes somewhere, reload, and edit again.");
+        }
+        text = text.slice(0, i + a.length) + r.wrap.innerHTML.replace(/&nbsp;/g, " ") + text.slice(j);
+      } else {
+        var data = JSON.parse(text), was = getKey(data, r.keys), now = current(r);
+        if (typeof was !== "string" || was.replace(/\s+/g, " ").trim() !== r.original) {
+          throw new Error("“" + r.original.slice(0, 40) + "…” changed on GitHub since you opened it. Reload and edit again.");
+        }
+        // swap just that string in the file, so the rest of its layout stays as it was
+        var from = JSON.stringify(was), to = JSON.stringify(now), at = text.indexOf(from);
+        if (at >= 0 && text.indexOf(from, at + 1) < 0) {
+          text = text.slice(0, at) + to + text.slice(at + from.length);
+        } else {
+          var parent = getKey(data, r.keys.slice(0, -1));
+          parent[r.keys[r.keys.length - 1]] = now;
+          text = JSON.stringify(data, null, 1) + "\n";
+        }
+        if (getKey(JSON.parse(text), r.keys) !== now) throw new Error("Couldn't change that line safely; nothing was saved.");
+      }
+    });
+    return text;
+  }
+
+  function saveAll(save) {
+    var todo = changed();
+    if (!todo.length) { say("No changes to save."); return; }
+    var files = [];
+    todo.forEach(function (r) { if (files.indexOf(r.file) < 0) files.push(r.file); });
     save.disabled = true;
     say("Saving…");
-    gh("GET").then(function (f) {
-      if (f._status === 401 || f._status === 403) throw new Error("GitHub didn't accept the token. Set it up again at davidcharles.info/edit/");
-      if (f._status !== 200 || !f.content) throw new Error("Couldn't fetch this page from GitHub (" + f._status + ").");
-      var text = b64ToText(f.content), a = "<!--content:start-->", z = "<!--content:end-->";
-      var i = text.indexOf(a), j = text.indexOf(z);
-      if (i < 0 || j < i) throw new Error("This page can't be edited here: its story markers are missing.");
-      if (normalise(text.slice(i + a.length, j)) !== normalise(original)) {
-        throw new Error("This post changed on GitHub since you opened it. Copy your changes somewhere, reload, and edit again.");
-      }
-      var updated = text.slice(0, i + a.length) + html + text.slice(j);
-      return gh("PUT", { message: "Edit “" + title.trim() + "” from the site editor",
-                         content: textToB64(updated), sha: f.sha, branch: BRANCH });
-    }).then(function (r) {
-      if (r._status === 409) throw new Error("Someone saved this file a moment ago. Reload and try again.");
-      if (r._status !== 200 && r._status !== 201) throw new Error("GitHub refused the save (" + r._status + (r.message ? ": " + r.message : "") + ").");
-      original = wrap.innerHTML;
+    var chain = Promise.resolve();
+    files.forEach(function (file) {
+      chain = chain.then(function () {
+        return gh(file, "GET").then(function (f) {
+          if (f._status === 401 || f._status === 403) throw new Error("GitHub didn't accept the token. Set it up again at davidcharles.info/edit/");
+          if (f._status !== 200 || !f.content) throw new Error("Couldn't fetch " + file + " from GitHub (" + f._status + ").");
+          var updated = apply(b64ToText(f.content), todo.filter(function (r) { return r.file === file; }));
+          return gh(file, "PUT", { message: "Edit “" + pageTitle + "” from the site editor",
+                                   content: textToB64(updated), sha: f.sha, branch: BRANCH });
+        }).then(function (r) {
+          if (r._status === 409) throw new Error("Someone saved " + file + " a moment ago. Reload and try again.");
+          if (r._status !== 200 && r._status !== 201) throw new Error("GitHub refused the save (" + r._status + (r.message ? ": " + r.message : "") + ").");
+          todo.forEach(function (x) { if (x.file === file) { x.original = current(x); x.saved = x.host.innerHTML; } });
+        });
+      });
+    });
+    chain.then(function () {
       finish(true);
       say("Saved. The website updates in about 3 minutes.");
       save.remove();

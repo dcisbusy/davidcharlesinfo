@@ -799,6 +799,28 @@ def book_button(series_slug):
     return f' <a class="button" href="/books/{esc(b["slug"])}/">Read it as a free ebook</a>' if b else ""
 
 
+
+# ---------------------------------------------------------------- the site editor's hooks
+def editable(file, keys):
+    """Attributes that let the in-place editor (assets/editor.js) change this text in its JSON source file."""
+    return f' data-edit-json="{file}" data-edit-key="{esc(json.dumps(keys))}"'
+
+
+def page_text(key, default):
+    """A line of page text David can edit, kept in data/page-text.json. Returns (text, attributes)."""
+    try:
+        t = json.load(open("data/page-text.json", encoding="utf-8")).get(key)
+    except OSError:
+        t = None
+    return esc(t if t is not None else default), editable("data/page-text.json", [key])
+
+
+def index_of(file, list_key, slug):
+    try:
+        return next(i for i, x in enumerate(json.load(open(file, encoding="utf-8"))[list_key]) if x.get("slug") == slug)
+    except (OSError, StopIteration, KeyError):
+        return None
+
 def build_books(series_list):
     books = load_books()
     if not books:
@@ -806,6 +828,8 @@ def build_books(series_list):
     cards = []
     for b in books:
         sr = next((x for x in series_list if x["slug"] == b["series"]), None)
+        bi = index_of("data/books.json", "books", b["slug"])
+        ed = (lambda k: editable("data/books.json", ["books", bi, k])) if bi is not None else (lambda k: "")
         d = f'books/{b["slug"]}'
         size = lambda f: f'{max(1, round(os.path.getsize(f"{d}/{f}") / 1048576))} MB'
         try:   # written by make_ebook.py, so the counts match the book after its edits
@@ -818,8 +842,8 @@ def build_books(series_list):
         words = f', about {w:,} words' if w else ""
         body = (f'<p class="meta crumbs"><a href="/books/">Books</a></p>'
                 f'<div class="book"><img class="book-cover" src="/{d}/cover-small.jpg" alt="Cover of {esc(b["title"])}" '
-                f'width="300" height="424"><div><h1>{esc(b["title"])}</h1><p class="intro"><em>{esc(b["subtitle"])}</em></p>'
-                f'<p>{esc(b["description"])}</p><p class="muted">{parts}{words}. Free to read and share.</p>'
+                f'width="300" height="424"><div><h1>{esc(b["title"])}</h1><p class="intro"><em{ed("subtitle")}>{esc(b["subtitle"])}</em></p>'
+                f'<p{ed("description")}>{esc(b["description"])}</p><p class="muted">{parts}{words}. Free to read and share.</p>'
                 f'<div class="buttons"><a class="button primary" href="/{d}/{b["slug"]}.epub" download>Download ebook '
                 f'(EPUB, {size(b["slug"] + ".epub")})</a> <a class="button" href="/{d}/{b["slug"]}.pdf" download>'
                 f'PDF to read or print ({size(b["slug"] + ".pdf")})</a></div>'
@@ -842,8 +866,10 @@ def build_books(series_list):
             continue
         cards.append(f'<li><a href="/{d}/"><img src="/{d}/cover-small.jpg" alt="" width="300" height="424" '
                      f'loading="lazy"><h3>{esc(b["title"])}</h3><p>{esc(b["subtitle"])}</p></a></li>')
-    body = ('<h1>Books</h1><p class="intro muted">Free ebooks made from the stories on this site, to read on your '
-            'phone, e-reader or paper. For my published books, see <a href="/shop/">the shop</a>.</p>'
+    intro, attrs = page_text("books", "Free ebooks made from the stories on this site, to read on your phone, "
+                                       "e-reader or paper.")
+    body = (f'<h1>Books</h1><p class="intro muted"><span{attrs}>{intro}</span> For my published books, see '
+            '<a href="/shop/">the shop</a>.</p>'
             f'<ul class="book-grid">{"".join(cards)}</ul>')
     write_if_changed("books/index.html", page("Free ebooks | David Charles",
                                               "Free ebooks by David Charles, made from his travel stories.",
@@ -877,8 +903,10 @@ def build_picker(stories, entries):
     topics = ('<button type="button" class="chip on" data-topic="">Anything</button>'
               + "".join(f'<button type="button" class="chip" data-topic="{k}">{esc(n)}</button>'
                         for k, n, _ in TOPICS))
+    rs_intro, rs_attrs = page_text("random-story", "How long have you got? I’ll find you something from twenty "
+                                                   "years of stories.")
     body = f"""<h1>Pick me a story</h1>
-<p class="intro muted">How long have you got? I’ll find you something from twenty years of stories.</p>
+<p class="intro muted"{rs_attrs}>{rs_intro}</p>
 <div class="picker">
 <p class="picker-label">Time</p><div class="chips" id="times">{times}</div>
 <p class="picker-label">About</p><div class="chips" id="topics">{topics}</div>
@@ -944,8 +972,10 @@ def build_series_pages(series_list):
         hero = (f'<figure class="series-hero"><img src="{esc(cover["photo"])}" alt=""></figure>' if cover else "")
         years = f'{first["date"][:4]}–{sr["items"][-1]["date"][:4]}' if first["date"][:4] != sr["items"][-1]["date"][:4] \
             else first["date"][:4]
+        si = index_of("data/series.json", "series", sr["slug"])
+        sed = editable("data/series.json", ["series", si, "description"]) if si is not None else ""
         body = (f'<p class="meta crumbs"><a href="/series/">Series</a></p>{hero}<h1>{esc(sr["name"])}</h1>\n'
-                f'<p class="intro">{esc(sr["description"])}</p>\n<p class="intro muted">{len(sr["items"])} parts, '
+                f'<p class="intro"{sed}>{esc(sr["description"])}</p>\n<p class="intro muted">{len(sr["items"])} parts, '
                 f'{years}, in order.</p>\n<div class="buttons"><a class="button primary" href="{esc(first["url"])}">'
                 f'Start at part 1</a>{book_button(sr["slug"])}</div>\n'
                 f'<p class="continue" data-series="{esc(sr["slug"])}" hidden></p>\n<ol class="series-cards">{rows}</ol>')
@@ -958,10 +988,12 @@ def build_series_pages(series_list):
                  else next((it for it in sr["items"] if it.get("photo")), sr["items"][0]))
         cards.append(
             f'<li><a href="/series/{esc(sr["slug"])}/">{pic(cover)}<div><h3>{esc(sr["name"])}</h3>'
-            f'<p>{esc(sr["description"])}</p><span class="muted">{len(sr["items"])} parts &middot; '
+            f'<p{editable("data/series.json", ["series", index_of("data/series.json", "series", sr["slug"]), "description"])}>'
+            f'{esc(sr["description"])}</p><span class="muted">{len(sr["items"])} parts &middot; '
             f'{sr["items"][0]["date"][:4]}</span></div></a></li>')
-    body = ('<h1>Series</h1>\n<p class="intro muted">Stories told in several parts, from bike rides to book '
-            f'clubs. Each one reads like a short book.</p>\n<ul class="series-covers">{"".join(cards)}</ul>')
+    intro, attrs = page_text("series", "Stories told in several parts, from bike rides to book clubs. Each one "
+                                        "reads like a short book.")
+    body = (f'<h1>Series</h1>\n<p class="intro muted"{attrs}>{intro}</p>\n<ul class="series-covers">{"".join(cards)}</ul>')
     write_if_changed("series/index.html", page("Series | David Charles", "Stories by David Charles told in parts.",
                                                "/series/", body, "/series/"))
 
@@ -971,7 +1003,7 @@ def build_series_pages(series_list):
 def build_editor_setup():
     """/edit/: switches on the in-place post editor (assets/editor.js) in this browser. Not linked or indexed."""
     body = """<h1>Site editor</h1>
-<p>This turns on an <strong>Edit</strong> button on every post, in this browser only. Tap it, change the words,
+<p>This turns on an <strong>Edit</strong> button on every post and page with words of your own, in this browser only. Tap it, change the words,
 press Save, and the website updates in about three minutes. Every save is recorded on GitHub, so nothing is
 ever lost.</p>
 <h2 class="section">1. Make a key on GitHub (once)</h2>
@@ -992,9 +1024,10 @@ ever lost.</p>
 <p id="ed-status" role="status" class="muted"></p>
 </form>
 <h2 class="section">3. Edit</h2>
-<p>Open any post on the site and tap <strong>Edit</strong> at the bottom right. Bold, italic and links are on the
-toolbar; Undo and Cancel are there if something goes wrong. Titles, dates and photos aren't editable here: ask Claude
-for those.</p>
+<p>Open any post or page and tap <strong>Edit</strong> at the bottom right: everything you can change gets a dashed
+outline. Bold, italic and links are on the toolbar for the main text (short lines such as book and series
+descriptions are plain text); Undo and Cancel are there if something goes wrong. Titles, dates, photos and counted
+lines aren't editable here: ask Claude for those.</p>
 <p class="muted small">The key stays in this browser's storage. If your phone is lost, delete the token on GitHub
 (Settings &rarr; Developer settings &rarr; Fine-grained tokens) and it stops working at once.</p>
 <script>
@@ -1011,7 +1044,7 @@ for those.</p>
         if(x[0]!==200){st.textContent='GitHub didn\u2019t accept that token ('+x[0]+'). Check it was copied whole and gives access to davidcharlesinfo.';return;}
         if(x[1].permissions&&!x[1].permissions.push){st.textContent='That token can read the site but not save to it: set Contents to \u201cRead and write\u201d.';return;}
         try{localStorage.setItem('dc-edit-token',t);}catch(e){st.textContent='This browser won\u2019t store the token (private browsing?).';return;}
-        inp.value=''; st.textContent='Done: the editor is on in this browser. Open any post and tap Edit.';
+        inp.value=''; st.textContent='Done: the editor is on in this browser. Open any post or page and tap Edit.';
       }).catch(function(){st.textContent='Couldn\u2019t reach GitHub. Check your connection.';});
   });
   document.getElementById('ed-remove').addEventListener('click',function(){
@@ -1020,7 +1053,7 @@ for those.</p>
   });
 })();
 </script>"""
-    write_if_changed("edit/index.html", page("Site editor | David Charles", "Turn on the in-place post editor.",
+    write_if_changed("edit/index.html", page("Site editor | David Charles", "Turn on the in-place page editor.",
                                              "/edit/", body, noindex=True))
 
 
@@ -1030,7 +1063,9 @@ def build_work_with_me():
     if not src:
         return
     draft = bool(re.match(r"\s*<!--[^>]*\bDRAFT\b", src))
-    body = re.sub(r"<!--.*?-->\s*", "", src, flags=re.S).strip()
+    body = re.sub(r"<!--(?!content:).*?-->\s*", "", src, flags=re.S).strip()
+    if "<!--content:start-->" in body:      # the editor can change it in place
+        body = f'<div data-edit-file="data/work-with-me.html">{body}</div>'
     write_if_changed("work-with-me/index.html", page(
         "Work with me | David Charles",
         "Nature connection, wilderness therapy, talks, writing, editing and comedy writing with David Charles.",
@@ -1072,11 +1107,13 @@ def build_timeline(stories, series_list):
         counts = " &middot; ".join(t for t in (f"{nb} blog post{'s' * (nb != 1)}" if nb else "",
                                                 f"{nn} newsletter issue{'s' * (nn != 1)}" if nn else "") if t)
         events = []
-        for m in sorted((m for m in miles if m["date"][:4] == y), key=lambda m: m["date"]):
-            t = esc(m["title"])
+        for mi, m in sorted(((i, m) for i, m in enumerate(miles) if m["date"][:4] == y), key=lambda x: x[1]["date"]):
+            t = f'<span{editable("data/timeline.json", ["milestones", mi, "title"])}>{esc(m["title"])}</span>'
             if m.get("url"):
                 t = f'<a href="{esc(m["url"])}">{t}</a>'
-            events.append((m["date"], f'<li class="milestone"><strong>{t}</strong> {esc(m.get("text", ""))}</li>'))
+            events.append((m["date"], f'<li class="milestone"><strong>{t}</strong> '
+                                      f'<span{editable("data/timeline.json", ["milestones", mi, "text"])}>'
+                                      f'{esc(m.get("text", ""))}</span></li>'))
         for sr in starts.get(y, []):
             events.append((sr["items"][0]["date"],
                            f'<li class="series-start"><strong><a href="/series/{esc(sr["slug"])}/">{esc(sr["name"])}</a>'
@@ -1131,9 +1168,9 @@ def build_start_here(stories, entries, series_list):
         return f'<span class="ph" style="background:{colour}" aria-hidden="true"></span>'
 
     themes = []
-    for th in conf["themes"]:
+    for ti, th in enumerate(conf["themes"]):
         cards = []
-        for it in th["items"]:
+        for ii, it in enumerate(th["items"]):
             u = it["url"]
             st = by_blog.get(u) or by_url.get(u)
             if u in slugs:
@@ -1156,7 +1193,8 @@ def build_start_here(stories, entries, series_list):
             else:
                 print("Start here: can't find", u)
                 continue
-            cards.append({"title": title, "url": url, "date": date, "photo": photo, "meta": meta, "note": it["note"]})
+            cards.append({"title": title, "url": url, "date": date, "photo": photo, "meta": meta, "note": it["note"],
+                          "edit": editable("data/start-here.json", ["themes", ti, "items", ii, "note"])})
         if cards:
             themes.append((th, cards))
 
@@ -1172,7 +1210,7 @@ def build_start_here(stories, entries, series_list):
     for th, cards in themes:
         lis = "".join(
             f'<li><a href="{esc(c["url"])}">{pic(c["photo"], c["title"])}<div><h3>{esc(c["title"])}</h3>'
-            f'<p>{esc(c["note"])}</p><span class="meta">{esc(c["date"][:4])}'
+            f'<p{c["edit"]}>{esc(c["note"])}</p><span class="meta">{esc(c["date"][:4])}'
             f'{" &middot; " + c["meta"] if c["meta"] else ""}</span></div></a></li>' for c in cards)
         sections.append(f'<h2 class="section" id="{anchor(th["name"])}">{esc(th["name"])}</h2>\n'
                         f'<ul class="sh-picks">{lis}</ul>')
@@ -1183,7 +1221,7 @@ def build_start_here(stories, entries, series_list):
                     for u, t in explore if os.path.exists(f'cards/{u.strip("/")}.jpg'))
     body = ((f'<header class="sh-hero"><img src="{esc(hero)}" alt="" fetchpriority="high">' if hero
              else '<header class="sh-hero plain">') +
-            f'<div><h1>Start here</h1><p>{esc(conf["intro"])}</p></div></header>\n'
+            f'<div><h1>Start here</h1><p{editable("data/start-here.json", ["intro"])}>{esc(conf["intro"])}</p></div></header>\n'
             f'<ul class="sh-doors">{doors}</ul>\n'
             '<p class="quick-pick">Got <a href="/random-story/?m=2">2 minutes</a>, <a href="/random-story/?m=5">5</a>, '
             '<a href="/random-story/?m=10">10</a> or <a href="/random-story/?m=20">20</a>? '
@@ -1215,7 +1253,8 @@ def search_records(stories, entries):
                          "type": "Page"})
     with open("_search_records.json", "w", encoding="utf-8") as f:
         json.dump(recs, f, ensure_ascii=False)
-    body = ('<h1>Search</h1>\n<p class="intro muted">Search every newsletter issue, blog post and page.</p>\n'
+    intro, attrs = page_text("search", "Search every newsletter issue, blog post and page.")
+    body = (f'<h1>Search</h1>\n<p class="intro muted"{attrs}>{intro}</p>\n'
             '<div id="search"></div>\n<link rel="stylesheet" href="/pagefind/pagefind-ui.css">\n'
             '<script src="/pagefind/pagefind-ui.js"></script>\n'
             '<script>window.addEventListener("DOMContentLoaded",function(){var ui=new PagefindUI({element:"#search",'
