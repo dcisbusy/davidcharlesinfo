@@ -103,7 +103,8 @@
    "size": [
     300,
     449
-   ]
+   ],
+   "series": "cycling-round-britain"
   },
   {
    "slug": "the-soles-of-my-shoes",
@@ -115,7 +116,8 @@
    "size": [
     300,
     459
-   ]
+   ],
+   "series": "hitchhiking"
   },
   {
    "slug": "hate-lycra",
@@ -154,5 +156,5 @@
    ]
   }
  ],
- "_other_books": "Books for sale, shown under the free ebooks on /books/ (this replaced the old /shop/ page). Each card links to the book's own page, where the ordering links are. Covers are 300px copies in books/other/."
+ "_other_books": "Books for sale, shown under the free ebooks on /books/ (this replaced the old /shop/ page). Each card links to the book's own page, where the ordering links are. Covers are 300px copies in books/other/. An optional 'series' puts a card for the book on that series page."
 }

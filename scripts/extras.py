@@ -508,6 +508,15 @@ def build_numbers(stories, mentions):
     def link(s):
         return f'<a href="{esc(s["url"])}">{esc(s["title"])}</a> ({nice(s["date"])})'
 
+    try:   # free ebooks plus books for sale
+        bj = json.load(open("data/books.json", encoding="utf-8"))
+        n_books = len([b for b in bj["books"] if not b.get("draft")]) + len(bj.get("other_books", []))
+    except (OSError, KeyError):
+        n_books = 0
+    try:
+        n_series = len(json.load(open("data/series.json", encoding="utf-8"))["series"])
+    except (OSError, KeyError):
+        n_series = 0
     top_words = vocab.most_common(60)
     mxw = top_words[0][1] if top_words else 1
     cloud = " ".join(f'<span style="font-size:{0.85 + 1.4 * (c / mxw) ** 0.6:.2f}em" title="{c:,} times">{esc(w)}</span>'
@@ -515,11 +524,13 @@ def build_numbers(stories, mentions):
     body = f"""<h1>20 years in numbers</h1>
 <p class="intro muted">Every blog post and newsletter issue since {years[0]}, counted. Where a blog post is a copy of
 a newsletter issue, it's counted once.</p>
-<div class="stat-tiles">
+<div class="stat-tiles six">
 {tile(f"{len(stories):,}", "stories")}
 {tile(f"{total_words:,}", "words")}
 {tile(len(years), "years of writing")}
 {tile(len(places), "places on the map")}
+<a class="tile-stat tile-link" href="/series/"><b>{n_series}</b><span>series &rarr;</span></a>
+<a class="tile-stat tile-link" href="/books/"><b>{n_books}</b><span>books &rarr;</span></a>
 </div>
 
 <h2 class="section">Stories per year</h2>
@@ -794,9 +805,49 @@ def load_books():
     return [b for b in books if os.path.exists(f'books/{b["slug"]}/{b["slug"]}.epub')]
 
 
+def series_book_card(series_slug):
+    """A card for the book made from (or about) this series, shown at the foot of the series page."""
+    b = next((b for b in load_books() if b["series"] == series_slug and not b.get("draft")), None)
+    if b:
+        return (f'<aside class="series-book"><a href="/books/{esc(b["slug"])}/"><img src="/books/{esc(b["slug"])}/cover-small.jpg" '
+                f'alt="" width="120" height="170" loading="lazy"><div><span class="kicker">Free ebook</span>'
+                f'<h3>{esc(b["title"])}</h3><p>{esc(b["subtitle"])}</p><span class="button primary">Read it as a free ebook'
+                f'</span></div></a></aside>')
+    try:
+        o = next((o for o in json.load(open("data/books.json", encoding="utf-8")).get("other_books", [])
+                  if o.get("series") == series_slug), None)
+    except OSError:
+        o = None
+    if o:
+        return (f'<aside class="series-book"><a href="{esc(o["url"])}"><img src="{esc(o["cover"])}" alt="" width="120" '
+                f'loading="lazy"><div><span class="kicker">The book</span><h3>{esc(o["title"])}</h3>'
+                f'<p>{esc(o["subtitle"])}</p><span class="button primary">More about the book</span></div></a></aside>')
+    return ""
+
+
+def series_book_link(series_slug):
+    """' The book →' after a series on the timeline, when there's a book for it."""
+    b = next((b for b in load_books() if b["series"] == series_slug and not b.get("draft")), None)
+    if b:
+        return f' <a class="tl-book" href="/books/{esc(b["slug"])}/">The book &rarr;</a>'
+    try:
+        o = next((o for o in json.load(open("data/books.json", encoding="utf-8")).get("other_books", [])
+                  if o.get("series") == series_slug), None)
+    except OSError:
+        o = None
+    return f' <a class="tl-book" href="/books/#{esc(o["slug"])}">The book &rarr;</a>' if o else ""
+
+
 def book_button(series_slug):
     b = next((b for b in load_books() if b["series"] == series_slug and not b.get("draft")), None)
-    return f' <a class="button" href="/books/{esc(b["slug"])}/">Read it as a free ebook</a>' if b else ""
+    if b:
+        return f' <a class="button" href="/books/{esc(b["slug"])}/">Read it as a free ebook</a>'
+    try:
+        o = next((o for o in json.load(open("data/books.json", encoding="utf-8")).get("other_books", [])
+                  if o.get("series") == series_slug), None)
+    except OSError:
+        o = None
+    return f' <a class="button" href="{esc(o["url"])}">The book: {esc(o["title"])}</a>' if o else ""
 
 
 
@@ -877,7 +928,7 @@ def build_books(series_list):
     except OSError:
         other = []
     other_cards = "".join(
-        f'<li><a href="{esc(o["url"])}"><img src="{esc(o["cover"])}" alt="" width="{o["size"][0]}" '
+        f'<li id="{esc(o["slug"])}"><a href="{esc(o["url"])}"><img src="{esc(o["cover"])}" alt="" width="{o["size"][0]}" '
         f'height="{o["size"][1]}" loading="lazy"><h3>{esc(o["title"])}</h3><p'
         f'{editable("data/books.json", ["other_books", i, "subtitle"])}>{esc(o["subtitle"])}</p>'
         f'<p class="format">{esc(o["format"])}</p></a></li>' for i, o in enumerate(other))
@@ -995,7 +1046,8 @@ def build_series_pages(series_list):
                 f'<p class="intro"{sed}>{esc(sr["description"])}</p>\n<p class="intro muted">{len(sr["items"])} parts, '
                 f'{years}, in order.</p>\n<div class="buttons"><a class="button primary" href="{esc(first["url"])}">'
                 f'Start at part 1</a>{book_button(sr["slug"])}</div>\n'
-                f'<p class="continue" data-series="{esc(sr["slug"])}" hidden></p>\n<ol class="series-cards">{rows}</ol>')
+                f'<p class="continue" data-series="{esc(sr["slug"])}" hidden></p>\n<ol class="series-cards">{rows}</ol>'
+                + series_book_card(sr["slug"]))
         write_if_changed(f'series/{sr["slug"]}/index.html', page(f'{sr["name"]} | David Charles', sr["description"],
                                                                  f'/series/{sr["slug"]}/', body,
                                                                  image=cover["photo"] if cover else None))
@@ -1130,11 +1182,14 @@ def build_timeline(stories, series_list):
                 t = f'<a href="{esc(m["url"])}">{t}</a>'
             events.append((m["date"], f'<li class="milestone"><strong>{t}</strong> '
                                       f'<span{editable("data/timeline.json", ["milestones", mi, "text"])}>'
-                                      f'{esc(m.get("text", ""))}</span></li>'))
+                                      f'{esc(m.get("text", ""))}</span>'
+                                      + (f' <a class="tl-book" href="{esc(m["book"])}">The book &rarr;</a>' if m.get("book") else "")
+                                      + '</li>'))
         for sr in starts.get(y, []):
             events.append((sr["items"][0]["date"],
                            f'<li class="series-start"><strong><a href="/series/{esc(sr["slug"])}/">{esc(sr["name"])}</a>'
-                           f'</strong> {esc(sr["description"])} <span class="muted">{len(sr["items"])} parts</span></li>'))
+                           f'</strong> {esc(sr["description"])} <span class="muted">{len(sr["items"])} parts</span>'
+                           + series_book_link(sr["slug"]) + '</li>'))
         events.sort(key=lambda e: e[0])
         # up to three photos: series openers and Start here picks first, then the longest stories
         cands = sorted(ys, key=lambda x: (x["url"] not in firsts and x["url"] not in picks,

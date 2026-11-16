@@ -35,7 +35,7 @@ os.chdir(ROOT)
 SITE = "https://davidcharles.info"
 SUBSTACK = "https://davidcharles.substack.com"
 GOATCOUNTER = "davidcharles"    # GoatCounter site code (davidcharles.goatcounter.com). Set to "" to switch stats off.
-CSS_VERSION = "16"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
+CSS_VERSION = "17"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
 
 NEWSLETTER_DATA = "newsletter-archive/posts.json"
 BLOG_DATA = "blog-archive/index.json"
@@ -52,7 +52,7 @@ HOME_DOORS = [                                                         # homepag
     ("/timeline/", "Twenty-year timeline", "/wp-content/uploads/2018/10/Me-2007-to-2018.jpg"),
     ("/photos/", "Photo wall", "/wp-content/uploads/2016/02/IMG_2598.jpg"),
     ("/random-story/", "Pick me a story", "/wp-content/uploads/2016/01/IMG_1379.jpg"),
-    ("/books/", "Free ebooks", "/books/cycling-to-the-sahara/cover.jpg"),
+    ("/books/", "Books", "/books/cycling-to-the-sahara/cover.jpg"),
 ]
 TILE_COLOURS = ["#2f6b4f", "#4a7a8c", "#8a6d3b", "#5b6e3a", "#7a4e5c", "#3f5a7a", "#9a5b34", "#4f6f63"]
 HEADERS = {
@@ -110,7 +110,7 @@ def slugify(s):
 # ---------------------------------------------------------------- page template
 
 NAV = [("/start-here/", "Start here"), ("/newsletter-archive/", "Newsletter"), ("/blog-archive/", "Archive"),
-       ("/series/", "Series"), ("/map/", "Map"), ("/trees/", "Trees"), ("/photos/", "Photos"), ("/search/", "Search")]
+       ("/series/", "Series"), ("/books/", "Books"), ("/map/", "Map"), ("/trees/", "Trees"), ("/photos/", "Photos"), ("/search/", "Search")]
 
 
 # Search Console: paste the content="..." code Google gives for the HTML-tag method here.
@@ -223,6 +223,7 @@ def page_text(key, default):
 _SH, _SHA = page_text("subscribe-heading", "Enjoyed this? There are more stories in the newsletter.")
 _ST, _STA = page_text("subscribe-text", "I write a free newsletter about adventure, nature and how to be human. "
                                         "Join the readers who get it in their inbox.")
+_BP, _BPA = page_text("books-plug", "Or take a story with you: free ebooks and paperbacks.")
 SUBSCRIBE_BOX = (
     f'<aside class="newsletter-box subscribe-box"><h2{_SHA}>{_SH}</h2>'
     f'<p{_STA}>{_ST}</p>'
@@ -231,7 +232,7 @@ SUBSCRIBE_BOX = (
     'davidcharles.info&amp;utm_medium=archive&amp;utm_campaign=post-end">Subscribe free</a>'
     '<a class="button secondary" href="/newsletter-archive/">Read past issues</a></div>'
     '<div class="subscribe-embed"></div>'
-    '<p class="small muted">Plus: <a href="/books/cycling-to-the-sahara/">Cycling to the Sahara</a>, a free ebook.</p>'
+    f'<p class="books-plug"><a href="/books/"><span{_BPA}>{_BP}</span> &rarr;</a></p>'
     '</aside>')
 
 
