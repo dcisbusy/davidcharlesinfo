@@ -1,7 +1,7 @@
 {
- "_about": "Chapter-by-chapter edits for the ebooks, made by scripts/make_ebook.py once a book's 'approved' is true. Keyed by chapter URL: drop (whole chapter, with the reason), title (new title from David's own words), cut (paragraphs by their opening words, photos by file name), cut_text (phrases cut inside a kept paragraph). Review pages: claude.ai artifacts 'Cycling towards Syria – proposed edit' and 'Thighs of Steel – proposed edit'.",
+ "_about": "Chapter-by-chapter edits for the ebooks, made by scripts/make_ebook.py once a book's 'approved' is true. Keyed by chapter URL: drop (whole chapter, with the reason), title (new title from David's own words), cut (paragraphs by their opening words, photos by file name), cut_text (phrases cut inside a kept paragraph), replace (phrases reworded by David). Review pages: claude.ai artifacts 'Cycling towards Syria – proposed edit' and 'Thighs of Steel – proposed edit'.",
  "cycling-towards-syria": {
-  "approved": false,
+  "approved": true,
   "chapters": {
    "/adventure/cycle-touring/cycling-towards-syria/cycling-towards-syria/": {
     "cut": [
@@ -96,7 +96,7 @@
   }
  },
  "thighs-of-steel": {
-  "approved": false,
+  "approved": true,
   "chapters": {
    "https://davidcharles.substack.com/p/1396125_-22-thighs-of-steel": {
     "title": "On the road",
@@ -725,13 +725,15 @@
     ]
    },
    "https://davidcharles.substack.com/p/admin-or-admiration": {
-    "cut": [
+    "replace": [
      {
-      "text": "I swear, two nights ago, I dreamt that Philip Schofield agreed to sign"
+      "from": "Philip Schofield agreed to sign",
+      "to": "a famous 90s TV presenter said he would sign"
+     },
+     {
+      "from": "Schofield, aside,",
+      "to": "Nightmares aside,"
      }
-    ],
-    "cut_text": [
-     "Schofield, aside,"
     ]
    },
    "https://davidcharles.substack.com/p/talking-politics-with-strangers": {

@@ -299,7 +299,7 @@ build runs by itself afterwards and the live site updates a couple of minutes la
 
 - **Cycling Round Britain (Twice) ebook:** built but hidden (`draft: true` in `data/books.json`), because a free ebook might compete with *Life to the Lees* and the planned book *Coasting*. Delete the draft line to publish it.
 - **Ebook introductions and endings** are drafts in `data/books.json`; rewrite them in your own words.
-- **Cycling towards Syria and Thighs of Steel edits (Nov 2026):** proposed cuts are in `data/book-edits.json`, waiting for approval (`"approved": false`). Review pages: the claude.ai artifacts *Cycling towards Syria – proposed edit* and *Thighs of Steel – proposed edit*. Once approved, set `approved` to `true` and run *Make ebook* for each.
+- **Cycling towards Syria and Thighs of Steel edits (Nov 2026):** approved by David on 16 Nov 2026 and applied from `data/book-edits.json` (whole chapters, paragraphs, phrases and photos cut; six new titles from his own lines; one joke reworded in his words). To undo any of it, edit that file and run *Make ebook*.
 
 6. **Rewrite the Start here blurbs** in `data/start-here.json` in your own voice. The
    current ones are drafts.

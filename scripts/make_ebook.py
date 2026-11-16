@@ -93,6 +93,19 @@ def plain(h):
     return " ".join(html.unescape(re.sub(r"<[^>]+>", " ", h)).split())
 
 
+def phrase_pattern(phrase):
+    """A plain-text phrase as a regex over HTML: characters may be entities, tags may sit between words."""
+    def ch(c):
+        if c.isalnum():
+            return re.escape(c)
+        alts = [re.escape(c), f"&#{ord(c)};", f"&#x{ord(c):x};"]
+        if ord(c) in html.entities.codepoint2name:
+            alts.append(f"&{html.entities.codepoint2name[ord(c)]};")
+        return "(?:" + "|".join(alts) + ")"
+    gap = r"(?:\s|&nbsp;|&#160;|\xa0|<[^>]+>)+"
+    return gap.join("".join(ch(c) for c in w) + r"(?:<[^>]+>)*" for w in phrase.split())
+
+
 def apply_edits(body, edit):
     """Cut the paragraphs and phrases listed for this chapter in data/book-edits.json."""
     cuts = [c["text"] for c in edit.get("cut", []) if c.get("text")]   # whole text, or its first 70 characters
@@ -101,19 +114,14 @@ def apply_edits(body, edit):
                                             and any(plain(p) == c or (len(c) >= 70 and plain(p).startswith(c))
                                                     for c in cuts)))
     for phrase in edit.get("cut_text", []):
-        # the phrase as plain text; in the HTML a character may be an entity and tags may sit between words
-        def ch(c):
-            if c.isalnum() or c == " ":
-                return re.escape(c)
-            alts = [re.escape(c), f"&#{ord(c)};", f"&#x{ord(c):x};"]
-            if ord(c) in html.entities.codepoint2name:
-                alts.append(f"&{html.entities.codepoint2name[ord(c)]};")
-            return "(?:" + "|".join(alts) + ")"
-        gap = r"(?:\s|&nbsp;|&#160;|\xa0|<[^>]+>)+"
-        pat = r"\s?" + gap.join("".join(ch(c) for c in w) + r"(?:<[^>]+>)*" for w in phrase.split())
-        new = re.sub(pat, "", body, count=1)
+        new = re.sub(r"\s?" + phrase_pattern(phrase), "", body, count=1)
         if new == body:
             print(f"  edit not found: {phrase[:60]}")
+        body = new
+    for r in edit.get("replace", []):           # David's own rewording of a phrase
+        new = re.sub(phrase_pattern(r["from"]), lambda m: html.escape(r["to"], quote=False), body, count=1)
+        if new == body:
+            print(f"  edit not found: {r['from'][:60]}")
         body = new
     body = re.sub(r"<p>\s*</p>", "", body)
     return body
