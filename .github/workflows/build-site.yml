@@ -46,6 +46,7 @@ jobs:
       - name: Build the site
         env:
           SUBSCRIBER_PASSWORD: ${{ secrets.SUBSCRIBER_PASSWORD }}   # locks subscriber-only files (scripts/lock.py)
+          PAID_SUBSCRIBER_PASSWORD: ${{ secrets.PAID_SUBSCRIBER_PASSWORD }}   # lets the paid password open free files too
         run: |
           pip install --quiet cryptography==44.0.0
           python scripts/build.py

@@ -913,7 +913,7 @@ def build_rides():
 <div id="ride-list"></div>
 <link rel="stylesheet" href="/assets/leaflet/leaflet.css">
 <script src="/assets/leaflet/leaflet.js"></script>
-<script src="/assets/lock.js?v=1"></script>
+<script src="/assets/lock.js?v=2"></script>
 <script>
 DCLock.gate(document.getElementById('ride-gate'), function(){{
   DCLock.open('/rides/rides-data.locked').then(function(buf){{
@@ -1045,7 +1045,7 @@ def build_books(series_list):
                 + '</p></div></div>'
                 f'<aside class="newsletter-box"><h2>Liked it?</h2><p{st_attrs}>{st_text}</p><p><a class="button primary" '
                 'href="https://davidcharles.substack.com/subscribe">Subscribe free</a></p>' + TIP_LINE + '</aside>'
-                '<script src="/assets/lock.js?v=1" defer></script>')
+                '<script src="/assets/lock.js?v=2" defer></script>')
         book_schema = {"@context": "https://schema.org", "@type": "Book", "name": b["title"],
                        "alternativeHeadline": b["subtitle"], "description": b["description"],
                        "author": PERSON, "url": f"{SITE}/{d}/", "image": f"{SITE}/{d}/cover.jpg",
@@ -1070,21 +1070,92 @@ def build_books(series_list):
         f'height="{o["size"][1]}" loading="lazy"><h3>{esc(o["title"])}</h3><p'
         f'{editable("data/books.json", ["other_books", i, "subtitle"])}>{esc(o["subtitle"])}</p>'
         f'<p class="format">{esc(o["format"])}</p></a></li>' for i, o in enumerate(other))
+    paid_cards = build_paid_books(st_text, st_attrs)
+    p_intro, p_attrs = page_text("books-paid", "My published books in full, as ebooks, for paid subscribers to the newsletter.")
     o_intro, o_attrs = page_text("books-for-sale", "Paperbacks and pay-what-you-like ebooks. Tap a cover for more "
                                                    "details and ordering.")
     body = (f'<h1>Books</h1><p class="intro muted"{attrs}>{intro}</p>'
             f'<p class="lock-note small">{LOCK_NOTE}</p>'
             f'<ul class="book-grid">{"".join(cards)}</ul>'
+            + (f'<h2 class="section" id="paid-books">Full books for paid subscribers</h2><p class="muted"{p_attrs}>{p_intro}</p>'
+               f'<ul class="book-grid">{"".join(paid_cards)}</ul>' if paid_cards else "")
             + (f'<h2 class="section" id="other-books">Books to buy</h2><p class="muted"{o_attrs}>{o_intro}</p>'
                f'<ul class="book-grid">{other_cards}</ul>' if other_cards else ""))
     write_if_changed("books/index.html", page("Books | David Charles",
                                               "Free ebooks by David Charles, made from his travel stories, "
                                               "plus his paperbacks and pay-what-you-like ebooks.",
-                                              "/books/", body + '<script src="/assets/lock.js?v=1" defer></script>'))
-    build_subscribers(books)
+                                              "/books/", body + '<script src="/assets/lock.js?v=2" defer></script>'))
+    build_subscribers(books, load_paid_books())
 
 
-def build_subscribers(books):
+def load_paid_books():
+    """Full books for paid subscribers (data/books.json "paid_books"), once scripts/make_paid_book.py has made them."""
+    try:
+        books = json.load(open("data/books.json", encoding="utf-8")).get("paid_books", [])
+    except (OSError, ValueError):
+        return []
+    return [b for b in books if os.path.exists(f'books/{b["slug"]}/{b["slug"]}.epub.locked')]
+
+
+def locked_buttons(b, tier, short=False):
+    """EPUB and PDF download buttons for a locked book (assets/lock.js opens them)."""
+    d = f'books/{b["slug"]}'
+    def size(f):
+        try:
+            return f', {max(1, round(os.path.getsize(f"{d}/{f}.locked") / 1048576))} MB'
+        except OSError:
+            return ""
+    t = f' data-tier="{tier}"' if tier != "free" else ""
+    go = f'/subscribers/?next=/{d}/' + ("&amp;tier=paid" if tier == "paid" else "")
+    return (f'<a class="button primary" href="{go}" data-locked="/{d}/{b["slug"]}.epub.locked"{t} '
+            f'data-name="{esc(b["title"])}.epub" data-type="application/epub+zip" data-goatcounter-click="ebook-{b["slug"]}-epub" '
+            f'data-goatcounter-title="{esc(b["title"])} (EPUB)">' + ("EPUB" if short else f'Download ebook (EPUB{size(b["slug"] + ".epub")})')
+            + f'</a> <a class="button" href="{go}" data-locked="/{d}/{b["slug"]}.pdf.locked"{t} '
+            f'data-name="{esc(b["title"])}.pdf" data-type="application/pdf" data-goatcounter-click="ebook-{b["slug"]}-pdf" '
+            f'data-goatcounter-title="{esc(b["title"])} (PDF)">' + ("PDF" if short else f'PDF to read or print{size(b["slug"] + ".pdf")}')
+            + '</a>')
+
+
+PAID_NOTE = ('<span class="when-not-paid">For paid subscribers: <a href="/subscribers/?tier=paid">unlock with the paid '
+             'subscribers’ password</a> from any paid issue.</span><span class="when-paid">Unlocked on this device. Thank you '
+             'for supporting my writing.</span>')
+
+
+def build_paid_books(st_text, st_attrs):
+    """A page for each full book for paid subscribers, at /books/<slug>/. Returns the cards for /books/."""
+    cards = []
+    for i, b in enumerate(json.load(open("data/books.json", encoding="utf-8")).get("paid_books", [])):
+        d = f'books/{b["slug"]}'
+        if not os.path.exists(f'{d}/{b["slug"]}.epub.locked'):
+            continue
+        ed = lambda k: editable("data/books.json", ["paid_books", i, k])
+        try:
+            st = json.load(open(f"{d}/stats.json", encoding="utf-8"))
+        except OSError:
+            st = {}
+        facts = ", ".join(x for x in (f'{st["chapters"]} chapters' if st.get("chapters") else "",
+                                      f'about {round(st["words"], -3):,} words' if st.get("words") else "") if x)
+        body = (f'<p class="meta crumbs"><a href="/books/">Books</a></p>'
+                f'<div class="book"><img class="book-cover" src="/{d}/cover-small.jpg" alt="Cover of {esc(b["title"])}" '
+                f'width="300" height="449"><div><h1>{esc(b["title"])}</h1><p class="intro"><em>{esc(b["subtitle"])}</em></p>'
+                f'<p{ed("description")}>{esc(b["description"])}</p><p class="muted">The whole book{": " + facts if facts else ""}. '
+                f'For paid subscribers.</p><div class="buttons">{locked_buttons(b, "paid")}</div>'
+                f'<p class="lock-note small">{PAID_NOTE}</p>'
+                f'<p class="muted small">EPUB opens in Apple Books, Google Play Books, Kobo and most e-readers. For '
+                f'Kindle, send it to your Kindle with Amazon’s Send to Kindle.'
+                + (f' <a href="{esc(b["about"])}">More about the book</a>.' if b.get("about") else "") + '</p></div></div>'
+                f'<aside class="newsletter-box"><h2>Liked it?</h2><p{st_attrs}>{st_text}</p><p><a class="button primary" '
+                'href="https://davidcharles.substack.com/subscribe">Subscribe</a></p>' + TIP_LINE + '</aside>'
+                '<script src="/assets/lock.js?v=2" defer></script>')
+        write_if_changed(f"{d}/index.html", page(f'{b["title"]}: ebook for paid subscribers | David Charles', b["description"],
+                                                 f"/{d}/", body, image=f"/{d}/cover.jpg"))
+        cards.append(f'<li><a href="/{d}/"><img src="/{d}/cover-small.jpg" alt="" width="300" height="449" loading="lazy">'
+                     f'<span class="lock-badge paid">Paid subscribers</span><h3>{esc(b["title"])}</h3>'
+                     f'<p>{esc(b["subtitle"])}</p></a></li>')
+    return cards
+
+
+def build_subscribers(books, paid_books=()):
     """/subscribers/: the password form, then everything it opens (ebooks, the rides map, the tree map).
     ?next=/somewhere/ sends the reader back there once they've unlocked."""
     intro, attrs = page_text("subscribers", "Ebooks and maps for newsletter subscribers.")
@@ -1101,6 +1172,15 @@ def build_subscribers(books):
             f'data-goatcounter-title="{esc(b["title"])} (EPUB)">EPUB</a> <a class="button" href="/{d}/" '
             f'data-locked="/{d}/{b["slug"]}.pdf.locked" data-name="{esc(b["title"])}.pdf" data-type="application/pdf" '
             f'data-goatcounter-click="ebook-{b["slug"]}-pdf" data-goatcounter-title="{esc(b["title"])} (PDF)">PDF</a></p></div></li>')
+    paid_items = "".join(
+        f'<li><a href="/books/{b["slug"]}/"><img src="/books/{b["slug"]}/cover-small.jpg" alt="" width="300" height="449" '
+        f'loading="lazy"></a><div><h3><a href="/books/{b["slug"]}/">{esc(b["title"])}</a></h3><p class="muted">'
+        f'{esc(b["subtitle"])}</p><p class="buttons">{locked_buttons(b, "paid", short=True)}</p></div></li>' for b in paid_books)
+    try:   # let the paid password open the free things too (needs both passwords; see scripts/lock.py)
+        import lock
+        lock.link_paid_to_free()
+    except Exception as e:
+        print("  subscribers: paid key not linked:", e)
     maps = ['<li><a href="/trees/"><strong>Tree map</strong></a><span class="muted"> Every council-mapped tree around '
             'Crystal Palace, Norwood, Beckenham and Sydenham.</span></li>']
     if os.path.exists("rides/rides-data.locked"):
@@ -1113,16 +1193,24 @@ def build_subscribers(books):
 <p class="when-unlocked sub-next" hidden><a class="button primary" id="sub-back" href="/">Back to where you were</a></p>
 <h2 class="section">Ebooks</h2>
 <ul class="sub-books">{"".join(items)}</ul>
-<h2 class="section">Maps</h2>
+""" + (f"""<h2 class="section" id="paid">Full books for paid subscribers</h2>
+<p class="muted small">{PAID_NOTE}</p>
+<div id="paid-gate" class="lock-gate" data-tier="paid" hidden></div>
+<ul class="sub-books">{paid_items}</ul>
+""" if paid_items else "") + f"""<h2 class="section">Maps</h2>
 <ul class="sub-maps">{"".join(maps)}</ul>
-<script src="/assets/lock.js?v=1"></script>
+<script src="/assets/lock.js?v=2"></script>
 <script>
 (function(){{
   var next = new URLSearchParams(location.search).get('next') || '';
   if (!/^\/[a-z0-9\/_-]*$/i.test(next) || next.indexOf('//') === 0) next = '';   // only pages on this site
-  var g = document.getElementById('sub-gate'), typed = false;
+  var tier = new URLSearchParams(location.search).get('tier') === 'paid' ? 'paid' : 'free';
+  var g = document.getElementById(tier === 'paid' && document.getElementById('paid-gate') ? 'paid-gate' : 'sub-gate'), typed = false;
+  if (tier === 'paid' && g.id === 'paid-gate') {{ g.hidden = false; g.scrollIntoView(); }}
   g.addEventListener('submit', function(){{ typed = true; }}, true);
+  if (g.id === 'paid-gate') document.getElementById('sub-gate').hidden = true;
   DCLock.gate(g, function(){{
+    if (g.id === 'paid-gate') DCLock.gate(document.getElementById('sub-gate'), function(){{}});
     if (!next) return;
     if (typed) {{ location.href = next; return; }}   // just unlocked: straight back to the book or map
     var b = document.getElementById('sub-back'); b.href = next; b.parentNode.hidden = false;

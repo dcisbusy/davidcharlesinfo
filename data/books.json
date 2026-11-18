@@ -156,5 +156,32 @@
    ]
   }
  ],
- "_other_books": "Books for sale, shown under the free ebooks on /books/ (this replaced the old /shop/ page). Each card links to the book's own page, where the ordering links are. Covers are 300px copies in books/other/. An optional 'series' puts a card for the book on that series page."
+ "_other_books": "Books for sale, shown under the free ebooks on /books/ (this replaced the old /shop/ page). Each card links to the book's own page, where the ordering links are. Covers are 300px copies in books/other/. An optional 'series' puts a card for the book on that series page.",
+ "paid_books": [
+  {
+   "slug": "life-to-the-lees",
+   "title": "Life to the Lees",
+   "subtitle": "Cycling Around Britain",
+   "description": "Life to the Lees is more than a simple travelogue: it’s a story of doubt and discovery, solitude and solidarity, regret and recovery. From London to Lerwick to Liverpool; from Liverpool to Land’s End to London again, David learns the humbling lessons of the road. And why sharks don’t have knees.",
+   "cover_source": "wp-content/uploads/2014/08/Life-to-the-Lees-cover-for-web.jpg",
+   "year": "2017",
+   "rights": "Copyright © 2017 David Charles",
+   "about": "/life-to-the-lees-cycling-around-britain/",
+   "front_pages": [
+    "Life to the Lees: Cycling Around Britain",
+    "To Win",
+    "People are like bicycles",
+    "Have you ever had one of those days"
+   ],
+   "front_centre": [
+    0,
+    2,
+    3
+   ],
+   "front_small": [
+    1
+   ]
+  }
+ ],
+ "_note_paid_books": "Full books for paid subscribers, made from David's finished manuscripts with: PAID_SUBSCRIBER_PASSWORD=... python3 scripts/make_paid_book.py <slug> <manuscript>. The manuscripts are not kept in this repository; only the locked files are."
 }

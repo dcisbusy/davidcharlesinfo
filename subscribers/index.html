@@ -6,7 +6,7 @@
 <title>For subscribers | David Charles</title>
 <meta name="description" content="Ebooks and maps for David Charles&#x27;s newsletter subscribers.">
 <link rel="canonical" href="https://davidcharles.info/subscribers/">
-<link rel="stylesheet" href="/assets/site.css?v=21">
+<link rel="stylesheet" href="/assets/site.css?v=22">
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
 <link rel="alternate" type="application/rss+xml" title="David Charles" href="https://davidcharles.info/feed.xml">
 <meta property="og:type" content="website">
@@ -29,14 +29,18 @@
 <ul class="sub-books"><li><a href="/books/cycling-to-the-sahara/"><img src="/books/cycling-to-the-sahara/cover-small.jpg" alt="" width="300" height="424" loading="lazy"></a><div><h3><a href="/books/cycling-to-the-sahara/">Cycling to the Sahara</a></h3><p class="muted">1,279 miles from London to the desert, by bike, boat and (whisper it) train</p><p class="buttons"><a class="button primary" href="/books/cycling-to-the-sahara/" data-locked="/books/cycling-to-the-sahara/cycling-to-the-sahara.epub.locked" data-name="Cycling to the Sahara.epub" data-type="application/epub+zip" data-goatcounter-click="ebook-cycling-to-the-sahara-epub" data-goatcounter-title="Cycling to the Sahara (EPUB)">EPUB</a> <a class="button" href="/books/cycling-to-the-sahara/" data-locked="/books/cycling-to-the-sahara/cycling-to-the-sahara.pdf.locked" data-name="Cycling to the Sahara.pdf" data-type="application/pdf" data-goatcounter-click="ebook-cycling-to-the-sahara-pdf" data-goatcounter-title="Cycling to the Sahara (PDF)">PDF</a></p></div></li><li><a href="/books/cycling-towards-syria/"><img src="/books/cycling-towards-syria/cover-small.jpg" alt="" width="300" height="424" loading="lazy"></a><div><h3><a href="/books/cycling-towards-syria/">Cycling towards Syria</a></h3><p class="muted">London to Vienna by bike in 2016, following the routes of migration</p><p class="buttons"><a class="button primary" href="/books/cycling-towards-syria/" data-locked="/books/cycling-towards-syria/cycling-towards-syria.epub.locked" data-name="Cycling towards Syria.epub" data-type="application/epub+zip" data-goatcounter-click="ebook-cycling-towards-syria-epub" data-goatcounter-title="Cycling towards Syria (EPUB)">EPUB</a> <a class="button" href="/books/cycling-towards-syria/" data-locked="/books/cycling-towards-syria/cycling-towards-syria.pdf.locked" data-name="Cycling towards Syria.pdf" data-type="application/pdf" data-goatcounter-click="ebook-cycling-towards-syria-pdf" data-goatcounter-title="Cycling towards Syria (PDF)">PDF</a></p></div></li><li><a href="/books/thighs-of-steel/"><img src="/books/thighs-of-steel/cover-small.jpg" alt="" width="300" height="424" loading="lazy"></a><div><h3><a href="/books/thighs-of-steel/">Thighs of Steel</a></h3><p class="muted">Riding in solidarity with people on the move, 2017–2025</p><p class="buttons"><a class="button primary" href="/books/thighs-of-steel/" data-locked="/books/thighs-of-steel/thighs-of-steel.epub.locked" data-name="Thighs of Steel.epub" data-type="application/epub+zip" data-goatcounter-click="ebook-thighs-of-steel-epub" data-goatcounter-title="Thighs of Steel (EPUB)">EPUB</a> <a class="button" href="/books/thighs-of-steel/" data-locked="/books/thighs-of-steel/thighs-of-steel.pdf.locked" data-name="Thighs of Steel.pdf" data-type="application/pdf" data-goatcounter-click="ebook-thighs-of-steel-pdf" data-goatcounter-title="Thighs of Steel (PDF)">PDF</a></p></div></li></ul>
 <h2 class="section">Maps</h2>
 <ul class="sub-maps"><li><a href="/rides/"><strong>Rides</strong></a><span class="muted"> Long bike rides on a map, day by day.</span></li><li><a href="/trees/"><strong>Tree map</strong></a><span class="muted"> Every council-mapped tree around Crystal Palace, Norwood, Beckenham and Sydenham.</span></li></ul>
-<script src="/assets/lock.js?v=1"></script>
+<script src="/assets/lock.js?v=2"></script>
 <script>
 (function(){
   var next = new URLSearchParams(location.search).get('next') || '';
   if (!/^\/[a-z0-9\/_-]*$/i.test(next) || next.indexOf('//') === 0) next = '';   // only pages on this site
-  var g = document.getElementById('sub-gate'), typed = false;
+  var tier = new URLSearchParams(location.search).get('tier') === 'paid' ? 'paid' : 'free';
+  var g = document.getElementById(tier === 'paid' && document.getElementById('paid-gate') ? 'paid-gate' : 'sub-gate'), typed = false;
+  if (tier === 'paid' && g.id === 'paid-gate') { g.hidden = false; g.scrollIntoView(); }
   g.addEventListener('submit', function(){ typed = true; }, true);
+  if (g.id === 'paid-gate') document.getElementById('sub-gate').hidden = true;
   DCLock.gate(g, function(){
+    if (g.id === 'paid-gate') DCLock.gate(document.getElementById('sub-gate'), function(){});
     if (!next) return;
     if (typed) { location.href = next; return; }   // just unlocked: straight back to the book or map
     var b = document.getElementById('sub-back'); b.href = next; b.parentNode.hidden = false;
@@ -45,6 +49,6 @@
 })();
 </script>
 </main>
-<script src="/assets/site.js?v=21" defer></script>
+<script src="/assets/site.js?v=22" defer></script>
 </body>
 </html>
