@@ -913,7 +913,7 @@ def build_rides():
 <div id="ride-list"></div>
 <link rel="stylesheet" href="/assets/leaflet/leaflet.css">
 <script src="/assets/leaflet/leaflet.js"></script>
-<script src="/assets/lock.js?v=2"></script>
+<script src="/assets/lock.js?v=3"></script>
 <script>
 DCLock.gate(document.getElementById('ride-gate'), function(){{
   DCLock.open('/rides/rides-data.locked').then(function(buf){{
@@ -1045,7 +1045,7 @@ def build_books(series_list):
                 + '</p></div></div>'
                 f'<aside class="newsletter-box"><h2>Liked it?</h2><p{st_attrs}>{st_text}</p><p><a class="button primary" '
                 'href="https://davidcharles.substack.com/subscribe">Subscribe free</a></p>' + TIP_LINE + '</aside>'
-                '<script src="/assets/lock.js?v=2" defer></script>')
+                '<script src="/assets/lock.js?v=3" defer></script>')
         book_schema = {"@context": "https://schema.org", "@type": "Book", "name": b["title"],
                        "alternativeHeadline": b["subtitle"], "description": b["description"],
                        "author": PERSON, "url": f"{SITE}/{d}/", "image": f"{SITE}/{d}/cover.jpg",
@@ -1084,7 +1084,7 @@ def build_books(series_list):
     write_if_changed("books/index.html", page("Books | David Charles",
                                               "Free ebooks by David Charles, made from his travel stories, "
                                               "plus his paperbacks and pay-what-you-like ebooks.",
-                                              "/books/", body + '<script src="/assets/lock.js?v=2" defer></script>'))
+                                              "/books/", body + '<script src="/assets/lock.js?v=3" defer></script>'))
     build_subscribers(books, load_paid_books())
 
 
@@ -1146,7 +1146,7 @@ def build_paid_books(st_text, st_attrs):
                 + (f' <a href="{esc(b["about"])}">More about the book</a>.' if b.get("about") else "") + '</p></div></div>'
                 f'<aside class="newsletter-box"><h2>Liked it?</h2><p{st_attrs}>{st_text}</p><p><a class="button primary" '
                 'href="https://davidcharles.substack.com/subscribe">Subscribe</a></p>' + TIP_LINE + '</aside>'
-                '<script src="/assets/lock.js?v=2" defer></script>')
+                '<script src="/assets/lock.js?v=3" defer></script>')
         write_if_changed(f"{d}/index.html", page(f'{b["title"]}: ebook for paid subscribers | David Charles', b["description"],
                                                  f"/{d}/", body, image=f"/{d}/cover.jpg"))
         cards.append(f'<li><a href="/{d}/"><img src="/{d}/cover-small.jpg" alt="" width="300" height="449" loading="lazy">'
@@ -1159,6 +1159,8 @@ def build_subscribers(books, paid_books=()):
     """/subscribers/: the password form, then everything it opens (ebooks, the rides map, the tree map).
     ?next=/somewhere/ sends the reader back there once they've unlocked."""
     intro, attrs = page_text("subscribers", "Ebooks and maps for newsletter subscribers.")
+    j_text, j_attrs = page_text("subscribers-join", "The newsletter is free. Sign up and you'll find the password at the "
+                                                    "bottom of every email, so you can open everything on this page.")
     items = []
     for b in books:
         if b.get("draft"):
@@ -1188,7 +1190,10 @@ def build_subscribers(books, paid_books=()):
                        'day by day.</span></li>')
     body = f"""<h1>For subscribers</h1>
 <p class="intro muted"{attrs}>{intro}</p>
-<div id="sub-gate" class="lock-gate"></div>
+<div id="sub-gate" class="lock-gate" data-no-join></div>
+<aside class="when-locked sub-join"><h2>Not a subscriber yet?</h2><p{j_attrs}>{j_text}</p>
+<p><a class="button primary" href="https://davidcharles.substack.com/subscribe?utm_source=davidcharles.info&amp;utm_medium=subscribers">Subscribe free</a>
+<a class="button secondary" href="/newsletter-archive/">Read past issues</a></p></aside>
 <p class="when-unlocked sub-done">Unlocked on this device. Thanks for subscribing. <a href="#" id="sub-forget">Lock it again</a></p>
 <p class="when-unlocked sub-next" hidden><a class="button primary" id="sub-back" href="/">Back to where you were</a></p>
 <h2 class="section">Ebooks</h2>
@@ -1199,7 +1204,7 @@ def build_subscribers(books, paid_books=()):
 <ul class="sub-books">{paid_items}</ul>
 """ if paid_items else "") + f"""<h2 class="section">Maps</h2>
 <ul class="sub-maps">{"".join(maps)}</ul>
-<script src="/assets/lock.js?v=2"></script>
+<script src="/assets/lock.js?v=3"></script>
 <script>
 (function(){{
   var next = new URLSearchParams(location.search).get('next') || '';

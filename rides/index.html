@@ -6,7 +6,7 @@
 <title>Rides | David Charles</title>
 <meta name="description" content="Long bike rides by David Charles, drawn on a map.">
 <link rel="canonical" href="https://davidcharles.info/rides/">
-<link rel="stylesheet" href="/assets/site.css?v=22">
+<link rel="stylesheet" href="/assets/site.css?v=24">
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
 <link rel="alternate" type="application/rss+xml" title="David Charles" href="https://davidcharles.info/feed.xml">
 <meta property="og:type" content="website">
@@ -19,7 +19,7 @@
 </head>
 <body>
 <main>
-<nav class="top"><a class="name" href="/">David Charles</a><a href="/start-here/">Start here</a><a href="/newsletter-archive/">Newsletter</a><a href="/blog-archive/">Archive</a><a href="/series/">Series</a><a href="/books/">Books</a><a href="/subscribers/">Subscribers</a><a href="/map/">Map</a><a href="/trees/">Trees</a><a href="/photos/">Photos</a><a href="/search/">Search</a><button class="theme-toggle" type="button">Dark</button></nav>
+<nav class="top"><a class="name" href="/">David Charles</a><a href="/start-here/">Start here</a><a href="/newsletter-archive/">Archive</a><a href="/series/">Series</a><a href="/books/">Books</a><a href="/subscribers/">Subscribers</a><a href="/photos/">Photos</a><a href="/search/">Search</a><button class="theme-toggle" type="button">Dark</button></nav>
 <h1>Rides</h1>
 <p class="intro muted" data-edit-json="data/page-text.json" data-edit-key="[&quot;rides&quot;]">Long bike rides, drawn from my notes. Solid lines follow my route between the places I slept each night; dashed lines are ferries. A question mark is a place still to check.</p>
 <div id="ride-gate" class="lock-gate"></div>
@@ -28,7 +28,7 @@
 <div id="ride-list"></div>
 <link rel="stylesheet" href="/assets/leaflet/leaflet.css">
 <script src="/assets/leaflet/leaflet.js"></script>
-<script src="/assets/lock.js?v=2"></script>
+<script src="/assets/lock.js?v=3"></script>
 <script>
 DCLock.gate(document.getElementById('ride-gate'), function(){
   DCLock.open('/rides/rides-data.locked').then(function(buf){
@@ -88,6 +88,6 @@ document.querySelectorAll('.ride').forEach(function(sec){
 }
 </script>
 </main>
-<script src="/assets/site.js?v=22" defer></script>
+<script src="/assets/site.js?v=24" defer></script>
 </body>
 </html>

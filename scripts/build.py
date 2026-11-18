@@ -35,7 +35,7 @@ os.chdir(ROOT)
 SITE = "https://davidcharles.info"
 SUBSTACK = "https://davidcharles.substack.com"
 GOATCOUNTER = "davidcharles"    # GoatCounter site code (davidcharles.goatcounter.com). Set to "" to switch stats off.
-CSS_VERSION = "22"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
+CSS_VERSION = "24"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
 
 NEWSLETTER_DATA = "newsletter-archive/posts.json"
 BLOG_DATA = "blog-archive/index.json"
@@ -109,8 +109,17 @@ def slugify(s):
 
 # ---------------------------------------------------------------- page template
 
-NAV = [("/start-here/", "Start here"), ("/newsletter-archive/", "Newsletter"), ("/blog-archive/", "Archive"),
-       ("/series/", "Series"), ("/books/", "Books"), ("/subscribers/", "Subscribers"), ("/map/", "Map"), ("/trees/", "Trees"), ("/photos/", "Photos"), ("/search/", "Search")]
+NAV = [("/start-here/", "Start here"), ("/newsletter-archive/", "Archive"), ("/series/", "Series"),
+       ("/books/", "Books"), ("/subscribers/", "Subscribers"), ("/photos/", "Photos"), ("/search/", "Search")]
+# Pages that light up a menu item other than their own: both archives sit under "Archive"
+NAV_SAME = {"/blog-archive/": "/newsletter-archive/"}
+
+
+def archive_tabs(here):
+    """The switch between the two archives (newsletter and old blog), at the top of each."""
+    return ('<nav class="archive-tabs" aria-label="Archive">' + "".join(
+        f'<a href="{u}"{" aria-current=" + chr(34) + "page" + chr(34) if u == here else ""}>{t}</a>'
+        for u, t in (("/newsletter-archive/", "Newsletter"), ("/blog-archive/", "Old blog"))) + '</nav>\n')
 
 
 # Search Console: paste the content="..." code Google gives for the HTML-tag method here.
@@ -125,6 +134,8 @@ def page(title, description, path, body, current=None, image=None, kind="website
     nav = "".join(
         f'<a href="{u}"{" aria-current=" + chr(34) + "page" + chr(34) if u == current else ""}>{esc(t)}</a>'
         for u, t in NAV)
+    if current in NAV_SAME:
+        nav = nav.replace(f'href="{NAV_SAME[current]}"', f'href="{NAV_SAME[current]}" aria-current="page"', 1)
     head = [
         '<!DOCTYPE html>',
         '<html lang="en-GB">',
@@ -615,7 +626,7 @@ def build_blog(entries, ctx=None):
     cat_tree = '<ul class="cat-tree">' + "".join(branch(u) for u in top_cats) + "</ul>"
     first, last = (years[-1], years[0]) if years else ("", "")
     body = (
-        "<h1>Blog archive</h1>\n"
+        archive_tabs("/blog-archive/") + "<h1>Blog archive</h1>\n"
         f'<p class="intro muted">{len(posts)} posts written between {first} and {last}. For new writing, see the '
         '<a href="/newsletter-archive/">newsletter</a>. Or explore it on the <a href="/map/">map</a>, the '
         '<a href="/photos/">photo wall</a> or in <a href="/numbers/">20 years in numbers</a>, follow a '
@@ -672,7 +683,7 @@ def build_home(issues, posts, extra="", minutes=None):
     write_if_changed("index.html", page(
         "David Charles", "Writer and outdoor instructor. Read every issue of my newsletter, and the archive of my blog.",
         "/", body, "/"))
-    body = ("<h1>Newsletter archive</h1>\n"
+    body = (archive_tabs("/newsletter-archive/") + "<h1>Newsletter archive</h1>\n"
             '<p class="intro muted">Every issue of my newsletter, newest first. Click any issue to read it on '
             f'Substack.</p>\n<div class="buttons">{SUBSCRIBE}<a class="button secondary" href="/subscribers/">For subscribers</a></div>\n'
             + issue_list(issues, minutes))

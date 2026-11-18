@@ -112,8 +112,8 @@
           : "Type the password from the bottom of any newsletter. You only need to do it once on this device.")) + '</p>' +
         '<label class="lock-label">Password <input type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false" required></label>' +
         '<button type="submit" class="button primary">Unlock</button><p class="lock-msg" role="status"></p>' +
-        '<p class="lock-sub">' + (paid ? 'Not a paid subscriber yet? <a href="' + sub + '">Upgrade or subscribe</a> and the password comes with the next paid issue.'
-                                      : 'Not a subscriber yet? <a href="' + sub + '">Join free</a> and the password comes with the next email.') + '</p></form>';
+        (el.hasAttribute("data-no-join") ? "" : '<p class="lock-sub">' + (paid ? 'Not a paid subscriber yet? <a href="' + sub + '">Upgrade or subscribe</a> and the password comes with the next paid issue.'
+                                      : 'Not a subscriber yet? <a href="' + sub + '">Join free</a> and the password comes with the next email.') + '</p>') + '</form>';
       var f = el.querySelector("form"), msg = el.querySelector(".lock-msg"), inp = el.querySelector("input");
       f.addEventListener("submit", function (e) {
         e.preventDefault();
