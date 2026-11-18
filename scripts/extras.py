@@ -883,14 +883,15 @@ def build_rides():
             + (f' <span class="chk" title="Place to check">?</span>' if d.get("check") else "")
             + f'<span class="m">{nice(d["date"])} &middot; '
             + ("rest day" if d.get("rest") else f'{d["miles"]:g} miles') + f' &middot; {esc(d["night"])}</span>'
-            + (f'<span class="m note">{esc(d["note"])}</span>' if d.get("note") else "") + '</li>'
+            + (f'<span class="m note">{esc(d["note"])}</span>' if d.get("note") else "")
+            + "".join(f'<q class="m">{esc(qt)}</q>' for qt in d.get("quotes", [])) + '</li>'
             for d in days)
         sections.append(
             f'<section class="ride" id="{esc(r["slug"])}"><h2>{esc(r["title"])}</h2>'
             f'<p class="intro muted">{len(days)} days &middot; {miles:,.0f} miles &middot; {outdoors} nights in a bivvy bag'
             + (f' &middot; <a href="{esc(r["book"])}">The book</a>' if r.get("book") else "")
             + f'</p><ol class="ride-days">{rows}</ol></section>')
-        data.append({"slug": r["slug"], "title": r["title"], "start": r["start"], "days": days, "route": r["route"]})
+        data.append({"slug": r["slug"], "title": r["title"], "start": r["start"], "days": days, "route": r["route"], "book": r.get("book")})
     data_js = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     r_intro, r_attrs = page_text("rides", "Long bike rides, drawn from my notes. Solid lines follow my route between "
                                           "the places I slept each night; dashed lines are ferries. A question mark is "
@@ -932,7 +933,9 @@ RIDES.forEach(function(r){{
     var m=L.circleMarker(here,{{radius:d.rest?7:5,weight:2,color:col('--bg'),fillColor:d.check?col('--muted'):col('--s1'),fillOpacity:1}}).addTo(map);
     m.bindPopup('<strong>Day '+d.day+': '+esc(d.stop)+'</strong><br><small>'+nice(d.date)+' &middot; '+
       (d.rest?'rest day':d.miles+' miles ('+d.total.toLocaleString()+' so far)')+'<br>Night: '+esc(d.night)+
-      (d.note?'<br>'+esc(d.note):'')+(d.check?'<br><em>'+esc(d.checknote||'Place to check')+'</em>':'')+'</small>');
+      (d.note?'<br>'+esc(d.note):'')+
+      ((d.quotes||[]).length?'<span class="pq">'+d.quotes.map(function(q){{return '&ldquo;'+esc(q)+'&rdquo;';}}).join(' ')+
+        (r.book?' <a href="'+r.book+'">From the book</a>':'')+'</span>':'')+(d.check?'<br><em>'+esc(d.checknote||'Place to check')+'</em>':'')+'</small>');
     marks[r.slug+'-'+d.day]=m;
   }});
   flush(mode);

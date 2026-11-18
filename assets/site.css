@@ -538,3 +538,5 @@ a.tile-stat.tile-link span { text-decoration: underline; }
 .ride-days .chk { display: inline-block; width: 18px; height: 18px; border-radius: 50%; background: var(--soft); text-align: center;
   font-size: 12px; line-height: 18px; color: var(--muted); margin-left: 4px; }
 .ride-days .note { font-style: italic; }
+.ride-days q.m { display: block; quotes: "\201C" "\201D"; font: italic 15px/1.45 var(--serif, Georgia, serif); color: var(--ink); margin-top: 4px; }
+.leaflet-popup-content .pq { display: block; margin-top: 6px; font-style: italic; max-width: 260px; }

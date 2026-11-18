@@ -42,7 +42,11 @@
    ],
    "last": "bike",
    "offroute": false,
-   "note": "Train from Leyton to Epping for the start."
+   "note": "Train from Leyton to Epping for the start.",
+   "quotes": [
+    "There's no wave this time and I simply roll down the hill alone and turn left at the end of Centre Drive.",
+    "Then I notice: my bags are indeed still on the rack, but the rack is no longer attached to the bike."
+   ]
   },
   {
    "day": 2,
@@ -82,7 +86,11 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "Hunger squeezes in on me as I slide down into Maldon, famous for the production of Jamie Oliver's favourite sea salt.",
+    "We chug out of the harbour and into the estuary, the North Sea rushing beyond."
+   ]
   },
   {
    "day": 3,
@@ -110,7 +118,10 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "This doesn't feel so much like an attempt to cycle around Britain, more like a race to see which will break first: my bike, my body or my brain."
+   ]
   },
   {
    "day": 4,
@@ -144,7 +155,10 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "My visit to the homely Hemsby Post Office runs on the following principle: if it doesn't help me sleep or cycle, it's going."
+   ]
   },
   {
    "day": 5,
@@ -178,7 +192,11 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "My bike is now reduced to nothing more than a pack animal - and a rather recalcitrant one at that, back wheel scraping and sawing.",
+    "Malcolm introduces himself, spins his bike around and we push together through the park."
+   ]
   },
   {
    "day": 6,
@@ -194,7 +212,10 @@
    "legs": [],
    "last": "bike",
    "offroute": true,
-   "note": "Rest day: train from King's Lynn to London and back."
+   "note": "Rest day: train from King's Lynn to London and back.",
+   "quotes": [
+    "It comes down to this: either I buy San Anselmo or I give up altogether."
+   ]
   },
   {
    "day": 7,
@@ -216,7 +237,11 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "At last I jump into the saddle of my San Anselmo.",
+    "It's a hay field, dotted with straw bales strung up and covered in white plastic, like enormous sugar lumps, offering ideal cover from the road."
+   ]
   },
   {
    "day": 8,
@@ -250,7 +275,11 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "But halfway across the Humber suspension bridge I do allow myself a pause for a celebratory garage sandwich and a glug of water.",
+    "I lean on the parapet and look out to the estuary, flat water running sky blue out to sea."
+   ]
   },
   {
    "day": 9,
@@ -271,6 +300,18 @@
      "Driffield"
     ],
     [
+     54.083,
+     -0.192,
+     "bike",
+     "Bridlington"
+    ],
+    [
+     54.116,
+     -0.083,
+     "bike",
+     "Flamborough Head"
+    ],
+    [
      54.283,
      -0.4,
      "bike",
@@ -278,7 +319,11 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "After the wolds and wealds of the last two days, I finally hit the coast again at Flamborough Head.",
+    "The sea is a dimpled face, wine-black, accented white expressions."
+   ]
   },
   {
    "day": 10,
@@ -300,7 +345,12 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "Whitby sort of tumbles down from the headland, split in two by the River Esk.",
+    "My plate arrives and, seizing my fork, I skewer the happy proof that I've finally reached The North: black pudding."
+   ],
+   "note": "Train to Newcastle for the night with a friend, and back the next morning."
   },
   {
    "day": 11,
@@ -328,7 +378,12 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "I feel invincible, like Hercules on a bike, bursting up hills that would have defeated me a couple of days ago.",
+    "I cross the Tyne, the famous steel fretwork of the Tyne Bridge framing triangles of blue."
+   ],
+   "note": "Rode without the heavy bags, which waited in Newcastle."
   },
   {
    "day": 12,
@@ -362,7 +417,10 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "A couple of hours later, I'm cycling past a panoramic view of Dunstanburgh Castle ruins, rising like broken teeth from the rocky headland on the edge of the world."
+   ]
   },
   {
    "day": 13,
@@ -390,17 +448,20 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "Ahead is a sign that reads, Welcome to Scotland; behind me a sign says, Welcome to England."
+   ]
   },
   {
    "day": 14,
    "date": "2011-07-30",
    "miles": 75.88,
    "total": 988,
-   "stop": "Tentsmuir Forest",
+   "stop": "Tentsmuir Forest, near Leuchars",
    "night": "Bivvy",
-   "lat": 56.44,
-   "lon": -2.82,
+   "lat": 56.402,
+   "lon": -2.862,
    "check": false,
    "rest": false,
    "legs": [
@@ -421,10 +482,33 @@
      -3.159,
      "bike",
      "Kirkcaldy"
+    ],
+    [
+     56.243,
+     -3.078,
+     "bike",
+     "Coaltown of Burnturk"
+    ],
+    [
+     56.293,
+     -2.972,
+     "bike",
+     "Ceres"
+    ],
+    [
+     56.34,
+     -2.796,
+     "bike",
+     "St Andrews"
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "From the more modern (read prosaic) road suspension bridge, the Forth Bridge defies my attempts to capture its majesty on camera.",
+    "It shimmers across the Firth of Forth like a mirage, its three pyramidical cantilevers rising into the white sky, not so unlike Giza."
+   ],
+   "note": "Camped just inside the forest near Leuchars."
   },
   {
    "day": 15,
@@ -437,9 +521,51 @@
    "lon": -3.437,
    "check": false,
    "rest": false,
-   "legs": [],
+   "legs": [
+    [
+     56.42,
+     -2.835,
+     "bike",
+     "Tentsmuir Forest"
+    ],
+    [
+     56.446,
+     -2.818,
+     "bike",
+     "Tentsmuir Point"
+    ],
+    [
+     56.431,
+     -2.87,
+     "bike",
+     "Tentsmuir Forest"
+    ],
+    [
+     56.402,
+     -2.862,
+     "bike",
+     "Forest entrance"
+    ],
+    [
+     56.444,
+     -2.88,
+     "bike",
+     "Tayport"
+    ],
+    [
+     56.355,
+     -3.23,
+     "bike",
+     "Tay estuary"
+    ]
+   ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "The next morning, I try to find my way through the forest, but I'm trapped in Hansel and Gretal's nightmares.",
+    "Those last ten miles around and around Tentsmuir have taken me over the thousand mile mark."
+   ],
+   "note": "Lost in Tentsmuir Forest for an hour before finding the way out."
   },
   {
    "day": 16,
@@ -467,7 +593,11 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "I finally throw down my bicycle near Lunan, on the slope of a hill, under a prickly pine.",
+    "It's dry and the stars are laid out before me: a whole universe of them."
+   ]
   },
   {
    "day": 17,
@@ -501,7 +631,10 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "Ythan View, named for the river on which Methlick stands, is an old inn, a few rooms above a whitewashed pub, basket flowers hanging from the eaves."
+   ]
   },
   {
    "day": 18,
@@ -520,10 +653,32 @@
      -2.46,
      "bike",
      "Turriff"
+    ],
+    [
+     57.664,
+     -2.523,
+     "bike",
+     "Banff"
+    ],
+    [
+     57.693,
+     -2.822,
+     "bike",
+     "Cullen"
+    ],
+    [
+     57.66,
+     -3.11,
+     "bike",
+     "River Spey"
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "The cow, it transpires, is a local celebrity: the Turra Coo.",
+    "At Cullen, golf courses jostle with the coast, caddies cluster on the greens, the beaches below brace themselves against the rolling sea, windbreakers planted in the sand."
+   ]
   },
   {
    "day": 19,
@@ -542,10 +697,19 @@
      -3.869,
      "bike",
      "Nairn"
+    ],
+    [
+     57.478,
+     -4.09,
+     "bike",
+     "Culloden"
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "It is, I suppose, appropriate to arrive in Macbeth's city in thunder, lightning or in rain."
+   ]
   },
   {
    "day": 20,
@@ -578,6 +742,12 @@
      "Nigg"
     ],
     [
+     57.784,
+     -3.995,
+     "bike",
+     "Fearn station"
+    ],
+    [
      57.695,
      -4.258,
      "bike",
@@ -597,7 +767,11 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "The four-car ferry arrives and all us cyclists roll on, leaving two late-coming cars to wait for the next.",
+    "He sits before me like a modern Hephaestus, whose crafting skill will make my Odyssey or end it."
+   ]
   },
   {
    "day": 21,
@@ -637,7 +811,11 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "For those of you who haven't met a midge, they're just like fairies, except they want to kill you.",
+    "I drop my bike to the ground, stagger across the sands at Duncansby Head and dabble my burning feet in the mineral shallows."
+   ]
   },
   {
    "day": 22,
@@ -653,7 +831,11 @@
    "legs": [],
    "last": "ferry",
    "offroute": false,
-   "note": "Overnight ferry from Kirkwall to Lerwick."
+   "note": "Overnight ferry from Kirkwall to Lerwick.",
+   "quotes": [
+    "The ferry arrives in Lerwick in the early hours.",
+    "Rain steeps the streets, but players in short sleeve woolly jumpers kneel and bowl on the green lawn opposite."
+   ]
   },
   {
    "day": 23,
@@ -669,7 +851,11 @@
    "legs": [],
    "last": "ferry",
    "offroute": false,
-   "note": "A short ride around Shetland, then the ferry back to Orkney."
+   "note": "A short ride around Shetland, then the ferry back to Orkney.",
+   "quotes": [
+    "I now understand why Shetland ponies are built so stocky, so low to the ground: aerodynamics.",
+    "I buy eighteen Twixes for the crossing back to Orkney."
+   ]
   },
   {
    "day": 24,
@@ -715,7 +901,11 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "Skara Brae has a lot to live up to after the childish delights of photographing myself at the sign for Twatt.",
+    "A barrel-shaped chapel squats on the side of the road, built by Italian prisoners during the Second World War."
+   ]
   },
   {
    "day": 25,
@@ -743,7 +933,10 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "But the beaches are white crescent moons shining between the black gneiss cliffs and the black sea; as good as any in the world."
+   ]
   },
   {
    "day": 26,
@@ -758,10 +951,22 @@
    "rest": false,
    "legs": [
     [
+     58.375,
+     -5.033,
+     "bike",
+     "Laxford Bridge"
+    ],
+    [
      58.351,
      -5.156,
      "bike",
      "Scourie"
+    ],
+    [
+     58.166,
+     -4.996,
+     "bike",
+     "Loch Assynt"
     ],
     [
      57.896,
@@ -771,7 +976,11 @@
     ]
    ],
    "last": "ferry",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "Elspeth is running the toaster, Morag is pushing pills.",
+    "I don't know if you're aware, but the west coast of Scotland is fractal."
+   ]
   },
   {
    "day": 27,
@@ -805,7 +1014,10 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "I have to pedal as hard as I can downhill into the wind, which guzzles around my head like the crashing waves of the sea."
+   ]
   },
   {
    "day": 28,
@@ -832,6 +1044,12 @@
      "Portree"
     ],
     [
+     57.27,
+     -6.03,
+     "bike",
+     "Loch Ainort"
+    ],
+    [
      57.2446,
      -5.9168,
      "bike",
@@ -845,7 +1063,11 @@
     ]
    ],
    "last": "ferry",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "The weather isn't up to much, but, after all that fuss on Uist, I wouldn't want it any other way: these mountains look good in grey.",
+    "I race myself to the ferry at Armadale and arrive with enough time to crack open an ice cream."
+   ]
   },
   {
    "day": 29,
@@ -891,7 +1113,11 @@
     ]
    ],
    "last": "ferry",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "I weave southerly between the lochs: Morar, nan Uamh, Ailort, Moidart, Shiel and Sunart.",
+    "But the sea is smiling, speckled black, gulls dipping for fish, and we chug on through peace."
+   ]
   },
   {
    "day": 30,
@@ -949,17 +1175,21 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "I look down on the harbour: the ferry doors are just closing.",
+    "Arran is Scotland in miniature, divided between highland and lowland, with Corbett peaks and Marilyn hills."
+   ]
   },
   {
    "day": 31,
    "date": "2011-08-16",
    "miles": 85.66,
    "total": 2170,
-   "stop": "Gatehouse of Fleet",
+   "stop": "Glengap Forest, near Gatehouse of Fleet",
    "night": "Bivvy",
-   "lat": 54.883,
-   "lon": -4.183,
+   "lat": 54.905,
+   "lon": -4.12,
    "check": false,
    "rest": false,
    "legs": [
@@ -968,6 +1198,12 @@
      -4.614,
      "bike",
      "Prestwick"
+    ],
+    [
+     55.458,
+     -4.629,
+     "bike",
+     "Ayr"
     ],
     [
      55.243,
@@ -983,18 +1219,21 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "So, after nine straight nights with an easy roof over my head, tonight I return to the bivvy, finding a dark spot in Glengap Forest, in the belly of the promised Galloway."
+   ]
   },
   {
    "day": 32,
    "date": "2011-08-17",
    "miles": 106.69,
    "total": 2277,
-   "stop": "Near Easton",
+   "stop": "Easton marshes",
    "night": "Bivvy",
-   "lat": 54.93,
-   "lon": -3.1,
-   "check": true,
+   "lat": 54.928,
+   "lon": -3.123,
+   "check": false,
    "rest": false,
    "legs": [
     [
@@ -1026,10 +1265,20 @@
      -3.066,
      "bike",
      "Gretna"
+    ],
+    [
+     54.892,
+     -2.933,
+     "bike",
+     "Carlisle"
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "Galloway is the gentle end of Scotland and I cross the border at Gretna, where the sun comes out to greet me.",
+    "The sun sets picturesque over Easton marshes and I discover a cow pat among my bedding."
+   ]
   },
   {
    "day": 33,
@@ -1063,7 +1312,11 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "Besides, who could resist climbing a mountain called Biker Fell?",
+    "Only when I blink three times do I see that it's actually called Birker Fell."
+   ]
   },
   {
    "day": 34,
@@ -1097,7 +1350,10 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "Somewhere near Levens, I'm innocently cycling along when I get mauled by a butterfly, flapping around my face and glasses, clutching at me."
+   ]
   },
   {
    "day": 35,
@@ -1119,7 +1375,10 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "The sunlight glitters in the eye of the Liver birds."
+   ]
   },
   {
    "day": 36,
@@ -1159,7 +1418,10 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "I turn the corner of the country and notice that I must be in Wales: vowels have disappeared from the road signs."
+   ]
   },
   {
    "day": 37,
@@ -1181,7 +1443,11 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "In the morning, I take the last twenty-five miles to the nearest town, to fulfil a lifelong dream of eating bangers in Bangor."
+   ],
+   "note": "Train from Bangor to Liverpool to meet Mum and Dad: a night at the Adelphi."
   },
   {
    "day": 38,
@@ -1209,7 +1475,11 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "With the soft sands for a mattress, I fall asleep on the beach, nibbling the last crumbs of ginger cake for dinner."
+   ],
+   "note": "Train back to Bangor, then on round the mainland, skipping Anglesey."
   },
   {
    "day": 39,
@@ -1240,10 +1510,19 @@
      -3.885,
      "bike",
      "Dolgellau"
+    ],
+    [
+     52.59,
+     -3.853,
+     "bike",
+     "Machynlleth"
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "Not Knowing, I'm not worried about where I am, where I'm going or how fast I'm going wherever I'm going."
+   ]
   },
   {
    "day": 40,
@@ -1271,7 +1550,10 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "At last I reach St David's, my namesake at the end of the road, the western tip of Wales."
+   ]
   },
   {
    "day": 41,
@@ -1308,10 +1590,20 @@
      -4.696,
      "bike",
      "Saundersfoot"
+    ],
+    [
+     51.745,
+     -4.7,
+     "bike",
+     "Stepaside"
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "That cycle computer has been with me since London.",
+    "As I cycle through the delightfully named Stepaside, steady exercise cleanses my mind and shows me how lucky I've been."
+   ]
   },
   {
    "day": 42,
@@ -1330,10 +1622,20 @@
      -4.311,
      "bike",
      "Carmarthen"
+    ],
+    [
+     51.602,
+     -3.342,
+     "bike",
+     "Pontypridd (Taff Trail)"
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "As I tuck in, I confess to myself that Wales has been difficult: six hundred miles of wet weather and humpback hills.",
+    "I sprint on down the Taff Trail, into Cardiff."
+   ]
   },
   {
    "day": 43,
@@ -1347,6 +1649,12 @@
    "check": true,
    "rest": false,
    "legs": [
+    [
+     51.588,
+     -2.998,
+     "bike",
+     "Newport"
+    ],
     [
      51.611,
      -2.64,
@@ -1368,7 +1676,11 @@
    ],
    "last": "bike",
    "offroute": false,
-   "checknote": "Where on the canal? Placed near Claverton"
+   "checknote": "Where on the canal? Placed near Claverton",
+   "quotes": [
+    "I celebrate England by joining the queue for a pizza buffet in Bristol.",
+    "I reach the canal at Bath and follow a line of puddles like cat's eyes on the tow path, wondering when I'm going to fall into the drink."
+   ]
   },
   {
    "day": 44,
@@ -1385,7 +1697,11 @@
    "last": "bike",
    "offroute": false,
    "note": "Rest day on the barge, with a swim by the Dundas aqueduct.",
-   "checknote": "Where on the canal? Placed near Claverton"
+   "checknote": "Where on the canal? Placed near Claverton",
+   "quotes": [
+    "We wander down to the Dundas aqueduct and jump into the gasping river Avon.",
+    "After breakfast, we go into Bath, for another breakfast."
+   ]
   },
   {
    "day": 45,
@@ -1408,7 +1724,11 @@
    ],
    "last": "bike",
    "offroute": false,
-   "checknote": "Placed north-east of Taunton, coming from Glastonbury"
+   "checknote": "Placed north-east of Taunton, coming from Glastonbury",
+   "quotes": [
+    "What is perhaps more surprising is that (aside from the exploding tyre incident) this is my first puncture, after more than three thousand miles.",
+    "Leaving the bike behind, I wind myself around and around the terraces of the Tor, like the winding of a spinning top filling with kinetic energy, as I rise to the summit."
+   ]
   },
   {
    "day": 46,
@@ -1429,6 +1749,12 @@
      "Dulverton, Exmoor"
     ],
     [
+     51.069,
+     -3.857,
+     "bike",
+     "Charles"
+    ],
+    [
      51.092,
      -3.885,
      "bike",
@@ -1442,7 +1768,11 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "I make a deliberate detour when I see a sign pointing to a hamlet called Charles.",
+    "The detour to my eponymous village happens to be up a one in three hill."
+   ]
   },
   {
    "day": 47,
@@ -1470,7 +1800,11 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "So I wheel my bike under the goalposts, to the shelter of a couple of trees and a patch of nettles.",
+    "I fall asleep dreaming of Land's End and turning a third corner, ready for the home straight."
+   ]
   },
   {
    "day": 48,
@@ -1489,10 +1823,57 @@
      -5.153,
      "bike",
      "Perranporth"
+    ],
+    [
+     50.186,
+     -5.42,
+     "bike",
+     "Hayle"
+    ],
+    [
+     50.211,
+     -5.48,
+     "bike",
+     "St Ives"
+    ],
+    [
+     50.19,
+     -5.59,
+     "bike",
+     "Zennor"
+    ],
+    [
+     50.124,
+     -5.683,
+     "bike",
+     "St Just"
+    ],
+    [
+     50.066,
+     -5.715,
+     "bike",
+     "Land's End"
+    ],
+    [
+     50.118,
+     -5.537,
+     "bike",
+     "Penzance"
+    ],
+    [
+     50.102,
+     -5.274,
+     "bike",
+     "Helston"
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "By the time I reach St Ives, Cornwall's clarity of light is turning everything into a watercolour painting.",
+    "I stop for the night in a field near Porkellis, slightly concerned that I'm sleeping in a tractor's parking space."
+   ],
+   "note": "All the way round the coast via St Ives and Land's End, but not round the Lizard."
   },
   {
    "day": 49,
@@ -1517,6 +1898,18 @@
      -5.016,
      "ferry",
      "St Mawes"
+    ],
+    [
+     50.15,
+     -5.005,
+     "ferry",
+     "Place, Roseland"
+    ],
+    [
+     50.34,
+     -4.791,
+     "bike",
+     "St Austell"
     ],
     [
      50.318,
@@ -1550,7 +1943,11 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "But we're in and I perch in the prow, one arm around San Anselmo, like an old friend.",
+    "I zip through the woods to Fowey, a riverine town I fall in love-at-first-sight with."
+   ]
   },
   {
    "day": 50,
@@ -1584,7 +1981,10 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "To the east, Torquay squats under ranked clouds; to the west, Brixham catches the last rays of sunshine through a pot hole in the grey cover."
+   ]
   },
   {
    "day": 51,
@@ -1605,6 +2005,12 @@
      "Exmouth"
     ],
     [
+     50.65,
+     -3.322,
+     "bike",
+     "Otterton"
+    ],
+    [
      50.68,
      -3.239,
      "bike",
@@ -1612,7 +2018,10 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "We scoot through Otterton, Sidmouth, Salcombe Regis, hiding between hedgerows and cranking up the Jurassic cliffs, 185 million years of geology under our tyres."
+   ]
   },
   {
    "day": 52,
@@ -1640,7 +2049,10 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "It looks like a fantasia cake, topped with pine grove candles, crumbs falling into the sea, served on a plate of sand."
+   ]
   },
   {
    "day": 53,
@@ -1654,6 +2066,12 @@
    "check": false,
    "rest": false,
    "legs": [
+    [
+     50.66,
+     -2.06,
+     "bike",
+     "Hartland Moor"
+    ],
     [
      50.64,
      -2.057,
@@ -1705,7 +2123,11 @@
    ],
    "last": "ferry",
    "offroute": false,
-   "note": "Night at a friend's in Winchester, by train from Portsmouth and back."
+   "note": "Night at a friend's in Winchester, by train from Portsmouth and back.",
+   "quotes": [
+    "I race down the long straight Ferry Road from Studland down to the Sandbanks chain ferry, which cuts off the neck of Poole harbour and saves me a twenty-five mile road trip.",
+    "From a plastering of posters, I discover that Bestival, the island's music festival, starts tomorrow."
+   ]
   },
   {
    "day": 54,
@@ -1745,7 +2167,10 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "So I throw my bike over the fence, where it lands with a jarring crash on the other side."
+   ]
   },
   {
    "day": 55,
@@ -1772,6 +2197,12 @@
      "Hastings"
     ],
     [
+     50.95,
+     0.734,
+     "bike",
+     "Rye"
+    ],
+    [
      51.026,
      0.996,
      "bike",
@@ -1785,7 +2216,11 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "That means today is my last chance to do two things that I loved all the way around Britain: cycling a hundred miles and sleeping rough.",
+    "In a heart-warming tribute to my first night's bivvy, I have slugs as bed fellows."
+   ]
   },
   {
    "day": 56,
@@ -1819,7 +2254,11 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "Mile 4,000 is archetypal, exactly how I imagined round Britain.",
+    "I am the coast: the path drops straight off into the sea on my right."
+   ]
   },
   {
    "day": 57,
@@ -1865,7 +2304,10 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "Arriving back in London, after all those miles, is like arriving in a foreign city that I saw in a dream once; it surprises me with its familiarity."
+   ]
   },
   {
    "day": 58,
@@ -1905,7 +2347,12 @@
     ]
    ],
    "last": "bike",
-   "offroute": false
+   "offroute": false,
+   "quotes": [
+    "I bump up onto the pavement and let San Anselmo come to a silent stop.",
+    "I climb off and lean the bike against a gas meter.",
+    "Fifty-eight days to cycle around the entire coastline of Britain, to heal from the loss of love and the loved."
+   ]
   }
  ]
 }
