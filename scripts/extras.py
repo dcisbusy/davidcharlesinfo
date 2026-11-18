@@ -920,7 +920,7 @@ RIDES.forEach(function(r){{
     var m=L.circleMarker(here,{{radius:d.rest?7:5,weight:2,color:col('--bg'),fillColor:d.check?col('--muted'):col('--s1'),fillOpacity:1}}).addTo(map);
     m.bindPopup('<strong>Day '+d.day+': '+esc(d.stop)+'</strong><br><small>'+nice(d.date)+' &middot; '+
       (d.rest?'rest day':d.miles+' miles ('+d.total.toLocaleString()+' so far)')+'<br>Night: '+esc(d.night)+
-      (d.check?'<br><em>Place to check</em>':'')+'</small>');
+      (d.check?'<br><em>'+esc(d.checknote||'Place to check')+'</em>':'')+'</small>');
     marks[r.slug+'-'+d.day]=m;
   }});
   flush(mode);
