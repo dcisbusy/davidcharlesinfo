@@ -1566,7 +1566,7 @@ def build_start_here(stories, entries, series_list):
         sections.append(f'<h2 class="section" id="{anchor(th["name"])}">{esc(th["name"])}</h2>\n'
                         f'<ul class="sh-picks">{lis}</ul>')
     explore = [("/series/", "Series"), ("/map/", "Adventure map"), ("/trees/", "Tree map"), ("/timeline/", "Timeline"),
-               ("/random-story/", "Pick me a story"), ("/books/", "Free ebooks")]
+               ("/random-story/", "Pick me a story"), ("/books/", "Free ebooks"), ("/subscribers/", "For subscribers")]
     tiles = "".join(f'<li><a href="{u}"><img src="/cards/{u.strip("/")}.jpg" alt="{esc(t)}" loading="lazy" '
                     f'decoding="async" width="1200" height="630"></a></li>'
                     for u, t in explore if os.path.exists(f'cards/{u.strip("/")}.jpg'))

@@ -110,7 +110,7 @@ def slugify(s):
 # ---------------------------------------------------------------- page template
 
 NAV = [("/start-here/", "Start here"), ("/newsletter-archive/", "Newsletter"), ("/blog-archive/", "Archive"),
-       ("/series/", "Series"), ("/books/", "Books"), ("/map/", "Map"), ("/trees/", "Trees"), ("/photos/", "Photos"), ("/search/", "Search")]
+       ("/series/", "Series"), ("/books/", "Books"), ("/subscribers/", "Subscribers"), ("/map/", "Map"), ("/trees/", "Trees"), ("/photos/", "Photos"), ("/search/", "Search")]
 
 
 # Search Console: paste the content="..." code Google gives for the HTML-tag method here.
@@ -229,6 +229,7 @@ _TB, _TBA = page_text("tip-button", "Tip on PayPal")
 TIP_LINE = (f'<p class="tip"><span{_TTA}>{_TT}</span> <a class="tip-link" href="{TIP_URL}" rel="noopener" '
             f'data-goatcounter-click="tip-paypal"><span{_TBA}>{_TB}</span> &rarr;</a></p>')
 _BP, _BPA = page_text("books-plug", "Or take a story with you: free ebooks and paperbacks.")
+_SP, _SPA = page_text("subscribers-plug", "Already a subscriber? Unlock the ebooks and maps.")
 SUBSCRIBE_BOX = (
     f'<aside class="newsletter-box subscribe-box"><h2{_SHA}>{_SH}</h2>'
     f'<p{_STA}>{_ST}</p>'
@@ -238,6 +239,7 @@ SUBSCRIBE_BOX = (
     '<a class="button secondary" href="/newsletter-archive/">Read past issues</a></div>'
     '<div class="subscribe-embed"></div>'
     f'<p class="books-plug"><a href="/books/"><span{_BPA}>{_BP}</span> &rarr;</a></p>'
+    f'<p class="books-plug subscribers-plug"><a href="/subscribers/"><span{_SPA}>{_SP}</span> &rarr;</a></p>'
     + TIP_LINE +
     '</aside>')
 
@@ -643,7 +645,8 @@ def build_home(issues, posts, extra="", minutes=None):
     rest = intro.replace(h1.group(0), "", 1).strip() if h1 else intro
     hero = (f'<header class="sh-hero home-hero"><img src="{HOME_HERO}" alt="" fetchpriority="high">'
             f'<div><h1>{h1.group(1) if h1 else "David Charles"}</h1>'
-            f'<div class="buttons">{SUBSCRIBE}<a class="button ghost" href="/start-here/">Start here</a></div></div></header>')
+            f'<div class="buttons">{SUBSCRIBE}<a class="button ghost" href="/start-here/">Start here</a>'
+            f'<a class="button ghost" href="/subscribers/">For subscribers</a></div></div></header>')
     latest = ""
     if issues:
         p = issues[0]
@@ -671,7 +674,8 @@ def build_home(issues, posts, extra="", minutes=None):
         "/", body, "/"))
     body = ("<h1>Newsletter archive</h1>\n"
             '<p class="intro muted">Every issue of my newsletter, newest first. Click any issue to read it on '
-            f'Substack.</p>\n<div class="buttons">{SUBSCRIBE}</div>\n' + issue_list(issues, minutes))
+            f'Substack.</p>\n<div class="buttons">{SUBSCRIBE}<a class="button secondary" href="/subscribers/">For subscribers</a></div>\n'
+            + issue_list(issues, minutes))
     write_if_changed("newsletter-archive/index.html", page(
         "Newsletter archive | David Charles",
         "Every issue of David Charles's newsletter, with links to read them on Substack.",

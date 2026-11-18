@@ -196,7 +196,8 @@ def targets():
                                ("/random-story/", "Pick me a story", "David Charles"),
                                ("/start-here/", "Start here", "David Charles"),
                                ("/newsletter-archive/", "Every issue of the newsletter", "David Charles"),
-                               ("/books/", "Free ebooks", "David Charles")):
+                               ("/books/", "Free ebooks", "David Charles"),
+                               ("/subscribers/", "Ebooks and maps for newsletter subscribers", "David Charles")):
         hero = json.load(open("data/start-here.json", encoding="utf-8")).get("hero") if url == "/start-here/" else None
         out.append((url, title, kicker, hero))
     if os.path.exists("trees/trees-data.txt.locked"):
