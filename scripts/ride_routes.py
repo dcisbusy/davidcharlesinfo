@@ -22,7 +22,11 @@ def route(a, b, name=""):
                 j = json.load(r)
             if j.get("code") == "Ok" and j["routes"]:
                 rt = j["routes"][0]
-                return [[round(y, 5), round(x, 5)] for x, y in rt["geometry"]["coordinates"]], rt["distance"] / 1609.344
+                miles = rt["distance"] / 1609.344
+                if miles > max(10, 2.5 * crow(a, b)):   # a wild detour (a ferry, or a road missing from the map)
+                    print("  DETOUR, straight line instead:", name, round(miles), "miles routed", file=sys.stderr)
+                    return [a, b], crow(a, b)
+                return [[round(y, 5), round(x, 5)] for x, y in rt["geometry"]["coordinates"]], miles
         except urllib.error.HTTPError as e:
             if "exclude" in url and e.code == 400:
                 EXCLUDE[0] = False      # this router doesn't offer it: stop asking
