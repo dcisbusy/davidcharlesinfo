@@ -859,10 +859,17 @@ def build_rides():
     import glob
     rides = []
     for f in sorted(glob.glob("data/rides/*.json")):
+        if f.endswith(".route.json"):
+            continue
         try:
-            rides.append(json.load(open(f, encoding="utf-8")))
+            ride = json.load(open(f, encoding="utf-8"))
         except (OSError, ValueError):
             continue
+        try:   # road-following lines from scripts/ride_routes.py, when it has run
+            ride["route"] = json.load(open(f.replace(".json", ".route.json"), encoding="utf-8"))["days"]
+        except (OSError, ValueError, KeyError):
+            ride["route"] = None
+        rides.append(ride)
     if not rides:
         return
     sections, data = [], []
@@ -875,22 +882,23 @@ def build_rides():
             f'<li data-day="{d["day"]}"><span class="d">Day {d["day"]}</span> <strong>{esc(d["stop"])}</strong>'
             + (f' <span class="chk" title="Place to check">?</span>' if d.get("check") else "")
             + f'<span class="m">{nice(d["date"])} &middot; '
-            + ("rest day" if d.get("rest") else f'{d["miles"]:g} miles') + f' &middot; {esc(d["night"])}</span></li>'
+            + ("rest day" if d.get("rest") else f'{d["miles"]:g} miles') + f' &middot; {esc(d["night"])}</span>'
+            + (f'<span class="m note">{esc(d["note"])}</span>' if d.get("note") else "") + '</li>'
             for d in days)
         sections.append(
             f'<section class="ride" id="{esc(r["slug"])}"><h2>{esc(r["title"])}</h2>'
             f'<p class="intro muted">{len(days)} days &middot; {miles:,.0f} miles &middot; {outdoors} nights in a bivvy bag'
             + (f' &middot; <a href="{esc(r["book"])}">The book</a>' if r.get("book") else "")
             + f'</p><ol class="ride-days">{rows}</ol></section>')
-        data.append({"slug": r["slug"], "title": r["title"], "start": r["start"], "days": days})
+        data.append({"slug": r["slug"], "title": r["title"], "start": r["start"], "days": days, "route": r["route"]})
     data_js = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
-    r_intro, r_attrs = page_text("rides", "Long bike rides, drawn from my notes. Solid lines join the places I slept "
-                                          "each night, in order; dashed lines are ferries. A question mark is a place "
-                                          "still to check.")
+    r_intro, r_attrs = page_text("rides", "Long bike rides, drawn from my notes. Solid lines follow my route between "
+                                          "the places I slept each night; dashed lines are ferries. A question mark is "
+                                          "a place still to check.")
     body = f"""<h1>Rides</h1>
 <p class="intro muted"{r_attrs}>{r_intro}</p>
 <div id="map" role="region" aria-label="Map of rides"></div>
-<p class="muted small">Lines are straight between stops, not the roads I rode.</p>
+<p class="muted small">{"Lines follow roads and paths between the places in my notes, so they show roughly the way I went, not every turn." if any(r.get("route") for r in rides) else "Lines are straight between stops, not the roads I rode."}</p>
 {"".join(sections)}
 <link rel="stylesheet" href="/assets/leaflet/leaflet.css">
 <script src="/assets/leaflet/leaflet.js"></script>
@@ -914,13 +922,17 @@ RIDES.forEach(function(r){{
   r.days.forEach(function(d){{
     var here=[d.lat,d.lon];
     if(!d.offroute){{
-      (d.legs||[]).forEach(function(l){{ go([l[0],l[1]],l[2]); }});
-      go(here,d.last||'bike');
+      var parts=r.route&&r.route[String(d.day)];
+      if(parts){{ parts.forEach(function(p){{ p[1].forEach(function(pt){{ go(pt,p[0]); }}); }}); }}
+      else {{
+        (d.legs||[]).forEach(function(l){{ go([l[0],l[1]],l[2]); }});
+        go(here,d.last||'bike');
+      }}
     }}
     var m=L.circleMarker(here,{{radius:d.rest?7:5,weight:2,color:col('--bg'),fillColor:d.check?col('--muted'):col('--s1'),fillOpacity:1}}).addTo(map);
     m.bindPopup('<strong>Day '+d.day+': '+esc(d.stop)+'</strong><br><small>'+nice(d.date)+' &middot; '+
       (d.rest?'rest day':d.miles+' miles ('+d.total.toLocaleString()+' so far)')+'<br>Night: '+esc(d.night)+
-      (d.check?'<br><em>'+esc(d.checknote||'Place to check')+'</em>':'')+'</small>');
+      (d.note?'<br>'+esc(d.note):'')+(d.check?'<br><em>'+esc(d.checknote||'Place to check')+'</em>':'')+'</small>');
     marks[r.slug+'-'+d.day]=m;
   }});
   flush(mode);
