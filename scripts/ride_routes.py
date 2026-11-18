@@ -23,7 +23,7 @@ def route(a, b, name=""):
             if j.get("code") == "Ok" and j["routes"]:
                 rt = j["routes"][0]
                 miles = rt["distance"] / 1609.344
-                if miles > max(10, 2.5 * crow(a, b)):   # a wild detour (a ferry, or a road missing from the map)
+                if miles > max(20, 3 * crow(a, b)):   # a wild detour (a ferry, or a road missing from the map)
                     print("  DETOUR, straight line instead:", name, round(miles), "miles routed", file=sys.stderr)
                     return [a, b], crow(a, b)
                 return [[round(y, 5), round(x, 5)] for x, y in rt["geometry"]["coordinates"]], miles
