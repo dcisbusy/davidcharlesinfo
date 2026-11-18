@@ -112,6 +112,23 @@ button.back-link{ font:inherit; font-size:0.85rem; cursor:pointer; margin-left:0
 .about p{ margin:0 0 0.6rem; }
 .about .small{ font-size:0.72rem; opacity:0.8; }
 .about a{ color:var(--lichen); }
+/* Subscribers only: the password card (assets/lock.js fills it) */
+.lock-gate:empty{ display:none; }
+.lock-gate{
+  position:absolute; top:3.6rem; left:0.9rem; right:0.9rem; z-index:1200; max-width:24rem; margin:0 auto;
+  background:rgba(22,29,36,0.97); border:1px solid var(--line); border-radius:10px;
+  padding:1rem 1.1rem; color:var(--bone); font-size:0.9rem; line-height:1.45;
+}
+.lock-gate .lock-title{ font-family:'Fraunces',Georgia,serif; font-size:1.15rem; margin:0 0 0.4rem; }
+.lock-gate p{ margin:0 0 0.6rem; }
+.lock-gate .lock-label{ display:block; margin:0 0 0.6rem; }
+.lock-gate input{ display:block; width:100%; box-sizing:border-box; margin-top:0.3rem; padding:0.55rem 0.6rem; font:inherit;
+  background:var(--ink); color:var(--bone); border:1px solid var(--line); border-radius:6px; }
+.lock-gate .button{ font:inherit; font-weight:600; padding:0.5rem 1rem; border-radius:6px; border:0; background:var(--amber); color:var(--ink); cursor:pointer; }
+.lock-gate .lock-msg:empty{ display:none; }
+.lock-gate .lock-msg{ margin-top:0.6rem; color:var(--amber); }
+.lock-gate .lock-sub{ font-size:0.78rem; opacity:0.85; margin:0.6rem 0 0; }
+.lock-gate a{ color:var(--lichen); }
 .user-dot{
   width:16px; height:16px;
   background:#4d9de0;
@@ -130,6 +147,7 @@ button.back-link{ font:inherit; font-size:0.85rem; cursor:pointer; margin-left:0
 </div>
 
 <div id="map"></div>
+<div id="treeGate" class="lock-gate"></div>
 
 <div class="load-overlay" id="loadOverlay">
   <span id="loadText">Loading trees…</span>
@@ -155,6 +173,7 @@ button.back-link{ font:inherit; font-size:0.85rem; cursor:pointer; margin-left:0
 
 <script src="/assets/leaflet/leaflet.js"></script>
 <script src="/assets/leaflet/supercluster.min.js"></script>
+<script src="/assets/lock.js?v=1"></script>
 <script>
 const LOCATION_COLORS = {
   'Highways': '#e2a13d',
@@ -340,8 +359,9 @@ async function loadTrees(){
   document.getElementById('loadOverlay').classList.add('visible');
   try{
     const [dataText, lookup] = await Promise.all([
-      fetch('trees-data.txt').then(r => { if(!r.ok) throw new Error('http '+r.status); return r.text(); }),
-      fetch('trees-lookup.json').then(r => { if(!r.ok) throw new Error('http '+r.status); return r.json(); })
+      // subscribers only: the data is locked (scripts/lock.py) and opened with the newsletter password
+      DCLock.open('trees-data.txt.locked').then(b => new TextDecoder().decode(b)),
+      DCLock.open('trees-lookup.json.locked').then(b => JSON.parse(new TextDecoder().decode(b)))
     ]);
     lookupData = lookup;
     const lines = dataText.split('\n').filter(l => l.length);
@@ -394,7 +414,8 @@ document.addEventListener('visibilitychange', () => {
 });
 
 initUserLocation();
-loadTrees();
+document.getElementById('statusPill').textContent = 'For subscribers';
+DCLock.gate(document.getElementById('treeGate'), loadTrees);
 
 document.getElementById('aboutBtn').addEventListener('click', () => {
   const box = document.getElementById('about'); box.hidden = !box.hidden;

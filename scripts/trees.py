@@ -3,7 +3,7 @@
 Runs on GitHub ("Update tree data" workflow), because the sandbox can't reach the Datastore.
 Downloads the London Public Realm Trees CSV (about 1.1 million trees), keeps the trees inside
 AREA (Crystal Palace, Upper and South Norwood, Beckenham, Penge, Sydenham, Forest Hill, Dulwich)
-and writes two small files the page loads:
+and writes two small files the page loads, locked for newsletter subscribers (scripts/lock.py, ".locked"):
 
   trees/trees-data.txt    one tree per line: id|lat|lon|species|place|borough|climate|height|canopy|girth
                           (species, place and borough are numbers pointing into the lookup file)
@@ -142,11 +142,15 @@ def main():
     if len(out) < 1000:
         sys.exit("Suspiciously few trees: not writing")
     os.makedirs("trees", exist_ok=True)
-    with open("trees/trees-data.txt", "w", encoding="utf-8") as f:
-        f.write("\n".join(out) + "\n")
-    with open("trees/trees-lookup.json", "w", encoding="utf-8") as f:
-        json.dump({"species": list(species), "locations": places, "boroughs": list(boroughs),
-                   "source": url, "area": AREA}, f, ensure_ascii=False, indent=0)
+    # Subscribers only: write the locked copies (scripts/lock.py), never the plain files
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import lock
+    lock.content_key(create=False)   # fails clearly if SUBSCRIBER_PASSWORD is missing or doesn't match
+    lookup = json.dumps({"species": list(species), "locations": places, "boroughs": list(boroughs),
+                         "source": url, "area": AREA}, ensure_ascii=False, indent=0)
+    for name, data in (("trees-data.txt.locked", "\n".join(out) + "\n"), ("trees-lookup.json.locked", lookup)):
+        with open(f"trees/{name}", "wb") as f:
+            f.write(lock.lock_bytes(data.encode("utf-8")))
 
 
 if __name__ == "__main__":

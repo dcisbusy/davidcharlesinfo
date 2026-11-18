@@ -4,3 +4,8 @@ package-lock.json
 *.csv
 __pycache__/
 *.pyc
+# Subscriber-only files: only the .locked copies are published (scripts/lock.py)
+books/*/*.epub
+books/*/*.pdf
+trees/trees-data.txt
+trees/trees-lookup.json

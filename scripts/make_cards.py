@@ -133,10 +133,12 @@ def draw_card(title, kicker, photo, out):
 
 def tree_backdrop():
     """The tree map's own trees as dots: a picture of the area made of nothing but trees."""
-    try:
-        lines = open("trees/trees-data.txt", encoding="utf-8").read().split("\n")
-        cats = json.load(open("trees/trees-lookup.json", encoding="utf-8"))["locations"]
-    except OSError:
+    try:   # the data is locked for subscribers (scripts/lock.py), so this needs SUBSCRIBER_PASSWORD
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import lock
+        lines = lock.unlock_bytes(open("trees/trees-data.txt.locked", "rb").read()).decode("utf-8").split("\n")
+        cats = json.loads(lock.unlock_bytes(open("trees/trees-lookup.json.locked", "rb").read()))["locations"]
+    except Exception:
         return None
     colours = {"Highways": (226, 161, 61), "Parks": (120, 170, 120), "Housing": (154, 181, 150), "Other": (138, 132, 120)}
     lat0, lon0, zoom = 51.4215, -0.062, 14000          # centre on Crystal Palace, pixels per degree of latitude
@@ -197,7 +199,7 @@ def targets():
                                ("/books/", "Free ebooks", "David Charles")):
         hero = json.load(open("data/start-here.json", encoding="utf-8")).get("hero") if url == "/start-here/" else None
         out.append((url, title, kicker, hero))
-    if os.path.exists("trees/trees-data.txt"):
+    if os.path.exists("trees/trees-data.txt.locked"):
         out.append(("/trees/", "Tree map: tap any tree to find out what it is",
                     "Crystal Palace · Norwood · Beckenham · Sydenham", "trees"))
     return out

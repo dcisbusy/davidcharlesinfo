@@ -3,6 +3,7 @@ name: Make ebook
 # Builds EPUB and PDF ebooks from series (scripts/make_ebook.py, details in data/books.json).
 # Runs on GitHub because newsletter photos have to be downloaded from Substack.
 # Actions -> Make ebook -> Run workflow, and type the book slugs (or leave "all").
+# Only the locked copies (.epub.locked, .pdf.locked) are committed: needs the SUBSCRIBER_PASSWORD secret.
 on:
   workflow_dispatch:
     inputs:
@@ -27,7 +28,7 @@ jobs:
       - name: Install tools and fonts
         run: |
           sudo apt-get update -q && sudo apt-get install -y -q pandoc poppler-utils
-          pip install --quiet pillow==11.3.0
+          pip install --quiet pillow==11.3.0 cryptography==44.0.0
           mkdir -p ~/.fonts
           curl -sSL -o ~/.fonts/Lora.ttf "https://github.com/google/fonts/raw/main/ofl/lora/Lora%5Bwght%5D.ttf"
           curl -sSL -o ~/.fonts/Lora-Italic.ttf "https://github.com/google/fonts/raw/main/ofl/lora/Lora-Italic%5Bwght%5D.ttf"
@@ -37,6 +38,7 @@ jobs:
       - name: Make the books
         env:
           BOOKS: ${{ inputs.books }}
+          SUBSCRIBER_PASSWORD: ${{ secrets.SUBSCRIBER_PASSWORD }}   # the books are locked for subscribers
         run: |
           if [ "$BOOKS" = "all" ]; then
             BOOKS=$(python -c "import json;print(' '.join(b['slug'] for b in json.load(open('data/books.json'))['books']))")

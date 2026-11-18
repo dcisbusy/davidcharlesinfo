@@ -22,6 +22,7 @@ import build  # noqa: E402
 
 sys.modules["build"] = build
 import extras  # noqa: E402
+import lock  # noqa: E402
 
 SITE = build.SITE
 CHROME = shutil.which("google-chrome") or shutil.which("chromium") or shutil.which("chromium-browser")
@@ -213,6 +214,7 @@ def chapter_source(it, st):
 
 
 def main(slug):
+    lock.content_key(create=False)   # fail now, not after the build, if SUBSCRIBER_PASSWORD is missing or wrong
     books = json.load(open("data/books.json", encoding="utf-8"))["books"]
     book = next(b for b in books if b["slug"] == slug)
     issues = json.load(open("newsletter-archive/posts.json", encoding="utf-8"))
@@ -354,6 +356,7 @@ a {{ color: inherit; text-decoration: none; }}
         os.remove(f)
     for f in (f"{slug}.epub", f"{slug}.pdf"):
         print(f"{out}/{f}: {os.path.getsize(f'{out}/{f}') // 1024} KB")
+        lock.lock_file(f"{out}/{f}", f"{out}/{f}.locked")   # subscribers only: keep just the locked copy
     print(f"{len(chapters)} chapters, {words:,} words")
     with open(f"{out}/stats.json", "w", encoding="utf-8") as f:   # the book page shows these
         json.dump({"chapters": len(chapters), "words": words}, f)

@@ -24,6 +24,7 @@ on:
 
 permissions:
   contents: write
+  actions: write   # to start "Make ebook" and "Update tree data" when the subscriber password changes
 
 concurrency:
   group: build-site
@@ -43,7 +44,11 @@ jobs:
         run: echo "START=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - name: Build the site
-        run: python scripts/build.py
+        env:
+          SUBSCRIBER_PASSWORD: ${{ secrets.SUBSCRIBER_PASSWORD }}   # locks subscriber-only files (scripts/lock.py)
+        run: |
+          pip install --quiet cryptography==44.0.0
+          python scripts/build.py
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
@@ -64,6 +69,16 @@ jobs:
           else
             git commit -m "Rebuild site"
             git pull --rebase -X theirs origin main && git push
+          fi
+
+      - name: Lock the ebooks and tree map again if the subscriber password changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --name-only "$START" HEAD -- assets/lock.json | grep -q .; then
+            echo "New subscriber key: remaking the ebooks and tree data so they open with the new password"
+            gh workflow run make-ebook.yml --ref main -f books=all
+            gh workflow run trees-data.yml --ref main
           fi
 
       - name: Tell search engines about changed pages (IndexNow)
