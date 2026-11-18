@@ -11,10 +11,11 @@ ROUTER = "https://routing.openstreetmap.de/routed-bike/route/v1/driving/"
 HEADERS = {"User-Agent": "davidcharles.info ride map (https://davidcharles.info/rides/)"}
 
 
-def route(a, b):
-    """Road geometry from a to b ([lat, lon] each) and its length in miles; a straight line if the router fails."""
-    url = f"{ROUTER}{a[1]},{a[0]};{b[1]},{b[0]}?overview=full&geometries=geojson"
-    for attempt in range(3):
+def route(a, b, name=""):
+    """Road geometry from a to b ([lat, lon] each) and its length in miles; a straight line if the router fails.
+    Ferries are left out (exclude=ferry): the ride data says which crossings David took."""
+    base = f"{ROUTER}{a[1]},{a[0]};{b[1]},{b[0]}?overview=full&geometries=geojson"
+    for attempt, url in enumerate([base + "&exclude=ferry", base + "&exclude=ferry", base]):
         try:
             with urllib.request.urlopen(urllib.request.Request(url, headers=HEADERS), timeout=60) as r:
                 j = json.load(r)
@@ -22,8 +23,9 @@ def route(a, b):
                 rt = j["routes"][0]
                 return [[round(y, 5), round(x, 5)] for x, y in rt["geometry"]["coordinates"]], rt["distance"] / 1609.344
         except Exception as e:   # network hiccup or router busy: wait and try again
-            print("  retry", attempt + 1, e, file=sys.stderr)
+            print("  retry", attempt + 1, name, e, file=sys.stderr)
             time.sleep(5 * (attempt + 1))
+    print("  STRAIGHT LINE (router failed):", name, a, b, file=sys.stderr)
     return [a, b], crow(a, b)
 
 
@@ -66,7 +68,8 @@ for f in sorted(glob.glob("data/rides/*.json")):
     for d in ride["days"]:
         if d.get("offroute"):
             continue
-        pts = [[l[0], l[1], l[2]] for l in d.get("legs", [])] + [[d["lat"], d["lon"], d.get("last", "bike")]]
+        pts = [[l[0], l[1], l[2], l[3] if len(l) > 3 else ""] for l in d.get("legs", [])] + \
+              [[d["lat"], d["lon"], d.get("last", "bike"), d["stop"]]]
         parts, miles = [], 0.0
         for p in pts:
             nxt = [p[0], p[1]]
@@ -75,7 +78,7 @@ for f in sorted(glob.glob("data/rides/*.json")):
             if p[2] == "ferry":
                 parts.append(["ferry", [here, nxt]])
             else:
-                geo, m = route(here, nxt)
+                geo, m = route(here, nxt, f"day {d['day']} to {p[3]}")
                 miles += m
                 time.sleep(1)    # be gentle with a free service
                 if parts and parts[-1][0] == "bike":
