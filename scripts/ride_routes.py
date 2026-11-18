@@ -5,7 +5,7 @@ FOSSGIS bike router (routing.openstreetmap.de, OpenStreetMap data); ferry legs s
 goes to data/rides/<slug>.route.json, which build_rides() in scripts/extras.py draws instead of straight lines.
 It also prints each day's routed miles beside the miles David logged, to spot a stop in the wrong place.
 Run by the "Ride routes" workflow (the router can't be reached from everywhere)."""
-import glob, json, math, sys, time, urllib.request
+import glob, json, math, sys, time, urllib.error, urllib.request
 
 ROUTER = "https://routing.openstreetmap.de/routed-bike/route/v1/driving/"
 HEADERS = {"User-Agent": "davidcharles.info ride map (https://davidcharles.info/rides/)"}
@@ -13,20 +13,31 @@ HEADERS = {"User-Agent": "davidcharles.info ride map (https://davidcharles.info/
 
 def route(a, b, name=""):
     """Road geometry from a to b ([lat, lon] each) and its length in miles; a straight line if the router fails.
-    Ferries are left out (exclude=ferry): the ride data says which crossings David took."""
+    Ferries are left out where the router allows it (exclude=ferry): the ride data says which crossings David took."""
     base = f"{ROUTER}{a[1]},{a[0]};{b[1]},{b[0]}?overview=full&geometries=geojson"
-    for attempt, url in enumerate([base + "&exclude=ferry", base + "&exclude=ferry", base]):
+    tries = ([base + "&exclude=ferry"] if EXCLUDE[0] else []) + [base, base, base]
+    for attempt, url in enumerate(tries):
         try:
             with urllib.request.urlopen(urllib.request.Request(url, headers=HEADERS), timeout=60) as r:
                 j = json.load(r)
             if j.get("code") == "Ok" and j["routes"]:
                 rt = j["routes"][0]
                 return [[round(y, 5), round(x, 5)] for x, y in rt["geometry"]["coordinates"]], rt["distance"] / 1609.344
+        except urllib.error.HTTPError as e:
+            if "exclude" in url and e.code == 400:
+                EXCLUDE[0] = False      # this router doesn't offer it: stop asking
+                print("  router has no ferry exclusion; using plain routes", file=sys.stderr)
+                continue
+            print("  retry", attempt + 1, name, e, file=sys.stderr)
+            time.sleep(5)
         except Exception as e:   # network hiccup or router busy: wait and try again
             print("  retry", attempt + 1, name, e, file=sys.stderr)
-            time.sleep(5 * (attempt + 1))
+            time.sleep(5)
     print("  STRAIGHT LINE (router failed):", name, a, b, file=sys.stderr)
     return [a, b], crow(a, b)
+
+
+EXCLUDE = [True]
 
 
 def crow(a, b):
