@@ -851,6 +851,95 @@ def book_button(series_slug):
 
 
 
+
+# ---------------------------------------------------------------- rides map
+def build_rides():
+    """/rides/: long rides drawn on a map from data/rides/*.json (night stops in order, ferry legs dashed).
+    Hidden (noindex, unlinked) until David has checked the first ride."""
+    import glob
+    rides = []
+    for f in sorted(glob.glob("data/rides/*.json")):
+        try:
+            rides.append(json.load(open(f, encoding="utf-8")))
+        except (OSError, ValueError):
+            continue
+    if not rides:
+        return
+    sections, data = [], []
+    for r in rides:
+        days = r["days"]
+        miles = sum(d["miles"] for d in days)
+        nights = collections.Counter(d["night"] for d in days)
+        outdoors = nights.get("Bivvy", 0)
+        rows = "".join(
+            f'<li data-day="{d["day"]}"><span class="d">Day {d["day"]}</span> <strong>{esc(d["stop"])}</strong>'
+            + (f' <span class="chk" title="Place to check">?</span>' if d.get("check") else "")
+            + f'<span class="m">{nice(d["date"])} &middot; '
+            + ("rest day" if d.get("rest") else f'{d["miles"]:g} miles') + f' &middot; {esc(d["night"])}</span></li>'
+            for d in days)
+        sections.append(
+            f'<section class="ride" id="{esc(r["slug"])}"><h2>{esc(r["title"])}</h2>'
+            f'<p class="intro muted">{len(days)} days &middot; {miles:,.0f} miles &middot; {outdoors} nights in a bivvy bag'
+            + (f' &middot; <a href="{esc(r["book"])}">The book</a>' if r.get("book") else "")
+            + f'</p><ol class="ride-days">{rows}</ol></section>')
+        data.append({"slug": r["slug"], "title": r["title"], "start": r["start"], "days": days})
+    data_js = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
+    r_intro, r_attrs = page_text("rides", "Long bike rides, drawn from my notes. Solid lines join the places I slept "
+                                          "each night, in order; dashed lines are ferries. A question mark is a place "
+                                          "still to check.")
+    body = f"""<h1>Rides</h1>
+<p class="intro muted"{r_attrs}>{r_intro}</p>
+<div id="map" role="region" aria-label="Map of rides"></div>
+<p class="muted small">Lines are straight between stops, not the roads I rode.</p>
+{"".join(sections)}
+<link rel="stylesheet" href="/assets/leaflet/leaflet.css">
+<script src="/assets/leaflet/leaflet.js"></script>
+<script>
+var RIDES={data_js};
+var MONTHS={json.dumps(MONTHS)};
+function nice(d){{var p=d.split('-');return (+p[2])+' '+MONTHS[+p[1]-1]+' '+p[0];}}
+function esc(s){{return String(s).replace(/[&<>"]/g,function(c){{return {{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}}[c];}});}}
+var map=L.map('map',{{scrollWheelZoom:false}});
+L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png',{{maxZoom:18,
+  attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}}).addTo(map);
+var css=getComputedStyle(document.documentElement);
+function col(v){{return css.getPropertyValue(v).trim();}}
+var marks={{}}, all=[];
+RIDES.forEach(function(r){{
+  var prev=[r.start.lat,r.start.lon], seg=[prev];
+  function flush(mode){{ if(seg.length>1) L.polyline(seg,{{color:mode==='ferry'?col('--s0'):col('--s1'),weight:mode==='ferry'?2:3,
+      dashArray:mode==='ferry'?'6 6':null,opacity:.9}}).addTo(map); seg=[seg[seg.length-1]]; }}
+  var mode='bike';
+  function go(pt,m){{ if(m!==mode){{ flush(mode); mode=m; }} seg.push(pt); all.push(pt); }}
+  r.days.forEach(function(d){{
+    var here=[d.lat,d.lon];
+    if(!d.offroute){{
+      (d.legs||[]).forEach(function(l){{ go([l[0],l[1]],l[2]); }});
+      go(here,d.last||'bike');
+    }}
+    var m=L.circleMarker(here,{{radius:d.rest?7:5,weight:2,color:col('--bg'),fillColor:d.check?col('--muted'):col('--s1'),fillOpacity:1}}).addTo(map);
+    m.bindPopup('<strong>Day '+d.day+': '+esc(d.stop)+'</strong><br><small>'+nice(d.date)+' &middot; '+
+      (d.rest?'rest day':d.miles+' miles ('+d.total.toLocaleString()+' so far)')+'<br>Night: '+esc(d.night)+
+      (d.check?'<br><em>Place to check</em>':'')+'</small>');
+    marks[r.slug+'-'+d.day]=m;
+  }});
+  flush(mode);
+  L.circleMarker([r.start.lat,r.start.lon],{{radius:8,weight:3,color:col('--s1'),fillColor:col('--bg'),fillOpacity:1}})
+    .addTo(map).bindPopup('<strong>Start and finish: '+esc(r.start.name)+'</strong>');
+}});
+map.fitBounds(L.latLngBounds(all),{{padding:[20,20]}});
+document.querySelectorAll('.ride').forEach(function(sec){{
+  sec.querySelectorAll('li[data-day]').forEach(function(li){{li.addEventListener('click',function(){{
+    var m=marks[sec.id+'-'+li.getAttribute('data-day')]; if(!m) return;
+    map.setView(m.getLatLng(),9); m.openPopup();
+    document.getElementById('map').scrollIntoView({{behavior:'smooth',block:'center'}});
+  }});}});
+}});
+</script>"""
+    write_if_changed("rides/index.html", page("Rides | David Charles",
+                                              "Long bike rides by David Charles, drawn on a map.",
+                                              "/rides/", body, noindex=True))
+
 # ---------------------------------------------------------------- the site editor's hooks
 def editable(file, keys):
     """Attributes that let the in-place editor (assets/editor.js) change this text in its JSON source file."""
@@ -1380,6 +1469,7 @@ def build_pages(ctx, entries):
     build_feed(stories)
     build_map(stories)
     otd = build_on_this_day(stories)
+    build_rides()
     figures = build_numbers(stories, ctx["mentions"])
     n = build_photos(stories)
     build_series_pages(ctx["series"])

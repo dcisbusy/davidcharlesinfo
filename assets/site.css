@@ -528,3 +528,12 @@ a.tile-stat.tile-link span { text-decoration: underline; }
 @media (max-width: 600px) { .stat-tiles.six { grid-template-columns: repeat(2, 1fr); } }
 .newsletter-box .tip { margin: 10px 0 0; padding-top: 10px; border-top: 1px solid rgba(0,0,0,.08); font: 15px/1.4 var(--ui); color: var(--muted); }
 .newsletter-box .tip-link { white-space: nowrap; }
+
+/* Rides map */
+.ride-days { list-style: none; padding: 0; margin: 12px 0 0; columns: 2 260px; column-gap: 24px; font: 15px/1.35 var(--ui); }
+.ride-days li { break-inside: avoid; padding: 6px 0; border-bottom: 1px solid var(--soft); cursor: pointer; }
+.ride-days li:hover strong { text-decoration: underline; }
+.ride-days .d { color: var(--muted); font-size: 13px; display: inline-block; min-width: 52px; }
+.ride-days .m { display: block; color: var(--muted); font-size: 13px; margin-left: 52px; }
+.ride-days .chk { display: inline-block; width: 18px; height: 18px; border-radius: 50%; background: var(--soft); text-align: center;
+  font-size: 12px; line-height: 18px; color: var(--muted); margin-left: 4px; }
