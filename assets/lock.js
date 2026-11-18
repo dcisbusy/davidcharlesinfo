@@ -106,7 +106,7 @@
       var sub = el.getAttribute("data-subscribe") || "https://davidcharles.substack.com/subscribe";
       var paid = tier === "paid";
       el.innerHTML =
-        '<form class="lock-form"><p class="lock-title">' + (paid ? "For paid subscribers" : "For newsletter subscribers") + '</p>' +
+        '<form class="lock-form"><p class="lock-title">' + (el.getAttribute("data-title") || (paid ? "For paid subscribers" : "For newsletter subscribers")) + '</p>' +
         '<p class="lock-text">' + (el.getAttribute("data-text") || (paid
           ? "Type the paid subscribers’ password from any paid issue. You only need to do it once on this device."
           : "Type the password from the bottom of any newsletter. You only need to do it once on this device.")) + '</p>' +

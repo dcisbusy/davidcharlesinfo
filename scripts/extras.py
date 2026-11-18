@@ -247,10 +247,14 @@ def find_places(stories, over):
     return mentions
 
 
+MAP_PINS = []   # how many stories the adventure map shows (for the subscribers page)
+
+
 def build_map(stories):
     pins = [[round(s["coords"][0], 4), round(s["coords"][1], 4), s["title"], s["url"], s["date"], s["place"],
              s["source"]] for s in stories if s.get("place")]
     counts = collections.Counter(s["place"] for s in stories if s.get("place"))
+    MAP_PINS[:] = [len(pins)]
     years = sorted({p[4][:4] for p in pins if p[4]}, reverse=True)
     top = "".join(f'<li><a href="#" data-place="{esc(n)}">{esc(n)} <span>{c}</span></a></li>'
                   for n, c in counts.most_common(40))
@@ -280,7 +284,7 @@ def build_map(stories):
 <link rel="stylesheet" href="/assets/leaflet/MarkerCluster.Default.css">
 <script src="/assets/leaflet/leaflet.js"></script>
 <script src="/assets/leaflet/leaflet.markercluster.js"></script>
-<script src="/assets/lock.js?v=3"></script>
+<script src="/assets/lock.js?v=4"></script>
 <script>
 DCLock.gate(document.getElementById('map-gate'), function(){{
   DCLock.open('/map/map-data.locked').then(function(buf){{
@@ -934,7 +938,7 @@ def build_rides():
 <div id="ride-list"></div>
 <link rel="stylesheet" href="/assets/leaflet/leaflet.css">
 <script src="/assets/leaflet/leaflet.js"></script>
-<script src="/assets/lock.js?v=3"></script>
+<script src="/assets/lock.js?v=4"></script>
 <script>
 DCLock.gate(document.getElementById('ride-gate'), function(){{
   DCLock.open('/rides/rides-data.locked').then(function(buf){{
@@ -1066,7 +1070,7 @@ def build_books(series_list):
                 + '</p></div></div>'
                 f'<aside class="newsletter-box"><h2>Liked it?</h2><p{st_attrs}>{st_text}</p><p><a class="button primary" '
                 'href="https://davidcharles.substack.com/subscribe">Subscribe free</a></p>' + TIP_LINE + '</aside>'
-                '<script src="/assets/lock.js?v=3" defer></script>')
+                '<script src="/assets/lock.js?v=4" defer></script>')
         book_schema = {"@context": "https://schema.org", "@type": "Book", "name": b["title"],
                        "alternativeHeadline": b["subtitle"], "description": b["description"],
                        "author": PERSON, "url": f"{SITE}/{d}/", "image": f"{SITE}/{d}/cover.jpg",
@@ -1105,7 +1109,7 @@ def build_books(series_list):
     write_if_changed("books/index.html", page("Books | David Charles",
                                               "Free ebooks by David Charles, made from his travel stories, "
                                               "plus his paperbacks and pay-what-you-like ebooks.",
-                                              "/books/", body + '<script src="/assets/lock.js?v=3" defer></script>'))
+                                              "/books/", body + '<script src="/assets/lock.js?v=4" defer></script>'))
     build_subscribers(books, load_paid_books())
 
 
@@ -1167,7 +1171,7 @@ def build_paid_books(st_text, st_attrs):
                 + (f' <a href="{esc(b["about"])}">More about the book</a>.' if b.get("about") else "") + '</p></div></div>'
                 f'<aside class="newsletter-box"><h2>Liked it?</h2><p{st_attrs}>{st_text}</p><p><a class="button primary" '
                 'href="https://davidcharles.substack.com/subscribe">Subscribe</a></p>' + TIP_LINE + '</aside>'
-                '<script src="/assets/lock.js?v=3" defer></script>')
+                '<script src="/assets/lock.js?v=4" defer></script>')
         write_if_changed(f"{d}/index.html", page(f'{b["title"]}: ebook for paid subscribers | David Charles', b["description"],
                                                  f"/{d}/", body, image=f"/{d}/cover.jpg"))
         cards.append(f'<li><a href="/{d}/"><img src="/{d}/cover-small.jpg" alt="" width="300" height="449" loading="lazy">'
@@ -1176,79 +1180,130 @@ def build_paid_books(st_text, st_attrs):
     return cards
 
 
+def perk_stats():
+    """Numbers for the subscribers page. The tree count needs the password (it's in the locked data), so the last
+    known numbers are kept in data/perk-stats.json for builds that don't have it."""
+    try:
+        st = json.load(open("data/perk-stats.json", encoding="utf-8"))
+    except (OSError, ValueError):
+        st = {}
+    old = dict(st)
+    if MAP_PINS:
+        st["stories_mapped"] = MAP_PINS[0]
+    try:
+        import lock
+        st["trees"] = lock.unlock_bytes(open("trees/trees-data.txt.locked", "rb").read()).count(b"\n")
+    except Exception:
+        pass
+    try:
+        import glob
+        st["ride_days"] = sum(len(json.load(open(f, encoding="utf-8"))["days"])
+                              for f in glob.glob("data/rides/*.json") if not f.endswith(".route.json"))
+    except (OSError, ValueError, KeyError):
+        pass
+    if st != old:
+        with open("data/perk-stats.json", "w", encoding="utf-8") as f:
+            json.dump(st, f, indent=1)
+            f.write("\n")
+    return st
+
+
+SUB_HERO = "/wp-content/uploads/2013/12/Cycling-Around-Britain-crop-6.jpg"
+SUB_MAPS = [   # address, name, photo, line
+    ("/map/", "Adventure map", "/wp-content/uploads/2012/03/Country-road-Tunisia.jpg",
+     "Every story from the newsletter and the blog, pinned where it happened."),
+    ("/rides/", "Rides", "/wp-content/uploads/2013/08/Cycling-Around-Britain-118.jpg",
+     "Long bike rides on a map, day by day."),
+    ("/trees/", "Tree map", "/assets/trees-tile.jpg",
+     "Every council-mapped tree around Crystal Palace, Norwood, Beckenham and Sydenham."),
+]
+
+
 def build_subscribers(books, paid_books=()):
-    """/subscribers/: the password form, then everything it opens (ebooks, the rides map, the tree map).
-    ?next=/somewhere/ sends the reader back there once they've unlocked."""
+    """/subscribers/: the password form, then everything it opens (ebooks, the maps).
+    ?next=/somewhere/ sends the reader back there once they've unlocked; ?tier=paid asks for the paid password."""
     intro, attrs = page_text("subscribers", "Ebooks and maps for newsletter subscribers.")
     j_text, j_attrs = page_text("subscribers-join", "The newsletter is free. Sign up and you'll find the password at the "
                                                     "bottom of every email, so you can open everything on this page.")
+    st = perk_stats()
+    free = [b for b in books if not b.get("draft")]
+    words = 0
+    for b in free:
+        try:
+            words += json.load(open(f'books/{b["slug"]}/stats.json', encoding="utf-8")).get("words", 0)
+        except (OSError, ValueError):
+            pass
+    facts = [(len(free), "ebooks"), (round(words, -4) if words else 0, "words to read"),
+             (st.get("stories_mapped"), "stories on the map"), (st.get("ride_days"), "days of riding"),
+             (st.get("trees"), "trees")]
+    facts_html = "".join(f'<li><strong>{n:,}</strong><span>{t}</span></li>' for n, t in facts if n)
+
     items = []
-    for b in books:
-        if b.get("draft"):
-            continue
+    for b in free:
         d = f'books/{b["slug"]}'
+        try:
+            w = json.load(open(f"{d}/stats.json", encoding="utf-8")).get("words")
+        except (OSError, ValueError):
+            w = None
         items.append(
-            f'<li><a href="/{d}/"><img src="/{d}/cover-small.jpg" alt="" width="300" height="424" loading="lazy"></a>'
-            f'<div><h3><a href="/{d}/">{esc(b["title"])}</a></h3><p class="muted">{esc(b["subtitle"])}</p>'
-            f'<p class="buttons"><a class="button primary" href="/{d}/" data-locked="/{d}/{b["slug"]}.epub.locked" '
-            f'data-name="{esc(b["title"])}.epub" data-type="application/epub+zip" data-goatcounter-click="ebook-{b["slug"]}-epub" '
-            f'data-goatcounter-title="{esc(b["title"])} (EPUB)">EPUB</a> <a class="button" href="/{d}/" '
-            f'data-locked="/{d}/{b["slug"]}.pdf.locked" data-name="{esc(b["title"])}.pdf" data-type="application/pdf" '
-            f'data-goatcounter-click="ebook-{b["slug"]}-pdf" data-goatcounter-title="{esc(b["title"])} (PDF)">PDF</a></p></div></li>')
+            f'<li><a class="cover" href="/{d}/"><img src="/{d}/cover-small.jpg" alt="Cover of {esc(b["title"])}" width="300" '
+            f'height="424" loading="lazy"></a><h3><a href="/{d}/">{esc(b["title"])}</a></h3><p class="muted">{esc(b["subtitle"])}'
+            + (f' &middot; about {round(w, -3):,} words' if w else "") + f'</p><p class="buttons">{locked_buttons(b, "free", short=True)}</p></li>')
     paid_items = "".join(
-        f'<li><a href="/books/{b["slug"]}/"><img src="/books/{b["slug"]}/cover-small.jpg" alt="" width="300" height="449" '
-        f'loading="lazy"></a><div><h3><a href="/books/{b["slug"]}/">{esc(b["title"])}</a></h3><p class="muted">'
-        f'{esc(b["subtitle"])}</p><p class="buttons">{locked_buttons(b, "paid", short=True)}</p></div></li>' for b in paid_books)
+        f'<li><a class="cover" href="/books/{b["slug"]}/"><img src="/books/{b["slug"]}/cover-small.jpg" alt="Cover of '
+        f'{esc(b["title"])}" width="300" height="449" loading="lazy"></a><h3><a href="/books/{b["slug"]}/">{esc(b["title"])}</a>'
+        f'</h3><p class="muted">{esc(b["subtitle"])}</p><p class="buttons">{locked_buttons(b, "paid", short=True)}</p></li>'
+        for b in paid_books)
     try:   # let the paid password open the free things too (needs both passwords; see scripts/lock.py)
         import lock
         lock.link_paid_to_free()
     except Exception as e:
         print("  subscribers: paid key not linked:", e)
-    maps = ['<li><a href="/map/"><strong>Adventure map</strong></a><span class="muted"> Every story from the newsletter '
-            'and the blog, pinned where it happened.</span></li>',
-            '<li><a href="/trees/"><strong>Tree map</strong></a><span class="muted"> Every council-mapped tree around '
-            'Crystal Palace, Norwood, Beckenham and Sydenham.</span></li>']
-    if os.path.exists("rides/rides-data.locked"):
-        maps.insert(1, '<li><a href="/rides/"><strong>Rides</strong></a><span class="muted"> Long bike rides on a map, '
-                       'day by day.</span></li>')
-    body = f"""<h1>For subscribers</h1>
-<p class="intro muted"{attrs}>{intro}</p>
-<div id="sub-gate" class="lock-gate" data-no-join></div>
-<aside class="when-locked sub-join"><h2>Not a subscriber yet?</h2><p{j_attrs}>{j_text}</p>
-<p><a class="button primary" href="https://davidcharles.substack.com/subscribe?utm_source=davidcharles.info&amp;utm_medium=subscribers">Subscribe free</a>
-<a class="button secondary" href="/newsletter-archive/">Read past issues</a></p></aside>
-<p class="when-unlocked sub-done">Unlocked on this device. Thanks for subscribing. <a href="#" id="sub-forget">Lock it again</a></p>
-<p class="when-unlocked sub-next" hidden><a class="button primary" id="sub-back" href="/">Back to where you were</a></p>
+    maps = "".join(
+        f'<li><a href="{u}"><img src="{img}" alt="" loading="lazy" decoding="async"><span class="label">{esc(n)}'
+        f'<small>{esc(line)}</small></span></a></li>'
+        for u, n, img, line in SUB_MAPS if u != "/rides/" or os.path.exists("rides/rides-data.locked"))
+    sub_url = "https://davidcharles.substack.com/subscribe?utm_source=davidcharles.info&amp;utm_medium=subscribers"
+    body = f"""<header class="sh-hero sub-hero"><img src="{SUB_HERO}" alt="" fetchpriority="high"><div>
+<h1>For subscribers</h1><p{attrs}>{intro}</p></div></header>
+<ul class="sub-facts">{facts_html}</ul>
+<div class="sub-cards when-locked">
+<div id="sub-gate" class="lock-gate" data-no-join data-title="Already a subscriber?"></div>
+<aside class="sub-join"><h2>Not a subscriber yet?</h2><p{j_attrs}>{j_text}</p>
+<p><a class="button primary" href="{sub_url}">Subscribe free</a> <a class="button secondary" href="/newsletter-archive/">Read past issues</a></p></aside>
+</div>
+<div class="sub-done when-unlocked"><p><strong>Unlocked on this device.</strong> Thanks for subscribing. Everything below is yours to open.
+<a href="#" id="sub-forget">Lock it again</a></p>
+<p class="sub-next" hidden><a class="button primary" id="sub-back" href="/">Back to where you were</a></p></div>
 <h2 class="section">Ebooks</h2>
-<ul class="sub-books">{"".join(items)}</ul>
+<ul class="sub-shelf">{"".join(items)}</ul>
 """ + (f"""<h2 class="section" id="paid">Full books for paid subscribers</h2>
 <p class="muted small">{PAID_NOTE}</p>
 <div id="paid-gate" class="lock-gate" data-tier="paid" hidden></div>
-<ul class="sub-books">{paid_items}</ul>
+<ul class="sub-shelf">{paid_items}</ul>
 """ if paid_items else "") + f"""<h2 class="section">Maps</h2>
-<ul class="sub-maps">{"".join(maps)}</ul>
-<script src="/assets/lock.js?v=3"></script>
+<ul class="sh-doors sub-maps">{maps}</ul>
+<script src="/assets/lock.js?v=4"></script>
 <script>
 (function(){{
-  var next = new URLSearchParams(location.search).get('next') || '';
+  var q = new URLSearchParams(location.search), next = q.get('next') || '';
   if (!/^\/[a-z0-9\/_-]*$/i.test(next) || next.indexOf('//') === 0) next = '';   // only pages on this site
-  var tier = new URLSearchParams(location.search).get('tier') === 'paid' ? 'paid' : 'free';
-  var g = document.getElementById(tier === 'paid' && document.getElementById('paid-gate') ? 'paid-gate' : 'sub-gate'), typed = false;
-  if (tier === 'paid' && g.id === 'paid-gate') {{ g.hidden = false; g.scrollIntoView(); }}
+  var paidGate = document.getElementById('paid-gate');
+  var g = q.get('tier') === 'paid' && paidGate ? paidGate : document.getElementById('sub-gate'), typed = false;
+  if (g === paidGate) {{ g.hidden = false; g.scrollIntoView(); }}
   g.addEventListener('submit', function(){{ typed = true; }}, true);
-  if (g.id === 'paid-gate') document.getElementById('sub-gate').hidden = true;
   DCLock.gate(g, function(){{
-    if (g.id === 'paid-gate') DCLock.gate(document.getElementById('sub-gate'), function(){{}});
     if (!next) return;
     if (typed) {{ location.href = next; return; }}   // just unlocked: straight back to the book or map
     var b = document.getElementById('sub-back'); b.href = next; b.parentNode.hidden = false;
   }});
+  if (g === paidGate) DCLock.gate(document.getElementById('sub-gate'), function(){{}});
   document.getElementById('sub-forget').addEventListener('click', function(e){{ e.preventDefault(); DCLock.forget(); location.reload(); }});
 }})();
 </script>"""
     write_if_changed("subscribers/index.html", page("For subscribers | David Charles",
                                                     "Ebooks and maps for David Charles's newsletter subscribers.",
-                                                    "/subscribers/", body, noindex=True))
+                                                    "/subscribers/", body, "/subscribers/", image=SUB_HERO, noindex=True))
 
 
 TOPICS = [("a", "Adventure", "/category/adventure/"), ("w", "Nature", "/category/nature/"),
