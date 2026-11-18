@@ -254,23 +254,43 @@ def build_map(stories):
     years = sorted({p[4][:4] for p in pins if p[4]}, reverse=True)
     top = "".join(f'<li><a href="#" data-place="{esc(n)}">{esc(n)} <span>{c}</span></a></li>'
                   for n, c in counts.most_common(40))
-    pins_js = json.dumps(pins, ensure_ascii=False).replace("</", "<\\/")   # safe inside <script>
+    # Subscribers only: the pins and place list are locked (scripts/lock.py); the page opens them in the browser
+    try:
+        import lock
+        out = lock.lock_bytes(json.dumps({"pins": pins, "top": top}, ensure_ascii=False).encode("utf-8"))
+        if not os.path.exists("map/map-data.locked") or open("map/map-data.locked", "rb").read() != out:
+            os.makedirs("map", exist_ok=True)
+            open("map/map-data.locked", "wb").write(out)
+    except Exception as e:   # no password here: keep the locked copy that's there
+        print("  map: not re-locked:", e)
     body = f"""<h1>Adventure map</h1>
 <p class="intro muted">{len(pins)} stories from {len(counts)} places, from the newsletter and the blog. Click a pin
-(or a numbered cluster to zoom in), or pick a place below. Newsletter issues open on Substack.</p>
+(or a numbered cluster to zoom in), or pick a place below. Newsletter issues open on Substack. For newsletter subscribers.</p>
+<div id="map-gate" class="lock-gate"></div>
+<div class="map-after" hidden>
 <div class="map-controls"><label for="year">Year</label> <select id="year"><option value="">All years</option>
 {"".join(f'<option>{y}</option>' for y in years)}</select> <span id="count" class="muted"></span></div>
 <div id="map" role="region" aria-label="Map of stories"></div>
 <h2>Most-visited places</h2>
-<ul class="chips" id="places">{top}</ul>
+<ul class="chips" id="places"></ul>
+</div>
 <p class="back"><a href="/trees/">Tree map: every tree around Crystal Palace</a> &middot; <a href="/numbers/">More in 20 years in numbers</a></p>
 <link rel="stylesheet" href="/assets/leaflet/leaflet.css">
 <link rel="stylesheet" href="/assets/leaflet/MarkerCluster.css">
 <link rel="stylesheet" href="/assets/leaflet/MarkerCluster.Default.css">
 <script src="/assets/leaflet/leaflet.js"></script>
 <script src="/assets/leaflet/leaflet.markercluster.js"></script>
+<script src="/assets/lock.js?v=3"></script>
 <script>
-var PINS={pins_js};
+DCLock.gate(document.getElementById('map-gate'), function(){{
+  DCLock.open('/map/map-data.locked').then(function(buf){{
+    var d=JSON.parse(new TextDecoder().decode(buf));
+    document.getElementById('places').innerHTML=d.top;
+    document.querySelector('.map-after').hidden=false;
+    drawMap(d.pins);
+  }}).catch(function(){{ document.getElementById('map-gate').textContent='Sorry, the map wouldn\u2019t open. Try reloading the page.'; }});
+}});
+function drawMap(PINS){{
 var MONTHS={json.dumps(MONTHS)};
 function nice(d){{var p=d.split('-');return p.length<3?d:(+p[2])+' '+MONTHS[+p[1]-1]+' '+p[0];}}
 function escHtml(s){{return s.replace(/[&<>"]/g,function(c){{return {{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}}[c];}});}}
@@ -303,6 +323,7 @@ document.querySelectorAll('#places a').forEach(function(a){{a.addEventListener('
   document.getElementById('map').scrollIntoView({{behavior:'smooth',block:'center'}});}}
 }});}});
 draw();
+}}
 </script>
 <p class="muted small">Pins: <span class="key s0"></span> newsletter
 <span class="key s1"></span> blog. Places are found automatically from each story's
@@ -1183,10 +1204,12 @@ def build_subscribers(books, paid_books=()):
         lock.link_paid_to_free()
     except Exception as e:
         print("  subscribers: paid key not linked:", e)
-    maps = ['<li><a href="/trees/"><strong>Tree map</strong></a><span class="muted"> Every council-mapped tree around '
+    maps = ['<li><a href="/map/"><strong>Adventure map</strong></a><span class="muted"> Every story from the newsletter '
+            'and the blog, pinned where it happened.</span></li>',
+            '<li><a href="/trees/"><strong>Tree map</strong></a><span class="muted"> Every council-mapped tree around '
             'Crystal Palace, Norwood, Beckenham and Sydenham.</span></li>']
     if os.path.exists("rides/rides-data.locked"):
-        maps.insert(0, '<li><a href="/rides/"><strong>Rides</strong></a><span class="muted"> Long bike rides on a map, '
+        maps.insert(1, '<li><a href="/rides/"><strong>Rides</strong></a><span class="muted"> Long bike rides on a map, '
                        'day by day.</span></li>')
     body = f"""<h1>For subscribers</h1>
 <p class="intro muted"{attrs}>{intro}</p>
