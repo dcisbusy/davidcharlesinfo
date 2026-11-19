@@ -190,7 +190,7 @@ def targets():
         out.append((f'/books/{b["slug"]}/', b["title"], "A free ebook by David Charles", b.get("cover_photo")))
     for url, title, kicker in (("/", "Twenty years of stories about adventure, nature and being human",
                                 "David Charles"),
-                               ("/timeline/", "Twenty years: a timeline", "David Charles"),
+                               ("/twenty-years/", "Twenty years: the timeline and the numbers", "David Charles"),
                                ("/series/", "Stories told in parts, from bike rides to book clubs", "David Charles"),
                                ("/map/", "Adventure map: where the stories happened", "David Charles"),
                                ("/random-story/", "Pick me a story", "David Charles"),

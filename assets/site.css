@@ -488,7 +488,7 @@ a.home-latest:hover { border-color: var(--accent); transform: translateY(-2px); 
                   margin: 8px 0 8px; padding: 0; border: 0; }
 .home-latest:hover h2 { color: var(--accent); }
 .home-latest p { margin: 0 0 10px; color: var(--muted); }
-ul.home-doors { grid-template-columns: repeat(4, 1fr); margin-bottom: 20px; }
+ul.home-doors { grid-template-columns: repeat(3, 1fr); margin-bottom: 20px; }
 .home-doors a { height: 130px; }
 .home-doors .label { font-size: 1.05em; }
 @media (max-width: 640px) {
@@ -618,10 +618,27 @@ ul.sub-maps { grid-template-columns: repeat(3, 1fr); padding: 0; margin-top: 16p
   ul.sub-shelf { grid-template-columns: repeat(2, 1fr); gap: 16px; }
 }
 
-/* Homepage tiles behind the subscriber password */
-.sh-doors .perk-tag { position: absolute; top: 10px; left: 10px; z-index: 1; padding: 4px 8px; border-radius: 4px;
+/* Subscriber perks (homepage tiles, book strip): a closed padlock, then an open one once this browser is unlocked */
+.perk-tag { position: absolute; top: 10px; left: 10px; z-index: 1; padding: 4px 8px; border-radius: 4px;
   font: 600 11px/1 var(--ui); letter-spacing: .05em; text-transform: uppercase; color: #fff; background: rgba(0,0,0,.6); }
-.sh-doors .perk-tag::before { content: "\1F512\FE0E  "; }
-html.dc-unlocked .sh-doors .perk-tag { display: none; }
+.perk-tag .when-locked::before { content: "\1F512\FE0E  "; }
+.perk-tag .when-unlocked::before { content: "\1F513\FE0E  "; }
+html.dc-unlocked .perk-tag { background: rgba(47,107,79,.92); }
 ul.otd .otd-numbers .ph { background: var(--accent); color: #fff; font: 700 26px/1 var(--serif); }
 .home-latest { margin-top: 0; }
+
+/* Homepage book strip */
+.home-books h2 .more { float: right; font: 600 14px/1.6 var(--ui); letter-spacing: 0; text-transform: none; }
+ul.book-strip { list-style: none; margin: 12px 0 28px; padding: 0 0 6px; display: grid; grid-auto-flow: column;
+  grid-auto-columns: minmax(118px, 1fr); gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; }
+.book-strip li { scroll-snap-align: start; }
+.book-strip a { position: relative; display: block; color: var(--ink); text-decoration: none; font-family: var(--ui); }
+.book-strip img { display: block; width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.16); transition: transform .25s ease; }
+.book-strip a:hover img { transform: translateY(-3px); }
+.book-strip .perk-tag { position: static; display: inline-block; margin-top: 8px; font-size: 9.5px; padding: 3px 6px; }
+.book-strip .t { display: block; margin-top: 8px; font-weight: 600; font-size: 14px; line-height: 1.25; }
+.book-strip .f { display: block; font-size: 12px; color: var(--muted); }
+.more-issues { margin: 8px 0 28px; }
+h2.tw-part { margin: 36px 0 8px; font: 700 1.8em/1.2 var(--serif); letter-spacing: 0; text-transform: none; color: var(--ink); border: 0; }
+@media (max-width: 640px) { ul.home-doors { grid-template-columns: repeat(2, 1fr); } ul.book-strip { grid-auto-columns: 120px; } }

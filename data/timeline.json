@@ -1,5 +1,5 @@
 {
- "_note": "Milestones for /timeline/. Series, yearly story counts and photos are added automatically; add life and work milestones here. date is YYYY or YYYY-MM-DD; url is optional (a post, page or Substack link). skip_photos: any photo whose address contains one of these words is left off the timeline, photo wall and series pages.",
+ "_note": "Milestones for /twenty-years/. Series, yearly story counts and photos are added automatically; add life and work milestones here. date is YYYY or YYYY-MM-DD; url is optional (a post, page or Substack link). skip_photos: any photo whose address contains one of these words is left off the timeline, photo wall and series pages.",
  "milestones": [
   {
    "date": "2005-05-05",

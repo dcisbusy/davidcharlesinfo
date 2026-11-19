@@ -35,7 +35,7 @@ os.chdir(ROOT)
 SITE = "https://davidcharles.info"
 SUBSTACK = "https://davidcharles.substack.com"
 GOATCOUNTER = "davidcharles"    # GoatCounter site code (davidcharles.goatcounter.com). Set to "" to switch stats off.
-CSS_VERSION = "26"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
+CSS_VERSION = "28"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
 
 NEWSLETTER_DATA = "newsletter-archive/posts.json"
 BLOG_DATA = "blog-archive/index.json"
@@ -45,16 +45,18 @@ MONTHS = ["January", "February", "March", "April", "May", "June", "July",
           "August", "September", "October", "November", "December"]
 HOME_HERO = "/wp-content/uploads/2018/02/Lake-in-Cairngorms.jpg"     # the big photo at the top of the homepage
 HOME_DOORS = [                                                         # homepage tiles: address, label, photo
-    ("/start-here/", "Start here", "/wp-content/uploads/2018/02/Me-in-Cairngorms.jpg"),
-    ("/map/", "Adventure map", "/wp-content/uploads/2013/12/Cycling-Around-Britain-122.jpg"),
-    ("/trees/", "Tree map", "/assets/trees-tile.jpg"),
-    ("/series/", "Series", "/wp-content/uploads/2012/03/Country-road-Tunisia-768x576.jpg"),
-    ("/timeline/", "Twenty-year timeline", "/wp-content/uploads/2018/10/Me-2007-to-2018.jpg"),
-    ("/photos/", "Photo wall", "/wp-content/uploads/2016/02/IMG_2598.jpg"),
+    ("/start-here/", "Start here", "/wp-content/uploads/2018/02/Me-in-Cairngorms.jpg"),     # first row: reading
     ("/newsletter-archive/", "Archive", "/wp-content/uploads/2016/01/IMG_1379.jpg"),
-    ("/books/", "Books", "/books/cycling-to-the-sahara/cover.jpg"),
+    ("/series/", "Series", "/wp-content/uploads/2012/03/Country-road-Tunisia-768x576.jpg"),
+    ("/map/", "Adventure map", "/wp-content/uploads/2013/12/Cycling-Around-Britain-122.jpg"),  # second row: perks
+    ("/rides/", "Rides", "/wp-content/uploads/2013/08/Cycling-Around-Britain-118.jpg"),
+    ("/trees/", "Tree map", "/assets/trees-tile.jpg"),
 ]
+HOME_ISSUES = 10                                                      # newsletter issues listed on the homepage
 PERKS = {"/map/", "/trees/", "/rides/"}                                # tiles behind the subscriber password
+# The tag on subscriber perks: a closed padlock until this browser has the password (assets/lock.js), then open
+PERK_TAG = ('<span class="perk-tag"><span class="when-locked">Subscriber perk</span>'
+            '<span class="when-unlocked">Unlocked: you’re awesome</span></span>')
 QUICK_PICK = ('<p class="quick-pick">Got <a href="/random-story/?m=2">2 minutes</a>, <a href="/random-story/?m=5">5</a>, '
               '<a href="/random-story/?m=10">10</a> or <a href="/random-story/?m=20">20</a>? '
               '<a href="/random-story/">Pick me a story</a></p>\n')
@@ -212,7 +214,7 @@ def page(title, description, path, body, current=None, image=None, kind="website
 
 
 # Old pages folded into newer ones: the old address forwards to the new place
-MOVED = {"/shop/": "/books/#other-books"}
+MOVED = {"/shop/": "/books/#other-books", "/timeline/": "/twenty-years/", "/numbers/": "/twenty-years/#numbers"}
 
 
 def redirect_page(to):
@@ -633,7 +635,7 @@ def build_blog(entries, ctx=None):
         archive_tabs("/blog-archive/") + "<h1>Blog archive</h1>\n"
         f'<p class="intro muted">{len(posts)} posts written between {first} and {last}. For new writing, see the '
         '<a href="/newsletter-archive/">newsletter</a>. Or explore it on the <a href="/map/">map</a>, the '
-        '<a href="/photos/">photo wall</a> or in <a href="/numbers/">20 years in numbers</a>, follow a '
+        '<a href="/photos/">photo wall</a> or in <a href="/twenty-years/">Twenty years</a>, follow a '
         '<a href="/series/">series</a>, or try a <a href="/random-story/">random story</a>.</p>\n'
         + QUICK_PICK +
         '<h2 class="section">Pages</h2>\n<ul class="pages">'
@@ -661,8 +663,7 @@ def build_home(issues, posts, extra="", minutes=None):
     rest = intro.replace(h1.group(0), "", 1).strip() if h1 else intro
     hero = (f'<header class="sh-hero home-hero"><img src="{HOME_HERO}" alt="" fetchpriority="high">'
             f'<div><h1>{h1.group(1) if h1 else "David Charles"}</h1>'
-            f'<div class="buttons">{SUBSCRIBE}<a class="button ghost" href="/start-here/">Start here</a>'
-            f'<a class="button ghost" href="/subscribers/">For subscribers</a></div></div></header>')
+            f'<div class="buttons">{SUBSCRIBE}<a class="button ghost" href="/subscribers/">Free ebooks</a></div></div></header>')
     latest = ""
     if issues:
         p = issues[0]
@@ -674,13 +675,17 @@ def build_home(issues, posts, extra="", minutes=None):
                   f'<time datetime="{esc(p.get("date"))}">{esc(nice(p.get("date", "")))}{mins}</time></div></a>')
     doors = "".join(
         f'<li><a href="{u}"><img src="{img}" alt="" loading="lazy" decoding="async">'
-        + ('<span class="perk-tag">Subscriber perk</span>' if u in PERKS else "")
+        + (PERK_TAG if u in PERKS else "")
         + f'<span class="label">{esc(t)}</span></a></li>' for u, t, img in HOME_DOORS if os.path.exists(img.lstrip("/")))
     body = (hero + "\n" + latest + "\n"
             f'<div class="intro home-intro" data-edit-file="{INTRO}">\n{rest}\n</div>\n'
+            + (extra or {}).get("books", "") +
             f'<ul class="sh-doors home-doors">{doors}</ul>\n'
             '<aside class="continue-home" hidden><h2 class="section">Carry on reading</h2><ul></ul></aside>\n'
-            + extra + '<div id="newsletter"></div>\n' + issue_list(issues, minutes))
+            + (extra or {}).get("otd", "") + '<div id="newsletter"></div>\n' + issue_list(issues[:HOME_ISSUES], minutes)
+            + (f'<p class="more-issues"><a class="button secondary" href="/newsletter-archive/">Every issue ({len(issues)}) &rarr;</a></p>\n'
+               if len(issues) > HOME_ISSUES else "")
+            + SUBSCRIBE_BOX + '<script src="/assets/lock.js?v=4" defer></script>')
     write_if_changed("index.html", page(
         "David Charles", "Writer and outdoor instructor. Read every issue of my newsletter, and the archive of my blog.",
         "/", body, "/"))
@@ -702,7 +707,7 @@ def build_extras(posts, pages, cats, years):
     write_if_changed("404.html", page("Page not found | David Charles", "Page not found.", "/404.html", body,
                                       noindex=True))
     urls = [("/", ""), ("/start-here/", ""), ("/newsletter-archive/", ""), ("/blog-archive/", ""), ("/series/", ""),
-            ("/map/", ""), ("/trees/", ""), ("/photos/", ""), ("/numbers/", ""), ("/search/", ""), ("/timeline/", ""),
+            ("/map/", ""), ("/trees/", ""), ("/photos/", ""), ("/twenty-years/", ""), ("/search/", ""),
             ("/random-story/", ""), ("/books/", "")]
     urls += [(u, "") for u in sorted("/" + os.path.dirname(f).replace(os.sep, "/") + "/"
                                      for f in __import__("glob").glob("series/*/index.html")

@@ -1,7 +1,7 @@
 """Words that are special to David: a corpus comparison for the 20 years in numbers page.
 
     pip install wordfreq        # once
-    python3 scripts/keywords.py # writes data/keywords.json; the next build shows it on /numbers/
+    python3 scripts/keywords.py # writes data/keywords.json; the next build shows it on /twenty-years/
 
 Every word in every story is counted and compared with how often it turns up in everyday English
 (the wordfreq package: a blend of books, news, Wikipedia, subtitles, web text and social media).

@@ -19,7 +19,7 @@ import re
 import sys
 from urllib.parse import quote
 
-from build import (MONTHS, PERSON, QUICK_PICK, SITE, SUBSTACK, TILE_COLOURS, TIP_LINE, chips, esc, file_for, nice, page, read, write_if_changed)
+from build import (MONTHS, PERK_TAG, PERSON, QUICK_PICK, SITE, SUBSTACK, TILE_COLOURS, TIP_LINE, chips, esc, file_for, nice, page, read, write_if_changed)
 
 STOP = set("""
 a about above after again against all am an and any are aren't as at be because been before being below between both
@@ -278,7 +278,7 @@ def build_map(stories):
 <h2>Most-visited places</h2>
 <ul class="chips" id="places"></ul>
 </div>
-<p class="back"><a href="/trees/">Tree map: every tree around Crystal Palace</a> &middot; <a href="/numbers/">More in 20 years in numbers</a></p>
+<p class="back"><a href="/trees/">Tree map: every tree around Crystal Palace</a> &middot; <a href="/twenty-years/#numbers">More in Twenty years</a></p>
 <link rel="stylesheet" href="/assets/leaflet/leaflet.css">
 <link rel="stylesheet" href="/assets/leaflet/MarkerCluster.css">
 <link rel="stylesheet" href="/assets/leaflet/MarkerCluster.Default.css">
@@ -351,7 +351,7 @@ def build_on_this_day(stories, n_stories=0):
     return """<section class="on-this-day" id="on-this-day" hidden>
 <h2 class="section" id="otd-title">On this day</h2>
 <ul class="otd" id="otd-list"></ul>
-<template id="otd-numbers"><li><a href="/numbers/" class="otd-numbers"><span class="ph">20</span><div><time>""" + (f"{n_stories:,} stories" if n_stories else "Counted") + """</time><span class="t">See 20 years in numbers &rarr;</span></div></a></li></template>
+<template id="otd-numbers"><li><a href="/twenty-years/" class="otd-numbers"><span class="ph">20</span><div><time>""" + (f"{n_stories:,} stories" if n_stories else "Counted") + """</time><span class="t">Twenty years: the timeline and the numbers &rarr;</span></div></a></li></template>
 </section>
 <script>
 (function(){
@@ -500,6 +500,9 @@ log-likelihood score). Tap a word to find the stories it's in.</p>
 {k["total_words"]:,} words, {nice(k["made"])}.</p>"""
 
 
+NUMBERS_BODY = []
+
+
 def build_numbers(stories, mentions):
     for s in stories:
         s["words"] = len(re.findall(r"[A-Za-zÀ-ɏ'’-]+", s["text"])) if s["has_text"] else 0
@@ -547,7 +550,7 @@ def build_numbers(stories, mentions):
     mxw = top_words[0][1] if top_words else 1
     cloud = " ".join(f'<span style="font-size:{0.85 + 1.4 * (c / mxw) ** 0.6:.2f}em" title="{c:,} times">{esc(w)}</span>'
                      for w, c in sorted(top_words, key=lambda x: x[0]))
-    body = f"""<h1>20 years in numbers</h1>
+    body = f"""<h2 class="tw-part" id="numbers">In numbers</h2>
 <p class="intro muted">Every blog post and newsletter issue since {years[0]}, counted. Where a blog post is a copy of
 a newsletter issue, it's counted once.</p>
 <div class="stat-tiles six">
@@ -594,9 +597,7 @@ a newsletter issue, it's counted once.</p>
 <p class="muted small">Leaving out little words like "the" and "really". Bigger means more often; hover for the count.
 Frequency alone mostly shows what every writer says a lot, which is why the comparison above is more revealing.</p>
 </details>"""
-    write_if_changed("numbers/index.html", page("20 years in numbers | David Charles",
-                                                f"{len(stories):,} stories and {total_words:,} words, counted.",
-                                                "/numbers/", body))
+    NUMBERS_BODY[:] = [body]   # shown on /twenty-years/ with the timeline (build_timeline)
     return (f'<a class="stat-tiles home-figures" href="/numbers/" aria-label="20 years in numbers">'
             f'{tile(f"{len(stories):,}", "stories")}{tile(f"{total_words:,}", "words")}'
             f'{tile(len(years), "years of writing")}{tile(len(places), "places on the map")}'
@@ -1506,7 +1507,7 @@ def build_work_with_me():
 
 
 def build_timeline(stories, series_list):
-    """/timeline/: twenty years, a year at a time. Milestones from data/timeline.json, plus series,
+    """/twenty-years/ (with the numbers from build_numbers): twenty years, a year at a time. Milestones from data/timeline.json, plus series,
     yearly story counts and a few photographs chosen from each year's stories."""
     try:
         tl = json.load(open("data/timeline.json", encoding="utf-8"))
@@ -1578,12 +1579,18 @@ def build_timeline(stories, series_list):
                    + "</section>")
     first, last = (min(years), max(years)) if years else ("", "")
     jump = " ".join(f'<a href="#y{y}">{y[2:] if i else y}</a>' for i, y in enumerate(sorted(years)))
-    body = (f'<h1>Twenty years</h1><p class="intro muted">{first} to {last}, a year at a time: the journeys, the '
-            f'projects, the turning points, and the stories written along the way.</p>'
-            f'<p class="tl-jump">{jump}</p><div class="timeline">{"".join(out)}</div>')
-    write_if_changed("timeline/index.html", page("Twenty years: a timeline | David Charles",
-                                                 "Twenty years of journeys, projects and stories by David Charles.",
-                                                 "/timeline/", body))
+    body = (f'<h1>Twenty years</h1><p class="intro muted">{first} to {last}: the journeys, the '
+            f'projects, the turning points and the stories written along the way, a year at a time and counted.</p>'
+            '<nav class="archive-tabs tw-tabs" aria-label="Twenty years"><a href="#timeline">Timeline</a>'
+            '<a href="#numbers">In numbers</a></nav>'
+            f'<h2 class="tw-part" id="timeline">Timeline</h2>'
+            f'<p class="tl-jump">{jump}</p><div class="timeline">{"".join(out)}</div>'
+            + "".join(NUMBERS_BODY))
+    write_if_changed("twenty-years/index.html", page("Twenty years | David Charles",
+                                                     "Twenty years of journeys, projects and stories by David Charles: "
+                                                     "a timeline, and everything counted.",
+                                                     "/twenty-years/", body, image="/cards/twenty-years.jpg"
+                                                     if os.path.exists("cards/twenty-years.jpg") else None))
 
 
 def build_start_here(stories, entries, series_list):
@@ -1649,7 +1656,7 @@ def build_start_here(stories, entries, series_list):
             f'{" &middot; " + c["meta"] if c["meta"] else ""}</span></div></a></li>' for c in cards)
         sections.append(f'<h2 class="section" id="{anchor(th["name"])}">{esc(th["name"])}</h2>\n'
                         f'<ul class="sh-picks">{lis}</ul>')
-    explore = [("/series/", "Series"), ("/map/", "Adventure map"), ("/trees/", "Tree map"), ("/timeline/", "Timeline"),
+    explore = [("/series/", "Series"), ("/map/", "Adventure map"), ("/trees/", "Tree map"), ("/twenty-years/", "Twenty years"),
                ("/random-story/", "Pick me a story"), ("/books/", "Free ebooks"), ("/subscribers/", "For subscribers")]
     tiles = "".join(f'<li><a href="{u}"><img src="/cards/{u.strip("/")}.jpg" alt="{esc(t)}" loading="lazy" '
                     f'decoding="async" width="1200" height="630"></a></li>'
@@ -1757,4 +1764,27 @@ def build_pages(ctx, entries):
     search_records(stories, entries)
     print(f"Map: {sum(1 for s in stories if s.get('place'))} stories placed; photo wall: {n} photos; "
           f"{len(ctx['series'])} series")
-    return otd
+    return {"otd": otd, "books": home_books()}
+
+
+def home_books():
+    """The homepage book strip: the subscriber ebooks, then the books to buy, then a link to /books/."""
+    lis = []
+    for b in load_books():
+        if b.get("draft"):
+            continue
+        lis.append(f'<li><a href="/books/{esc(b["slug"])}/"><img src="/books/{esc(b["slug"])}/cover-small.jpg" alt="" '
+                   f'width="300" height="424" loading="lazy" decoding="async">{PERK_TAG}'
+                   f'<span class="t">{esc(b["title"])}</span><span class="f">Ebook</span></a></li>')
+    try:
+        others = json.load(open("data/books.json", encoding="utf-8")).get("other_books", [])
+    except (OSError, ValueError):
+        others = []
+    for o in others:
+        lis.append(f'<li><a href="{esc(o["url"])}"><img src="{esc(o["cover"])}" alt="" width="{o.get("size", [300, 449])[0]}" '
+                   f'height="{o.get("size", [300, 449])[1]}" loading="lazy" decoding="async">'
+                   f'<span class="t">{esc(o["title"])}</span><span class="f">{esc(o.get("format", "Book"))}</span></a></li>')
+    if not lis:
+        return ""
+    return ('<section class="home-books"><h2 class="section">Books <a class="more" href="/books/">See all books &rarr;</a></h2>'
+            f'<ul class="book-strip">{"".join(lis)}</ul></section>')
