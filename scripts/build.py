@@ -35,7 +35,7 @@ os.chdir(ROOT)
 SITE = "https://davidcharles.info"
 SUBSTACK = "https://davidcharles.substack.com"
 GOATCOUNTER = "davidcharles"    # GoatCounter site code (davidcharles.goatcounter.com). Set to "" to switch stats off.
-CSS_VERSION = "25"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
+CSS_VERSION = "26"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
 
 NEWSLETTER_DATA = "newsletter-archive/posts.json"
 BLOG_DATA = "blog-archive/index.json"
@@ -51,9 +51,13 @@ HOME_DOORS = [                                                         # homepag
     ("/series/", "Series", "/wp-content/uploads/2012/03/Country-road-Tunisia-768x576.jpg"),
     ("/timeline/", "Twenty-year timeline", "/wp-content/uploads/2018/10/Me-2007-to-2018.jpg"),
     ("/photos/", "Photo wall", "/wp-content/uploads/2016/02/IMG_2598.jpg"),
-    ("/random-story/", "Pick me a story", "/wp-content/uploads/2016/01/IMG_1379.jpg"),
+    ("/newsletter-archive/", "Archive", "/wp-content/uploads/2016/01/IMG_1379.jpg"),
     ("/books/", "Books", "/books/cycling-to-the-sahara/cover.jpg"),
 ]
+PERKS = {"/map/", "/trees/", "/rides/"}                                # tiles behind the subscriber password
+QUICK_PICK = ('<p class="quick-pick">Got <a href="/random-story/?m=2">2 minutes</a>, <a href="/random-story/?m=5">5</a>, '
+              '<a href="/random-story/?m=10">10</a> or <a href="/random-story/?m=20">20</a>? '
+              '<a href="/random-story/">Pick me a story</a></p>\n')
 TILE_COLOURS = ["#2f6b4f", "#4a7a8c", "#8a6d3b", "#5b6e3a", "#7a4e5c", "#3f5a7a", "#9a5b34", "#4f6f63"]
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -631,6 +635,7 @@ def build_blog(entries, ctx=None):
         '<a href="/newsletter-archive/">newsletter</a>. Or explore it on the <a href="/map/">map</a>, the '
         '<a href="/photos/">photo wall</a> or in <a href="/numbers/">20 years in numbers</a>, follow a '
         '<a href="/series/">series</a>, or try a <a href="/random-story/">random story</a>.</p>\n'
+        + QUICK_PICK +
         '<h2 class="section">Pages</h2>\n<ul class="pages">'
         + "".join(f'<li><a href="{esc(e["url"])}">{esc(e["title"])}</a></li>' for e in pages) + "</ul>\n"
         '<h2 class="section">Categories</h2>\n' + cat_tree + "\n"
@@ -669,24 +674,20 @@ def build_home(issues, posts, extra="", minutes=None):
                   f'<time datetime="{esc(p.get("date"))}">{esc(nice(p.get("date", "")))}{mins}</time></div></a>')
     doors = "".join(
         f'<li><a href="{u}"><img src="{img}" alt="" loading="lazy" decoding="async">'
-        f'<span class="label">{esc(t)}</span></a></li>' for u, t, img in HOME_DOORS if os.path.exists(img.lstrip("/")))
-    body = (hero + "\n"
+        + ('<span class="perk-tag">Subscriber perk</span>' if u in PERKS else "")
+        + f'<span class="label">{esc(t)}</span></a></li>' for u, t, img in HOME_DOORS if os.path.exists(img.lstrip("/")))
+    body = (hero + "\n" + latest + "\n"
             f'<div class="intro home-intro" data-edit-file="{INTRO}">\n{rest}\n</div>\n'
-            + latest + "\n"
             f'<ul class="sh-doors home-doors">{doors}</ul>\n'
             '<aside class="continue-home" hidden><h2 class="section">Carry on reading</h2><ul></ul></aside>\n'
-            '<p class="quick-pick">Got <a href="/random-story/?m=2">2 minutes</a>, <a href="/random-story/?m=5">5</a>, '
-            '<a href="/random-story/?m=10">10</a> or <a href="/random-story/?m=20">20</a>? '
-            '<a href="/random-story/">Pick me a story</a></p>\n'
-            + extra +
-            '<h2 class="section" id="newsletter">The newsletter</h2>\n' + issue_list(issues, minutes))
+            + extra + '<div id="newsletter"></div>\n' + issue_list(issues, minutes))
     write_if_changed("index.html", page(
         "David Charles", "Writer and outdoor instructor. Read every issue of my newsletter, and the archive of my blog.",
         "/", body, "/"))
     body = (archive_tabs("/newsletter-archive/") + "<h1>Newsletter archive</h1>\n"
             '<p class="intro muted">Every issue of my newsletter, newest first. Click any issue to read it on '
             f'Substack.</p>\n<div class="buttons">{SUBSCRIBE}<a class="button secondary" href="/subscribers/">For subscribers</a></div>\n'
-            + issue_list(issues, minutes))
+            + QUICK_PICK + issue_list(issues, minutes))
     write_if_changed("newsletter-archive/index.html", page(
         "Newsletter archive | David Charles",
         "Every issue of David Charles's newsletter, with links to read them on Substack.",

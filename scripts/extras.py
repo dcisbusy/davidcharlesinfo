@@ -19,7 +19,7 @@ import re
 import sys
 from urllib.parse import quote
 
-from build import (MONTHS, PERSON, SITE, SUBSTACK, TILE_COLOURS, TIP_LINE, chips, esc, file_for, nice, page, read, write_if_changed)
+from build import (MONTHS, PERSON, QUICK_PICK, SITE, SUBSTACK, TILE_COLOURS, TIP_LINE, chips, esc, file_for, nice, page, read, write_if_changed)
 
 STOP = set("""
 a about above after again against all am an and any are aren't as at be because been before being below between both
@@ -338,7 +338,7 @@ words, so the odd pin may be in the wrong place.</p>"""
 
 # ---------------------------------------------------------------- On this day
 
-def build_on_this_day(stories):
+def build_on_this_day(stories, n_stories=0):
     days = collections.defaultdict(list)
     common = common_photos(stories)
     for s in stories:
@@ -351,6 +351,7 @@ def build_on_this_day(stories):
     return """<section class="on-this-day" id="on-this-day" hidden>
 <h2 class="section" id="otd-title">On this day</h2>
 <ul class="otd" id="otd-list"></ul>
+<template id="otd-numbers"><li><a href="/numbers/" class="otd-numbers"><span class="ph">20</span><div><time>""" + (f"{n_stories:,} stories" if n_stories else "Counted") + """</time><span class="t">See 20 years in numbers &rarr;</span></div></a></li></template>
 </section>
 <script>
 (function(){
@@ -363,10 +364,9 @@ def build_on_this_day(stories):
         (D[key(d)]||[]).forEach(function(x){if(x[0]<year)items.push(x);});});}
       title='This week in years gone by';
     }
-    if(!items.length) return;
     items.sort(function(a,b){return b[0]-a[0];});
     var ul=document.getElementById('otd-list');
-    items.slice(0,6).forEach(function(x){
+    items.slice(0,5).forEach(function(x){
       var li=document.createElement('li'), a=document.createElement('a'), pic, div=document.createElement('div'),
           t=document.createElement('time'), b=document.createElement('span');
       if(x[3]){pic=document.createElement('img');pic.src=x[3];pic.alt='';pic.loading='lazy';
@@ -376,6 +376,7 @@ def build_on_this_day(stories):
       b.className='t'; b.textContent=x[1]; a.href=x[2];
       div.appendChild(t); div.appendChild(b); a.appendChild(pic); a.appendChild(div); li.appendChild(a); ul.appendChild(li);
     });
+    ul.appendChild(document.getElementById('otd-numbers').content.cloneNode(true));   // always: the numbers card
     document.getElementById('otd-title').textContent=title;
     document.getElementById('on-this-day').hidden=false;
   }).catch(function(){});
@@ -1689,6 +1690,7 @@ def search_records(stories, entries):
         json.dump(recs, f, ensure_ascii=False)
     intro, attrs = page_text("search", "Search every newsletter issue, blog post and page.")
     body = (f'<h1>Search</h1>\n<p class="intro muted"{attrs}>{intro}</p>\n'
+            + QUICK_PICK +
             '<div id="search"></div>\n<link rel="stylesheet" href="/pagefind/pagefind-ui.css">\n'
             '<script src="/pagefind/pagefind-ui.js"></script>\n'
             '<script>window.addEventListener("DOMContentLoaded",function(){var ui=new PagefindUI({element:"#search",'
@@ -1741,9 +1743,9 @@ def build_pages(ctx, entries):
     stories = ctx["stories"]
     build_feed(stories)
     build_map(stories)
-    otd = build_on_this_day(stories)
+    otd = build_on_this_day(stories, len(stories))
     build_rides()
-    figures = build_numbers(stories, ctx["mentions"])
+    build_numbers(stories, ctx["mentions"])   # the page only: its tiles left the homepage (Nov 2026)
     n = build_photos(stories)
     build_series_pages(ctx["series"])
     build_books(ctx["series"])
@@ -1755,4 +1757,4 @@ def build_pages(ctx, entries):
     search_records(stories, entries)
     print(f"Map: {sum(1 for s in stories if s.get('place'))} stories placed; photo wall: {n} photos; "
           f"{len(ctx['series'])} series")
-    return figures + otd
+    return otd

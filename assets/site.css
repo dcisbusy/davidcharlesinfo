@@ -617,3 +617,11 @@ ul.sub-maps { grid-template-columns: repeat(3, 1fr); padding: 0; margin-top: 16p
   .sub-hero { min-height: 240px; }
   ul.sub-shelf { grid-template-columns: repeat(2, 1fr); gap: 16px; }
 }
+
+/* Homepage tiles behind the subscriber password */
+.sh-doors .perk-tag { position: absolute; top: 10px; left: 10px; z-index: 1; padding: 4px 8px; border-radius: 4px;
+  font: 600 11px/1 var(--ui); letter-spacing: .05em; text-transform: uppercase; color: #fff; background: rgba(0,0,0,.6); }
+.sh-doors .perk-tag::before { content: "\1F512\FE0E  "; }
+html.dc-unlocked .sh-doors .perk-tag { display: none; }
+ul.otd .otd-numbers .ph { background: var(--accent); color: #fff; font: 700 26px/1 var(--serif); }
+.home-latest { margin-top: 0; }
