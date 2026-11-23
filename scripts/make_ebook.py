@@ -281,6 +281,9 @@ def main(slug):
         if edit:
             body = apply_edits(body, edit)
         body = drop_title_heading(body, [title, it["title"], edit.get("title") or ""])
+        # a footnote number whose note was cut with the rest of the issue, and dividers left at the end
+        body = re.sub(r'<a href="#footnote-anchor-\d+"[^>]*>\d+</a>\s*(?=$|<hr|<h\d)', "", body.strip())
+        body = re.sub(r"(?:\s*<hr\s*/?>)+\s*$", "", body)
         chapters.append((dict(it, title=edit.get("title") or title), body))
 
     out = f"books/{slug}"
