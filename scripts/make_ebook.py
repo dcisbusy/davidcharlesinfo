@@ -126,15 +126,18 @@ def apply_edits(body, edit):
                                             and any(plain(p) == c or (len(c) >= 70 and plain(p).startswith(c))
                                                     for c in cuts)))
     for phrase in edit.get("cut_text", []):
-        new = re.sub(r"\s?" + phrase_pattern(phrase), "", body, count=1)
+        # keep any tags the phrase ran through (a closing </strong>, say), so nothing is left open
+        new = re.sub(r"\s?" + phrase_pattern(phrase), lambda m: "".join(re.findall(r"<[^>]+>", m.group(0))), body, count=1)
         if new == body:
             print(f"  edit not found: {phrase[:60]}")
         body = new
     for r in edit.get("replace", []):           # David's own rewording of a phrase
-        new = re.sub(phrase_pattern(r["from"]), lambda m: html.escape(r["to"], quote=False), body, count=1)
+        new = re.sub(phrase_pattern(r["from"]), lambda m: html.escape(r["to"], quote=False)
+                     + "".join(re.findall(r"<[^>]+>", m.group(0))), body, count=1)
         if new == body:
             print(f"  edit not found: {r['from'][:60]}")
         body = new
+    body = re.sub(r"<(strong|b|em|i)>\s*</\1>", "", body)
     body = re.sub(r"<p>\s*</p>", "", body)
     return body
 
