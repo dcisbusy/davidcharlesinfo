@@ -19,6 +19,7 @@ import re
 import sys
 from urllib.parse import quote
 
+import build  # noqa: E402
 from build import (MONTHS, PERK_TAG, PERSON, QUICK_PICK, SITE, SUBSTACK, TILE_COLOURS, TIP_LINE, chips, esc, file_for, nice, page, read, write_if_changed)
 
 STOP = set("""
@@ -1009,13 +1010,9 @@ def editable(file, keys):
     return f' data-edit-json="{file}" data-edit-key="{esc(json.dumps(keys))}"'
 
 
-def page_text(key, default):
-    """A line of page text David can edit, kept in data/page-text.json. Returns (text, attributes)."""
-    try:
-        t = json.load(open("data/page-text.json", encoding="utf-8")).get(key)
-    except OSError:
-        t = None
-    return esc(t if t is not None else default), editable("data/page-text.json", [key])
+def page_text(key, default, rich=True):
+    """A line of page text David can edit, kept in data/page-text.json (links, bold and italic allowed)."""
+    return build.page_text(key, default, rich)
 
 
 def index_of(file, list_key, slug):

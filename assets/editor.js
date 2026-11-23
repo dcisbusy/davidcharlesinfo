@@ -38,7 +38,8 @@
   Array.prototype.forEach.call(document.querySelectorAll("[data-edit-json]"), function (el) {
     var keys;
     try { keys = JSON.parse(el.getAttribute("data-edit-key")); } catch (e) { return; }
-    regions.push({ kind: "json", host: el, file: el.getAttribute("data-edit-json"), keys: keys });
+    regions.push({ kind: "json", host: el, file: el.getAttribute("data-edit-json"), keys: keys,
+                   rich: el.hasAttribute("data-edit-rich") });   // rich: bold, italic and links allowed
   });
   if (!regions.length) return;
 
@@ -87,12 +88,31 @@
   }
   function cmd(name, value) {
     return function () {
-      if (!focused || focused.kind !== "file") { say("Bold, italic and links work in the main text only."); return; }
-      focused.wrap.focus();
+      if (!focused || (focused.kind !== "file" && !focused.rich)) { say("Bold, italic and links don't work in this line."); return; }
+      focused.target.focus();
       document.execCommand(name, false, value || null);
     };
   }
-  function current(r) { return r.kind === "file" ? r.wrap.innerHTML : r.host.textContent.replace(/\s+/g, " ").trim(); }
+  // a one-line field with links: keep only <a href>, <strong>/<b>, <em>/<i>; everything else becomes plain text
+  function cleanInline(node) {
+    var out = "";
+    Array.prototype.forEach.call(node.childNodes, function (n) {
+      if (n.nodeType === 3) { out += n.textContent.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); return; }
+      if (n.nodeType !== 1) return;
+      var t = n.tagName.toLowerCase(), inner = cleanInline(n);
+      if (t === "a" && n.getAttribute("href")) out += '<a href="' + n.getAttribute("href").replace(/"/g, "&quot;") + '">' + inner + "</a>";
+      else if (t === "b" || t === "strong") out += "<strong>" + inner + "</strong>";
+      else if (t === "i" || t === "em") out += "<em>" + inner + "</em>";
+      else out += inner;
+    });
+    return out.replace(/\s+/g, " ");
+  }
+  function current(r) {
+    if (r.kind === "file") return r.wrap.innerHTML;
+    if (r.rich) return cleanInline(r.host).trim();
+    return r.host.textContent.replace(/\s+/g, " ").trim();
+  }
+  function plainOf(htmlText) { var d = document.createElement("div"); d.innerHTML = htmlText; return d.textContent.replace(/\s+/g, " ").trim(); }
   function changed() { return regions.filter(function (r) { return current(r) !== r.original; }); }
 
   // while editing, tapping text inside a link edits it instead of following the link
@@ -132,9 +152,9 @@
     bar.appendChild(bold);
     bar.appendChild(ital);
     bar.appendChild(tool("Link", "Add a link", function () {
-      if (!focused || focused.kind !== "file") { say("Links work in the main text only."); return; }
+      if (!focused || (focused.kind !== "file" && !focused.rich)) { say("Links don't work in this line."); return; }
       var u = prompt("Link address (https://…)");
-      if (u) { focused.wrap.focus(); document.execCommand("createLink", false, u.trim()); }
+      if (u) { focused.target.focus(); document.execCommand("createLink", false, u.trim()); }
     }));
     bar.appendChild(tool("Unlink", "Remove a link", cmd("unlink")));
     bar.appendChild(tool("Undo", "Undo", function () { document.execCommand("undo"); }));
@@ -242,7 +262,9 @@
           text = JSON.stringify(data, null, 1) + "\n";
           return;
         }
-        if (typeof was !== "string" || was.replace(/\s+/g, " ").trim() !== r.original) {
+        var same = typeof was === "string" && (r.rich ? plainOf(was) === plainOf(r.original)
+                                                       : was.replace(/\s+/g, " ").trim() === r.original);
+        if (!same) {
           throw new Error("“" + r.original.slice(0, 40) + "…” changed on GitHub since you opened it. Reload and edit again.");
         }
         // swap just that string in the file, so the rest of its layout stays as it was

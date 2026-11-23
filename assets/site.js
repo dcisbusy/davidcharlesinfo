@@ -155,7 +155,7 @@
   try {
     if (localStorage.getItem("dc-edit-token") && document.querySelector(".entry-content, [data-edit-file], [data-edit-json]")) {
       var s = document.createElement("script");
-      s.src = "/assets/editor.js?v=4";
+      s.src = "/assets/editor.js?v=5";
       document.head.appendChild(s);
     }
   } catch (e) {}

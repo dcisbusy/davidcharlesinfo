@@ -35,7 +35,7 @@ os.chdir(ROOT)
 SITE = "https://davidcharles.info"
 SUBSTACK = "https://davidcharles.substack.com"
 GOATCOUNTER = "davidcharles"    # GoatCounter site code (davidcharles.goatcounter.com). Set to "" to switch stats off.
-CSS_VERSION = "29"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
+CSS_VERSION = "30"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
 
 NEWSLETTER_DATA = "newsletter-archive/posts.json"
 BLOG_DATA = "blog-archive/index.json"
@@ -227,14 +227,50 @@ def redirect_page(to):
 SUBSCRIBE = f'<a class="button primary" href="{SUBSTACK}/subscribe">Subscribe on Substack</a>'
 # The sign-up box at the end of posts. "Subscribe free" opens Substack's own sign-up form in place (site.js);
 # nothing loads from Substack until someone taps it. The latest issue is filled in from /assets/latest.json.
-def page_text(key, default):
-    """A line of site text from data/page-text.json, with the attributes that let the site editor change it."""
+class _Inline(__import__("html.parser").parser.HTMLParser):
+    """Keeps <a href>, <strong>/<b> and <em>/<i> from a line of site text; everything else is escaped."""
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.out, self.open = [], []
+
+    def handle_starttag(self, tag, attrs):
+        href = dict(attrs).get("href") or ""
+        if tag == "a" and re.match(r"(https?:|mailto:|/|#)", href):
+            self.out.append(f'<a href="{html.escape(href)}">')
+        elif tag in ("strong", "b", "em", "i"):
+            self.out.append(f"<{'strong' if tag in ('strong', 'b') else 'em'}>")
+        else:
+            return
+        self.open.append(tag)
+
+    def handle_endtag(self, tag):
+        if tag in self.open:
+            self.open.remove(tag)
+            self.out.append({"a": "</a>", "strong": "</strong>", "b": "</strong>"}.get(tag, "</em>"))
+
+    def handle_data(self, data):
+        self.out.append(html.escape(data, quote=False))
+
+
+def inline_html(text):
+    p = _Inline()
+    p.feed(text)
+    p.close()
+    return "".join(p.out) + "".join("</a>" if t == "a" else "</strong>" if t in ("strong", "b") else "</em>"
+                                    for t in reversed(p.open))
+
+
+def page_text(key, default, rich=True):
+    """A line of site text from data/page-text.json, with the attributes that let the site editor change it.
+    rich: the line may hold links, bold and italic (not for lines that sit inside a link or button)."""
     try:
         t = json.load(open("data/page-text.json", encoding="utf-8")).get(key)
     except OSError:
         t = None
-    attrs = f' data-edit-json="data/page-text.json" data-edit-key="{html.escape(json.dumps([key]))}"'
-    return html.escape(t if t is not None else default, quote=False), attrs
+    t = t if t is not None else default
+    attrs = (f' data-edit-json="data/page-text.json" data-edit-key="{html.escape(json.dumps([key]))}"'
+             + (" data-edit-rich" if rich else ""))
+    return (inline_html(t) if rich else html.escape(t, quote=False)), attrs
 
 
 _SH, _SHA = page_text("subscribe-heading", "Enjoyed this? There are more stories in the newsletter.")
@@ -242,11 +278,11 @@ _ST, _STA = page_text("subscribe-text", "I write a free newsletter about adventu
                                         "Join the readers who get it in their inbox.")
 TIP_URL = "https://www.paypal.me/dcisbusy"    # PayPal tip link, shown at the end of posts, long pages and ebook pages
 _TT, _TTA = page_text("tip-text", "If a story really made your day, you can leave me a tip.")
-_TB, _TBA = page_text("tip-button", "Tip on PayPal")
+_TB, _TBA = page_text("tip-button", "Tip on PayPal", rich=False)
 TIP_LINE = (f'<p class="tip"><span{_TTA}>{_TT}</span> <a class="tip-link" href="{TIP_URL}" rel="noopener" '
             f'data-goatcounter-click="tip-paypal"><span{_TBA}>{_TB}</span> &rarr;</a></p>')
-_BP, _BPA = page_text("books-plug", "Or take a story with you: free ebooks and paperbacks.")
-_SP, _SPA = page_text("subscribers-plug", "Already a subscriber? Unlock the ebooks and maps.")
+_BP, _BPA = page_text("books-plug", "Or take a story with you: free ebooks and paperbacks.", rich=False)
+_SP, _SPA = page_text("subscribers-plug", "Already a subscriber? Unlock the ebooks and maps.", rich=False)
 SUBSCRIBE_BOX = (
     f'<aside class="newsletter-box subscribe-box"><h2{_SHA}>{_SH}</h2>'
     f'<p{_STA}>{_ST}</p>'
