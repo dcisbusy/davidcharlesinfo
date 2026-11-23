@@ -1286,7 +1286,7 @@ def build_subscribers(books, paid_books=()):
 <script>
 (function(){{
   var q = new URLSearchParams(location.search), next = q.get('next') || '';
-  if (!/^\/[a-z0-9\/_-]*$/i.test(next) || next.indexOf('//') === 0) next = '';   // only pages on this site
+  if (!/^\\/[a-z0-9\\/_-]*$/i.test(next) || next.indexOf('//') === 0) next = '';   // only pages on this site
   var paidGate = document.getElementById('paid-gate');
   var g = q.get('tier') === 'paid' && paidGate ? paidGate : document.getElementById('sub-gate'), typed = false;
   if (g === paidGate) {{ g.hidden = false; g.scrollIntoView(); }}
