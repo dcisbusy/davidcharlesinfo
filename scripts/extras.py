@@ -285,7 +285,7 @@ def build_map(stories):
 <link rel="stylesheet" href="/assets/leaflet/MarkerCluster.Default.css">
 <script src="/assets/leaflet/leaflet.js"></script>
 <script src="/assets/leaflet/leaflet.markercluster.js"></script>
-<script src="/assets/lock.js?v=4"></script>
+<script src="/assets/lock.js?v=5"></script>
 <script>
 DCLock.gate(document.getElementById('map-gate'), function(){{
   DCLock.open('/map/map-data.locked').then(function(buf){{
@@ -941,7 +941,7 @@ def build_rides():
 <div id="ride-list"></div>
 <link rel="stylesheet" href="/assets/leaflet/leaflet.css">
 <script src="/assets/leaflet/leaflet.js"></script>
-<script src="/assets/lock.js?v=4"></script>
+<script src="/assets/lock.js?v=5"></script>
 <script>
 DCLock.gate(document.getElementById('ride-gate'), function(){{
   DCLock.open('/rides/rides-data.locked').then(function(buf){{
@@ -1057,10 +1057,10 @@ def build_books(series_list):
                 f'<p{ed("description")}>{esc(b["description"])}</p><p class="muted">{parts}{words}. Free for newsletter subscribers.</p>'
                 f'<div class="buttons"><a class="button primary" href="/subscribers/?next=/{d}/" '
                 f'data-locked="/{d}/{b["slug"]}.epub.locked" data-name="{esc(b["title"])}.epub" data-type="application/epub+zip" '
-                f'data-goatcounter-click="ebook-{b["slug"]}-epub" data-goatcounter-title="{esc(b["title"])} (EPUB)">Download ebook '
+                f'data-count="ebook-{b["slug"]}-epub" data-count-title="{esc(b["title"])} (EPUB)">Download ebook '
                 f'(EPUB, {size(b["slug"] + ".epub")})</a> <a class="button" href="/subscribers/?next=/{d}/" '
                 f'data-locked="/{d}/{b["slug"]}.pdf.locked" data-name="{esc(b["title"])}.pdf" data-type="application/pdf" '
-                f'data-goatcounter-click="ebook-{b["slug"]}-pdf" data-goatcounter-title="{esc(b["title"])} (PDF)">'
+                f'data-count="ebook-{b["slug"]}-pdf" data-count-title="{esc(b["title"])} (PDF)">'
                 f'PDF to read or print ({size(b["slug"] + ".pdf")})</a></div>'
                 f'<p class="lock-note small">{LOCK_NOTE}</p>'
                 f'<p class="muted small">EPUB opens in Apple Books, Google Play Books, Kobo and most e-readers. For '
@@ -1069,7 +1069,7 @@ def build_books(series_list):
                 + '</p></div></div>'
                 f'<aside class="newsletter-box"><h2>Liked it?</h2><p{st_attrs}>{st_text}</p><p><a class="button primary" '
                 'href="https://davidcharles.substack.com/subscribe">Subscribe free</a></p>' + TIP_LINE + '</aside>'
-                '<script src="/assets/lock.js?v=4" defer></script>')
+                '<script src="/assets/lock.js?v=5" defer></script>')
         book_schema = {"@context": "https://schema.org", "@type": "Book", "name": b["title"],
                        "alternativeHeadline": b["subtitle"], "description": b["description"],
                        "author": PERSON, "url": f"{SITE}/{d}/", "image": f"{SITE}/{d}/cover.jpg",
@@ -1108,7 +1108,7 @@ def build_books(series_list):
     write_if_changed("books/index.html", page("Books | David Charles",
                                               "Free ebooks by David Charles, made from his travel stories, "
                                               "plus his paperbacks and pay-what-you-like ebooks.",
-                                              "/books/", body + '<script src="/assets/lock.js?v=4" defer></script>'))
+                                              "/books/", body + '<script src="/assets/lock.js?v=5" defer></script>'))
     build_subscribers(books, load_paid_books())
 
 
@@ -1132,11 +1132,11 @@ def locked_buttons(b, tier, short=False):
     t = f' data-tier="{tier}"' if tier != "free" else ""
     go = f'/subscribers/?next=/{d}/' + ("&amp;tier=paid" if tier == "paid" else "")
     return (f'<a class="button primary" href="{go}" data-locked="/{d}/{b["slug"]}.epub.locked"{t} '
-            f'data-name="{esc(b["title"])}.epub" data-type="application/epub+zip" data-goatcounter-click="ebook-{b["slug"]}-epub" '
-            f'data-goatcounter-title="{esc(b["title"])} (EPUB)">' + ("EPUB" if short else f'Download ebook (EPUB{size(b["slug"] + ".epub")})')
+            f'data-name="{esc(b["title"])}.epub" data-type="application/epub+zip" data-count="ebook-{b["slug"]}-epub" '
+            f'data-count-title="{esc(b["title"])} (EPUB)">' + ("EPUB" if short else f'Download ebook (EPUB{size(b["slug"] + ".epub")})')
             + f'</a> <a class="button" href="{go}" data-locked="/{d}/{b["slug"]}.pdf.locked"{t} '
-            f'data-name="{esc(b["title"])}.pdf" data-type="application/pdf" data-goatcounter-click="ebook-{b["slug"]}-pdf" '
-            f'data-goatcounter-title="{esc(b["title"])} (PDF)">' + ("PDF" if short else f'PDF to read or print{size(b["slug"] + ".pdf")}')
+            f'data-name="{esc(b["title"])}.pdf" data-type="application/pdf" data-count="ebook-{b["slug"]}-pdf" '
+            f'data-count-title="{esc(b["title"])} (PDF)">' + ("PDF" if short else f'PDF to read or print{size(b["slug"] + ".pdf")}')
             + '</a>')
 
 
@@ -1170,7 +1170,7 @@ def build_paid_books(st_text, st_attrs):
                 + (f' <a href="{esc(b["about"])}">More about the book</a>.' if b.get("about") else "") + '</p></div></div>'
                 f'<aside class="newsletter-box"><h2>Liked it?</h2><p{st_attrs}>{st_text}</p><p><a class="button primary" '
                 'href="https://davidcharles.substack.com/subscribe">Subscribe</a></p>' + TIP_LINE + '</aside>'
-                '<script src="/assets/lock.js?v=4" defer></script>')
+                '<script src="/assets/lock.js?v=5" defer></script>')
         write_if_changed(f"{d}/index.html", page(f'{b["title"]}: ebook for paid subscribers | David Charles', b["description"],
                                                  f"/{d}/", body, image=f"/{d}/cover.jpg"))
         cards.append(f'<li><a href="/{d}/"><img src="/{d}/cover-small.jpg" alt="" width="300" height="449" loading="lazy">'
@@ -1282,7 +1282,7 @@ def build_subscribers(books, paid_books=()):
 <ul class="sub-shelf">{paid_items}</ul>
 """ if paid_items else "") + f"""<h2 class="section">Maps</h2>
 <ul class="sh-doors sub-maps">{maps}</ul>
-<script src="/assets/lock.js?v=4"></script>
+<script src="/assets/lock.js?v=5"></script>
 <script>
 (function(){{
   var q = new URLSearchParams(location.search), next = q.get('next') || '';

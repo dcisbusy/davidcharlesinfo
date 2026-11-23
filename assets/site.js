@@ -160,3 +160,19 @@
     }
   } catch (e) {}
 })();
+
+/* Count taps on links to the shops where David's books are sold, and on tip links (GoatCounter events
+   "out-gumroad", "out-lulu", "out-amazon", "out-paypal", "out-payhip", titled with the link's page and text). */
+(function () {
+  var shops = /(^|\.)(gumroad\.com|lulu\.com|payhip\.com|amazon\.co\.uk|amazon\.com|amzn\.to|paypal\.me|paypal\.com)$/i;
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest("a[href]");
+    if (!a || !window.goatcounter || !goatcounter.count) return;
+    var host;
+    try { host = new URL(a.href, location.href).hostname; } catch (err) { return; }
+    var m = host.match(shops);
+    if (!m) return;
+    var shop = m[2].split(".")[0].replace("amzn", "amazon");
+    goatcounter.count({ path: "out-" + shop, title: (a.textContent || "").trim().slice(0, 60) + " · " + location.pathname, event: true });
+  }, true);
+})();

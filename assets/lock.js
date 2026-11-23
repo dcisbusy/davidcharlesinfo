@@ -147,7 +147,12 @@
       if (!key) { location.href = "/subscribers/?next=" + encodeURIComponent(location.pathname) + (tier === "paid" ? "&tier=paid" : ""); return; }
       var label = a.textContent; a.textContent = "Opening…";
       download(a.getAttribute("data-locked"), a.getAttribute("data-name"), a.getAttribute("data-type"), tier)
-        .then(function () { a.textContent = label; },
+        .then(function () {
+          a.textContent = label;
+          // count real downloads only (not taps by people who haven't unlocked yet)
+          if (window.goatcounter && goatcounter.count && a.getAttribute("data-count"))
+            goatcounter.count({ path: a.getAttribute("data-count"), title: a.getAttribute("data-count-title") || "Ebook download", event: true });
+        },
               function () { a.textContent = "Sorry, that didn't work. Tap to try again."; });
     });
   });
