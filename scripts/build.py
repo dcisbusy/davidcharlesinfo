@@ -721,7 +721,7 @@ def build_home(issues, posts, extra="", minutes=None):
             + (extra or {}).get("otd", "") + '<div id="newsletter"></div>\n' + issue_list(issues[:HOME_ISSUES], minutes)
             + (f'<p class="more-issues"><a class="button secondary" href="/newsletter-archive/">Every issue ({len(issues)}) &rarr;</a></p>\n'
                if len(issues) > HOME_ISSUES else "")
-            + SUBSCRIBE_BOX + '<script src="/assets/lock.js?v=5" defer></script>')
+            + SUBSCRIBE_BOX + '<script src="/assets/lock.js?v=6" defer></script>')
     write_if_changed("index.html", page(
         "David Charles", "Writer and outdoor instructor. Read every issue of my newsletter, and the archive of my blog.",
         "/", body, "/"))

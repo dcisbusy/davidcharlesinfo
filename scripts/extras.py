@@ -285,7 +285,7 @@ def build_map(stories):
 <link rel="stylesheet" href="/assets/leaflet/MarkerCluster.Default.css">
 <script src="/assets/leaflet/leaflet.js"></script>
 <script src="/assets/leaflet/leaflet.markercluster.js"></script>
-<script src="/assets/lock.js?v=5"></script>
+<script src="/assets/lock.js?v=6"></script>
 <script>
 DCLock.gate(document.getElementById('map-gate'), function(){{
   DCLock.open('/map/map-data.locked').then(function(buf){{
@@ -941,7 +941,7 @@ def build_rides():
 <div id="ride-list"></div>
 <link rel="stylesheet" href="/assets/leaflet/leaflet.css">
 <script src="/assets/leaflet/leaflet.js"></script>
-<script src="/assets/lock.js?v=5"></script>
+<script src="/assets/lock.js?v=6"></script>
 <script>
 DCLock.gate(document.getElementById('ride-gate'), function(){{
   DCLock.open('/rides/rides-data.locked').then(function(buf){{
@@ -1022,7 +1022,7 @@ def index_of(file, list_key, slug):
         return None
 
 LOCK_NOTE = ('<span class="when-locked">For newsletter subscribers: <a href="/subscribers/">unlock with the password</a> '
-             'from the bottom of any newsletter.</span><span class="when-unlocked">Unlocked on this device. Thanks for '
+             'in any newsletter since 23 November 2026.</span><span class="when-unlocked">Unlocked on this device. Thanks for '
              'subscribing.</span>')
 
 
@@ -1069,7 +1069,7 @@ def build_books(series_list):
                 + '</p></div></div>'
                 f'<aside class="newsletter-box"><h2>Liked it?</h2><p{st_attrs}>{st_text}</p><p><a class="button primary" '
                 'href="https://davidcharles.substack.com/subscribe">Subscribe free</a></p>' + TIP_LINE + '</aside>'
-                '<script src="/assets/lock.js?v=5" defer></script>')
+                '<script src="/assets/lock.js?v=6" defer></script>')
         book_schema = {"@context": "https://schema.org", "@type": "Book", "name": b["title"],
                        "alternativeHeadline": b["subtitle"], "description": b["description"],
                        "author": PERSON, "url": f"{SITE}/{d}/", "image": f"{SITE}/{d}/cover.jpg",
@@ -1108,7 +1108,7 @@ def build_books(series_list):
     write_if_changed("books/index.html", page("Books | David Charles",
                                               "Free ebooks by David Charles, made from his travel stories, "
                                               "plus his paperbacks and pay-what-you-like ebooks.",
-                                              "/books/", body + '<script src="/assets/lock.js?v=5" defer></script>'))
+                                              "/books/", body + '<script src="/assets/lock.js?v=6" defer></script>'))
     build_subscribers(books, load_paid_books())
 
 
@@ -1170,7 +1170,7 @@ def build_paid_books(st_text, st_attrs):
                 + (f' <a href="{esc(b["about"])}">More about the book</a>.' if b.get("about") else "") + '</p></div></div>'
                 f'<aside class="newsletter-box"><h2>Liked it?</h2><p{st_attrs}>{st_text}</p><p><a class="button primary" '
                 'href="https://davidcharles.substack.com/subscribe">Subscribe</a></p>' + TIP_LINE + '</aside>'
-                '<script src="/assets/lock.js?v=5" defer></script>')
+                '<script src="/assets/lock.js?v=6" defer></script>')
         write_if_changed(f"{d}/index.html", page(f'{b["title"]}: ebook for paid subscribers | David Charles', b["description"],
                                                  f"/{d}/", body, image=f"/{d}/cover.jpg"))
         cards.append(f'<li><a href="/{d}/"><img src="/{d}/cover-small.jpg" alt="" width="300" height="449" loading="lazy">'
@@ -1222,8 +1222,8 @@ def build_subscribers(books, paid_books=()):
     """/subscribers/: the password form, then everything it opens (ebooks, the maps).
     ?next=/somewhere/ sends the reader back there once they've unlocked; ?tier=paid asks for the paid password."""
     intro, attrs = page_text("subscribers", "Ebooks and maps for newsletter subscribers.")
-    j_text, j_attrs = page_text("subscribers-join", "The newsletter is free. Sign up and you'll find the password at the "
-                                                    "bottom of every email, so you can open everything on this page.")
+    j_text, j_attrs = page_text("subscribers-join", "The newsletter is free. Sign up and you'll find the password in "
+                                                    "every email, so you can open everything on this page.")
     st = perk_stats()
     free = [b for b in books if not b.get("draft")]
     words = 0
@@ -1282,7 +1282,7 @@ def build_subscribers(books, paid_books=()):
 <ul class="sub-shelf">{paid_items}</ul>
 """ if paid_items else "") + f"""<h2 class="section">Maps</h2>
 <ul class="sh-doors sub-maps">{maps}</ul>
-<script src="/assets/lock.js?v=5"></script>
+<script src="/assets/lock.js?v=6"></script>
 <script>
 (function(){{
   var q = new URLSearchParams(location.search), next = q.get('next') || '';

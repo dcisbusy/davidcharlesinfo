@@ -109,7 +109,7 @@
         '<form class="lock-form"><p class="lock-title">' + (el.getAttribute("data-title") || (paid ? "For paid subscribers" : "For newsletter subscribers")) + '</p>' +
         '<p class="lock-text">' + (el.getAttribute("data-text") || (paid
           ? "Type the paid subscribers’ password from any paid issue. You only need to do it once on this device."
-          : "Type the password from the bottom of any newsletter. You only need to do it once on this device.")) + '</p>' +
+          : "Type the password from any newsletter since 23 November 2026. You only need to do it once on this device.")) + '</p>' +
         '<label class="lock-label">Password <input type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false" required></label>' +
         '<button type="submit" class="button primary">Unlock</button><p class="lock-msg" role="status"></p>' +
         (el.hasAttribute("data-no-join") ? "" : '<p class="lock-sub">' + (paid ? 'Not a paid subscriber yet? <a href="' + sub + '">Upgrade or subscribe</a> and the password comes with the next paid issue.'
@@ -121,7 +121,7 @@
         unlock(inp.value).then(function (got) {
           if (!got[tier]) { msg.textContent = "That password opens the free ebooks and maps. These need the paid subscribers’ password, from any paid issue."; return; }
           el.innerHTML = ""; onOpen();
-        }).catch(function () { msg.textContent = "That's not the password. Check the bottom of the newsletter and try again."; });
+        }).catch(function () { msg.textContent = "That's not the password. Check any newsletter since 23 November 2026 and try again."; });
       });
     });
   }
