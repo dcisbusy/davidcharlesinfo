@@ -703,7 +703,11 @@ def build_extras(posts, pages, cats, years):
     body = ('<h1>Page not found</h1>\n<p class="intro">Sorry, there\'s nothing at this address. '
             'It may have moved when this site stopped using WordPress.</p>\n'
             '<div class="buttons"><a class="button primary" href="/blog-archive/">Browse the blog archive</a>'
-            '<a class="button secondary" href="/">Go to the homepage</a></div>')
+            '<a class="button secondary" href="/">Go to the homepage</a></div>'
+            # GoatCounter counts the page's canonical address, so every missing page showed up as /404.html.
+            # Count the address people actually asked for instead, e.g. "/404/old-post/" (title "404: Not found").
+            '<script>window.goatcounter={path:function(){return "/404"+location.pathname+location.search;},'
+            'title:"404: Not found"};</script>')
     write_if_changed("404.html", page("Page not found | David Charles", "Page not found.", "/404.html", body,
                                       noindex=True))
     urls = [("/", ""), ("/start-here/", ""), ("/newsletter-archive/", ""), ("/blog-archive/", ""), ("/series/", ""),
