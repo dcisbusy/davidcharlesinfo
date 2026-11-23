@@ -235,6 +235,13 @@
         text = text.slice(0, i + a.length) + r.wrap.innerHTML.replace(/&nbsp;/g, " ") + text.slice(j);
       } else {
         var data = JSON.parse(text), was = getKey(data, r.keys), now = current(r);
+        var parent0 = getKey(data, r.keys.slice(0, -1));
+        if (was === undefined && parent0 && typeof parent0 === "object" && !Array.isArray(parent0)) {
+          // text the site shows by default but that isn't in the file yet: add it rather than refuse
+          parent0[r.keys[r.keys.length - 1]] = now;
+          text = JSON.stringify(data, null, 1) + "\n";
+          return;
+        }
         if (typeof was !== "string" || was.replace(/\s+/g, " ").trim() !== r.original) {
           throw new Error("“" + r.original.slice(0, 40) + "…” changed on GitHub since you opened it. Reload and edit again.");
         }
