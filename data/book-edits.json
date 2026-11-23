@@ -91,6 +91,17 @@
      {
       "img": "Krakadorn-6-June-2015-FOX.jpg"
      }
+    ],
+    "cut_text": [
+     "On the walls of Zollamtsstrasse refugee camp was originally published on Cycling to Syria"
+    ]
+   },
+   "/adventure/cycle-touring/cycling-towards-syria/the-tech-setup/": {
+    "drop": "David, 23 Nov 2026: remove The Tech Setup completely"
+   },
+   "/adventure/cycle-touring/cycling-towards-syria/conversations-in-calais/": {
+    "cut_text": [
+     "Listen to the conversation by playing the YouTube video below."
     ]
    }
   }
@@ -513,6 +524,12 @@
      {
       "text": "p.s.: Happy birthday dad!"
      }
+    ],
+    "replace": [
+     {
+      "from": "And welcome to the silent sound",
+      "to": "Welcome to the silent sound"
+     }
     ]
    },
    "/activism/no-borders/join-us-for-world-refugee-day/": {
@@ -706,6 +723,9 @@
      {
       "text": "If you would like to show your support, then please share the website "
      }
+    ],
+    "cut_text": [
+     "Instead,"
     ]
    },
    "https://davidcharles.substack.com/p/we-identify-as-human-beings": {
@@ -797,6 +817,12 @@
      },
      {
       "text": "If you want to connect to this story, then my fundraising page is stil"
+     }
+    ],
+    "replace": [
+     {
+      "from": "And greetings from Athens.",
+      "to": "Greetings from Athens."
      }
     ]
    },
@@ -1312,6 +1338,12 @@
      {
       "text": "Big love, dc:"
      }
+    ],
+    "replace": [
+     {
+      "from": "But there is a gross story",
+      "to": "There is a gross story"
+     }
     ]
    },
    "/adventure/cycle-touring/remember-that-time-we-cycled-2200km-across-britain-on-a-route-that-spelled-out-refugees-welcome-oh-yeah/": {
@@ -1685,6 +1717,12 @@
      {
       "text": "Until next time, big love, dc:"
      }
+    ],
+    "replace": [
+     {
+      "from": "And a warm welcome from the walled city",
+      "to": "A warm welcome from the walled city"
+     }
     ]
    },
    "https://davidcharles.substack.com/p/a-midpoint": {
@@ -1703,6 +1741,12 @@
      },
      {
       "text": "Big love, dc:"
+     }
+    ],
+    "replace": [
+     {
+      "from": "And a warm welcome from Thessaloniki",
+      "to": "A warm welcome from Thessaloniki"
      }
     ]
    },

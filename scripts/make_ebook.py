@@ -82,7 +82,7 @@ def cut_sections(c, pattern):
 
 
 LOCAL_COPY = re.compile(r"(?:davidcharles\.info|cyclingtosyria\.com)/(wp-content/uploads/[^?\s]+?)(?:\?|$)")
-BLOCK = re.compile(r"(<h3\b.*?</h3>|<p\b.*?</p>|<figure\b.*?</figure>|<blockquote\b.*?</blockquote>|<ul\b.*?</ul>|"
+BLOCK = re.compile(r"(<h[3-6]\b.*?</h[3-6]>|<p\b.*?</p>|<figure\b.*?</figure>|<blockquote\b.*?</blockquote>|<ul\b.*?</ul>|"
                    r"<ol\b.*?</ol>|<img\b[^>]*>|<hr\s*/?>|<table\b.*?</table>|<pre\b.*?</pre>|<h4\b.*?</h4>)", re.S)
 
 
@@ -181,10 +181,16 @@ def clean(content, stock, book, cut_imgs=frozenset()):
     c = re.sub(r'<a\b[^>]*>\s*(<img\b[^>]*>)\s*</a>', r"\1", c, flags=re.S)
     c = re.sub(r"<div\b[^>]*>", "", c)
     c = re.sub(r"</div>", "", c)
+    # a link left holding nothing (its photo was cut or lost), so its caption doesn't stand alone below
+    c = re.sub(r"<a\b[^>]*>\s*</a>", "", c)
     c = re.sub(r'<figure\b[^>]*>', "<figure>", c)
     c = re.sub(r'<figcaption\b[^>]*>', "<figcaption>", c)
     c = re.sub(r"<figure>\s*</figure>", "", c)
     c = re.sub(r"<figure>\s*<figcaption>.*?</figcaption>\s*</figure>", "", c, flags=re.S)
+    # a photo cut or lost: its caption goes too ("Not these", "Photo of … by …")
+    c = re.sub(r"<figure>(?:(?!</figure>).)*</figure>", lambda m: m.group(0) if "<img" in m.group(0) else "", c, flags=re.S)
+    # newsletter greetings that headed the issue, not the story
+    c = re.sub(r"<h[1-6]\b[^>]*>\s*(?:<strong>)?\s*Happy Friday!?\s*(?:</strong>)?\s*</h[1-6]>", "", c, flags=re.I)
     # chapter sub-headings sit below the chapter title
     c = re.sub(r"<(/?)h[1-2]\b", r"<\1h3", c)
     # site-relative links become full links
@@ -192,7 +198,30 @@ def clean(content, stock, book, cut_imgs=frozenset()):
     c = re.sub(r'\s(class|id|style|width|height|sizes|srcset|loading|decoding|aria-describedby|data-[\w-]+|'
                r'target|rel|tabindex|role|aria-[\w-]+)="[^"]*"', "", c)
     c = re.sub(r"<p>\s*(&nbsp;|<br\s*/?>)?\s*</p>", "", c)
+    # headings left with nothing under them (their links or buttons were Substack furniture)
+    c = re.sub(r"<h([3-6])>(?:(?!</h\1>).)*</h\1>\s*(?=<h[1-6]\b|<figure>\s*<img|$)", "", c, flags=re.S)
+    c = re.sub(r">([^<]+)<", lambda m: ">" + break_long(m.group(1)) + "<", ">" + c + "<")[1:-1]
     return c.strip()
+
+
+def break_long(text):
+    """Let very long run-together words ("Sorrytobotheryou…") break at the end of a line, so a justified line
+    above them isn't stretched wide."""
+    return re.sub(r"[^\s<>&;/]{26,}", lambda m: "\u200b".join(m.group(0)[i:i + 12] for i in range(0, len(m.group(0)), 12)), text)
+
+
+def drop_title_heading(body, titles):
+    """A heading near the start that only repeats the chapter's title (or just says "Thighs of Steel"):
+    the newsletter's section heading, left over from cutting the issue down to this story."""
+    def norm(t):
+        return re.sub(r"[^a-z0-9]", "", html.unescape(re.sub(r"<[^>]+>", "", t)).lower())
+    wanted = {norm(t) for t in titles if t}
+    for m in list(re.finditer(r"<h[3-6]>(.*?)</h[3-6]>", body, re.S))[:3]:
+        before = re.sub(r"<figure>.*?</figure>|<hr\s*/?>", "", body[:m.start()], flags=re.S).strip()
+        h = norm(m.group(1))
+        if h in wanted or (h == "thighsofsteel" and not before):
+            return body[:m.start()] + body[m.end():]
+    return body
 
 
 def chapter_source(it, st):
@@ -232,8 +261,11 @@ def main(slug):
     edits = ed.get("chapters", {}) if ed.get("approved") else {}
 
     chapters = []
+    years = book.get("years")   # e.g. [2018, 2023]: only chapters from those years
     for it in sr["items"]:
         if it["url"] in skip or it.get("blog_url") in skip:
+            continue
+        if years and not years[0] <= int(it["date"][:4]) <= years[1]:
             continue
         edit = edits.get(it["url"], {})
         if edit.get("drop"):
@@ -248,6 +280,7 @@ def main(slug):
         body = re.sub(r"^\s*<h3>\s*" + re.escape(it["title"]) + r"\s*</h3>", "", body)
         if edit:
             body = apply_edits(body, edit)
+        body = drop_title_heading(body, [title, it["title"], edit.get("title") or ""])
         chapters.append((dict(it, title=edit.get("title") or title), body))
 
     out = f"books/{slug}"
