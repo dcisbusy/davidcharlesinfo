@@ -25,6 +25,17 @@ import extras  # noqa: E402
 import lock  # noqa: E402
 
 SITE = build.SITE
+# Lora at fixed weights (assets/fonts/lora, from Fontsource, SIL Open Font License). A variable font made Chrome
+# embed every page as heavy-looking Type 3 glyphs, so the PDF read as bold throughout.
+LORA_FACES = [('lora-latin-ext-400-normal', 'normal', '400', 'U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF'), ('lora-latin-400-normal', 'normal', '400', 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD'), ('lora-latin-ext-700-normal', 'normal', '700', 'U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF'), ('lora-latin-700-normal', 'normal', '700', 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD'), ('lora-latin-ext-400-italic', 'italic', '400', 'U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF'), ('lora-latin-400-italic', 'italic', '400', 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD'), ('lora-latin-ext-700-italic', 'italic', '700', 'U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF'), ('lora-latin-700-italic', 'italic', '700', 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD')]
+
+
+def lora_css():
+    root = os.path.abspath("assets/fonts/lora")
+    return "".join(f"@font-face{{font-family:'Lora';font-style:{st};font-weight:{w};src:url('file://{root}/{f}.woff2') "
+                   f"format('woff2');unicode-range:{ur};}}\n" for f, st, w, ur in LORA_FACES)
+
+
 CHROME = shutil.which("google-chrome") or shutil.which("chromium") or shutil.which("chromium-browser")
 
 
@@ -292,7 +303,7 @@ def main(slug):
     year = sr["items"][0]["date"][:4]
 
     # ---- cover (1600 x 2263, the shape of an A5 page) drawn with Chrome
-    cover_html = f"""<!doctype html><meta charset="utf-8"><style>
+    cover_html = f"""<!doctype html><meta charset="utf-8"><style>{lora_css()}
     @page {{ margin: 0 }} html,body {{ margin:0; width:1600px; height:2263px; background:#f3ead8; }}
     body {{ font-family: Lora, Georgia, serif; color:#2a1f14; display:flex; flex-direction:column; }}
     .top {{ padding: 170px 120px 60px; }}
@@ -353,7 +364,7 @@ def main(slug):
 
     # PDF via Chrome: A5 pages, cover first
     pdf_html = f"""<!doctype html><html lang="en-GB"><meta charset="utf-8"><title>{html.escape(book["title"])}</title>
-<style>
+<style>{lora_css()}
 @page {{ size: A5; margin: 18mm 16mm 20mm; }}
 html, body {{ margin: 0; }}
 body {{ font: 10.5pt/1.55 Lora, Georgia, serif; color: #1d1a16; }}
@@ -365,7 +376,7 @@ img {{ max-width: 100%; max-height: 120mm; display: block; margin: 8pt auto; pag
 figure {{ margin: 10pt 0; page-break-inside: avoid; }} figcaption {{ font-size: 8.5pt; color: #6d6052;
   text-align: center; font-style: italic; }}
 a {{ color: inherit; text-decoration: none; }}
-.toc ol {{ padding-left: 18pt; }} .toc li {{ margin: 0 0 3pt; }}
+.toc ol {{ padding-left: 26pt; }} .toc li {{ margin: 0 0 3pt; }}
 .title-page {{ text-align: center; padding-top: 50mm; }}
 .title-page h1 {{ font-size: 28pt; }} .title-page p {{ text-align: center; }}
 </style>

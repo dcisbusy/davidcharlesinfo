@@ -82,6 +82,7 @@ def main(slug, manuscript):
     # PDF via Chrome: A5 pages, cover first, each part on a new page
     page = f"""<!doctype html><html lang="en-GB"><meta charset="utf-8"><title>{html.escape(book["title"])}</title>
 <style>
+{__import__("make_ebook").lora_css()}
 @page {{ size: A5; margin: 18mm 16mm 20mm; }}
 html, body {{ margin: 0; }}
 body {{ font: 10.5pt/1.55 Lora, Georgia, serif; color: #1d1a16; }}
