@@ -85,6 +85,7 @@ html,body{ margin:0; padding:0; height:100%; background:var(--ink); font-family:
 .leaflet-popup-content-wrapper{ background:var(--ink-soft); color:var(--bone); border-radius:10px; }
 .leaflet-popup-tip{ background:var(--ink-soft); }
 .tree-popup .name{ font-family:'Fraunces',serif; font-size:1.05rem; margin:0 0 0.2rem; }
+.tree-popup .latin{ font-family:'Inter',-apple-system,sans-serif; font-style:italic; font-size:0.75rem; color:rgba(234,227,210,0.55); margin-left:0.3rem; white-space:nowrap; }
 .tree-popup .sci{ font-style:italic; opacity:0.75; font-size:0.8rem; margin:0 0 0.5rem; }
 .tree-popup .row{ font-size:0.78rem; opacity:0.85; margin:0.15rem 0; }
 .tree-popup .id{ font-family:'Space Mono',monospace; font-size:0.68rem; opacity:0.6; margin-top:0.5rem; }
@@ -285,6 +286,7 @@ const USE_COLORS = { poisonous:'#e5533f', medicinal:'#9b7fe0', edible:'#a5d66f' 
 const USE_ORDER = ['poisonous', 'medicinal', 'edible'];   // a tree in several layers takes the first colour
 const RISK = { high:'can kill or seriously harm', moderate:'likely to make you ill', low:'mild, or mainly a risk to animals' };
 let speciesUses = [];          // per species index: the matching rule, or null
+const speciesLatin = {};       // species name -> its commonest Latin name (from species-list.txt)
 let allPoints = null;
 const indexCache = {};
 // The spreadsheet, one rule per row: name, match, latin, edible, medicinal, poisonous, risk, sources, checked
@@ -365,6 +367,12 @@ function usesHtml(rule){
   if(rule.edible || rule.medicinal) h += `<div class="warn">General notes on the species. Only eat or use what you've identified for certain.</div>`;
   return h;
 }
+// The Latin name, shown beside the common name when they differ (not for names that already are Latin)
+function latinFor(name){
+  const l = speciesLatin[name];
+  if(!l || l.toLowerCase() === name.toLowerCase() || /unknown|not known|vacant/i.test(l)) return '';
+  return l;
+}
 function buildPopupHtml(row){
   const species = lookupData.species[row.speciesIdx];
   const borough = lookupData.boroughs[row.boroughIdx];
@@ -373,7 +381,7 @@ function buildPopupHtml(row){
   if(row.canopy) details.push(`${row.canopy}m canopy`);
   if(row.girth) details.push(`${row.girth}cm girth`);
   return `<div class="tree-popup">
-    <div class="name">${esc(species)}</div>
+    <div class="name">${esc(species)}${latinFor(species) ? ` <span class="latin">${esc(latinFor(species))}</span>` : ''}</div>
     <div class="row">${esc(borough)}</div>
     ${details.length ? `<div class="row">${esc(details.join(', '))}</div>` : ''}
     ${row.climate ? `<div class="row">2090 climate suitability: ${esc(row.climate)}</div>` : ''}
@@ -509,7 +517,7 @@ async function loadTrees(){
         fetch('species-uses.csv', { cache:'no-cache' }).then(r => { if(!r.ok) throw new Error('species-uses.csv: ' + r.status); return r.text(); }).then(parseRulesCsv),
         fetch('species-list.txt', { cache:'no-cache' }).then(r => r.ok ? r.text() : '').catch(() => '')
       ]);
-      const latin = {};
+      const latin = speciesLatin;
       for(const line of list.split('\n')){
         const [n, l] = line.split('\t');
         if(n && l && !n.startsWith('#')) latin[n] = l;
