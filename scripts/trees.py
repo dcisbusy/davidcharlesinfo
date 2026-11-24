@@ -25,6 +25,8 @@ AREA = (51.383, -0.125, 51.458, 0.035)
 CKAN = "https://ckan.publishing.service.gov.uk/api/3/action/"
 RESOURCE = "59908e1d-a2c8-4ff8-b6ff-c94ef3ff51b1"      # Public_Realm_tree_list (May 2025)
 DATASET = "london-public-realm-trees1"
+# Common names too vague to be useful on the map: replaced by the tree's Latin name
+VAGUE = re.compile(r"^(an? )?(flowering plant|conifer|plant|bean|tree|shrub|broadleaf|unknown.*)$|\bspecies$", re.I)
 UA = {"User-Agent": "davidcharles.info tree map (github.com/dcisbusy/davidcharlesinfo)"}
 
 
@@ -128,6 +130,9 @@ def main():
         if not (s <= lat <= n and w <= lon <= e):
             continue
         name = cell(r, "species") or cell(r, "latin") or "Unknown tree"
+        if VAGUE.search(name):   # 'A Flowering Plant', 'A Conifer', 'Pyrus Species': use the Latin name instead
+            lat = cell(r, "latin")
+            name = lat if lat and not re.search(r"unknown|not known|vacant", lat, re.I) else "Unknown tree"
         name = name[:1].upper() + name[1:]
         species_count[name] += 1
         if cell(r, "latin"):

@@ -105,7 +105,7 @@ html,body{ margin:0; padding:0; height:100%; background:var(--ink); font-family:
 .layers{ display:flex; flex-direction:column; align-items:flex-start !important; gap:0.25rem; margin-bottom:0.5rem; padding-bottom:0.5rem; border-bottom:1px solid var(--line); }
 .layers label{ display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-size:0.78rem; }
 .layers input{ accent-color:var(--amber); margin:0; }
-#keyPlaces, #keyUses{ display:block; }
+#keyUses{ display:block; }
 .legend [hidden]{ display:none !important; }
 .legend .note{ display:block; font-size:0.65rem; opacity:0.75; margin-top:0.35rem; line-height:1.35; }
 .tree-popup .use{ font-size:0.78rem; line-height:1.4; margin:0.4rem 0 0; }
@@ -127,6 +127,14 @@ button.back-link{ font:inherit; font-size:0.85rem; cursor:pointer; margin-left:0
 .about .small{ font-size:0.72rem; opacity:0.8; }
 .about a{ color:var(--lichen); }
 /* Subscribers only: the password card (assets/lock.js fills it) */
+.disclaimer[hidden]{ display:none; }
+.disclaimer{ position:fixed; inset:0; z-index:2000; background:rgba(10,14,18,0.78); display:flex; align-items:center; justify-content:center; padding:1rem; }
+.disclaimer-box{ background:var(--ink-soft); color:var(--bone); border:1px solid var(--line); border-radius:12px; max-width:32rem; max-height:100%; overflow:auto;
+  padding:1.1rem 1.2rem; font-size:0.88rem; line-height:1.45; }
+.disclaimer-box h2{ font-family:'Fraunces',Georgia,serif; font-weight:500; font-size:1.3rem; margin:0 0 0.6rem; color:var(--amber); }
+.disclaimer-box p{ margin:0 0 0.65rem; }
+.disclaimer-box .small{ font-size:0.75rem; opacity:0.8; }
+.disclaimer-box .button{ font:inherit; font-weight:600; padding:0.65rem 1.2rem; border-radius:8px; border:0; background:var(--amber); color:var(--ink); cursor:pointer; width:100%; margin-top:0.3rem; }
 .lock-gate:empty{ display:none; }
 .lock-gate{
   position:absolute; top:3.6rem; left:0.9rem; right:0.9rem; z-index:1200; max-width:24rem; margin:0 auto;
@@ -162,6 +170,18 @@ button.back-link{ font:inherit; font-size:0.85rem; cursor:pointer; margin-left:0
 
 <div id="map"></div>
 <div id="treeGate" class="lock-gate"></div>
+<div class="disclaimer" id="disclaimer" role="dialog" aria-modal="true" aria-labelledby="disclaimerTitle" hidden>
+  <div class="disclaimer-box">
+    <h2 id="disclaimerTitle">Before you use this map</h2>
+    <p><b>This map is for education and interest only.</b> It is not a field guide and must not be used to identify any plant, or to decide whether anything is safe to eat, touch or use as medicine.</p>
+    <p><b>Do not pick, eat or use any part of any tree because of this map.</b> The councils' records can be out of date or wrong, a tree may have been replaced, and many edible plants have poisonous look-alikes. The notes describe a species in general, not the tree in front of you, and they may be incomplete or mistaken.</p>
+    <p>Medicinal notes describe traditional and pharmaceutical uses. They are not medical advice: never treat yourself or anyone else with a plant, and talk to a doctor or pharmacist first.</p>
+    <p>Street and park trees can be polluted, sprayed or fouled by dogs, and they belong to the council or landowner. Keep children and pets away from poisonous trees.</p>
+    <p>If you think someone has eaten something poisonous, call <b>NHS 111</b>, or <b>999</b> in an emergency, and take a sample of the plant with you. For pets, call your vet.</p>
+    <p class="small">You use this map and its information entirely at your own risk. David Charles accepts no responsibility for any harm, illness or loss from using it.</p>
+    <button class="button" id="disclaimerOk" type="button">I understand</button>
+  </div>
+</div>
 
 <div class="load-overlay" id="loadOverlay">
   <span id="loadText">Loading trees…</span>
@@ -173,12 +193,6 @@ button.back-link{ font:inherit; font-size:0.85rem; cursor:pointer; margin-left:0
     <label><input type="checkbox" value="edible"> Edible</label>
     <label><input type="checkbox" value="medicinal"> Medicinal</label>
     <label><input type="checkbox" value="poisonous"> Poisonous</label>
-  </div>
-  <div id="keyPlaces">
-    <div><span class="dot" style="background:#e2a13d;"></span>Highways</div>
-    <div><span class="dot" style="background:#42604a;"></span>Parks</div>
-    <div><span class="dot" style="background:#9ab596;"></span>Housing</div>
-    <div><span class="dot" style="background:#8a8478;"></span>Other</div>
   </div>
   <div id="keyUses" hidden>
     <div data-use="edible"><span class="dot" style="background:#a5d66f;"></span>Edible</div>
@@ -192,7 +206,7 @@ button.back-link{ font:inherit; font-size:0.85rem; cursor:pointer; margin-left:0
   <h1>Tree map</h1>
   <div data-edit-file="trees/index.html"><!--content:start-->
   <p>Every tree the councils have mapped around Crystal Palace, Upper and South Norwood, Penge, Beckenham, Sydenham, Forest Hill and Dulwich: street trees, park trees and trees on estates. Tap a dot to find out what it is. Allow location and the map follows you on your walk.</p>
-  <p>Tick <b>Edible</b>, <b>Medicinal</b> or <b>Poisonous</b> to see only those trees, and tap one for what it's used for and what it can do to you. These are general notes about the species, not about the tree in front of you: never eat anything you can't identify for certain, ask a doctor before using any plant as medicine, and think twice about street trees beside busy roads or at dog height. More in <a href="https://davidcharles.substack.com/p/trees-that-could-kill-you">Trees that could kill you</a>.</p>
+  <p>Tick <b>Edible</b>, <b>Medicinal</b> or <b>Poisonous</b> to see only those trees, and tap one for what it's used for and what it can do to you. These are general notes about the species, not about the tree in front of you: never eat anything you can't identify for certain, ask a doctor before using any plant as medicine, and think twice about street trees beside busy roads or at dog height. <a href="#" id="showDisclaimer">Read the full disclaimer</a>. The notes and their sources are in <a href="https://github.com/dcisbusy/davidcharlesinfo/blob/main/trees/species-uses.csv">a spreadsheet</a>.</p>
   <p>Some places have far fewer trees than you'd expect: the councils only record trees they look after, and some (Croydon especially) have mapped very few.</p>
   <p class="small">Data: <a href="https://data.london.gov.uk/dataset/local-authority-maintained-trees">London Public Realm Trees</a>, Greater London Authority and the borough councils. Contains public sector information licensed under the <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence v3.0</a>. Map &copy; OpenStreetMap contributors.</p>
   <!--content:end--></div>
@@ -261,13 +275,33 @@ function clusterIcon(count){
 }
 
 function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-// Edible / medicinal / poisonous notes (trees/species-uses.json), matched to the councils' species names
+// Edible / medicinal / poisonous notes (trees/species-uses.csv), matched to the councils' species names
 const USE_COLORS = { poisonous:'#e5533f', medicinal:'#9b7fe0', edible:'#a5d66f' };
 const USE_ORDER = ['poisonous', 'medicinal', 'edible'];   // a tree in several layers takes the first colour
 const RISK = { high:'can kill or seriously harm', moderate:'likely to make you ill', low:'mild, or mainly a risk to animals' };
 let speciesUses = [];          // per species index: the matching rule, or null
 let allPoints = null;
 const indexCache = {};
+// The spreadsheet, one rule per row: name, match, latin, edible, medicinal, poisonous, risk, sources, checked
+function parseRulesCsv(text){
+  const rows = []; let row = [], field = '', q = false;
+  for(let i = 0; i < text.length; i++){
+    const c = text[i];
+    if(q){
+      if(c === '"' && text[i+1] === '"'){ field += '"'; i++; }
+      else if(c === '"') q = false;
+      else field += c;
+    }
+    else if(c === '"') q = true;
+    else if(c === ','){ row.push(field); field = ''; }
+    else if(c === '\n'){ row.push(field); rows.push(row); row = []; field = ''; }
+    else if(c !== '\r') field += c;
+  }
+  if(field || row.length){ row.push(field); rows.push(row); }
+  const head = rows.shift().map(h => h.trim().toLowerCase());
+  return rows.filter(r => r.length > 1 && r[head.indexOf('match')])
+    .map(r => Object.fromEntries(head.map((h, i) => [h, (r[i] || '').trim()])));
+}
 function matchUses(rules, names, latin){
   const compiled = rules.map(r => ({ rule:r, re:new RegExp(r.match, 'i') }));
   return names.map(name => {
@@ -287,7 +321,7 @@ function activeUses(){
 }
 function treeColor(row){
   const uses = activeUses();
-  if(!uses.length) return LOCATION_COLORS[row.cat] || LOCATION_COLORS['Other'];
+  if(!uses.length) return '#9ab596';
   const rule = speciesUses[row.speciesIdx];
   for(const u of USE_ORDER) if(uses.includes(u) && rule && rule[u]) return USE_COLORS[u];
   return LOCATION_COLORS['Other'];
@@ -308,7 +342,6 @@ function applyLayers(){
   const uses = activeUses();
   const { index, count } = indexFor(uses);
   superIndex = index;
-  document.getElementById('keyPlaces').hidden = uses.length > 0;
   document.getElementById('keyUses').hidden = uses.length === 0;
   document.querySelectorAll('#keyUses [data-use]').forEach(d => { d.hidden = !uses.includes(d.dataset.use); });
   const label = uses.length ? uses.join(' + ') : 'trees';
@@ -336,7 +369,7 @@ function buildPopupHtml(row){
   if(row.girth) details.push(`${row.girth}cm girth`);
   return `<div class="tree-popup">
     <div class="name">${esc(species)}</div>
-    <div class="row">${esc(row.cat)} · ${esc(borough)}</div>
+    <div class="row">${esc(borough)}</div>
     ${details.length ? `<div class="row">${esc(details.join(', '))}</div>` : ''}
     ${row.climate ? `<div class="row">2090 climate suitability: ${esc(row.climate)}</div>` : ''}
     ${usesHtml(speciesUses[row.speciesIdx])}
@@ -463,7 +496,7 @@ async function loadTrees(){
     try{
       // species-list.txt gives each name's Latin name too, which catches vague names like 'A Flowering Plant'
       const [guide, list] = await Promise.all([
-        fetch('species-uses.json', { cache:'no-cache' }).then(r => r.json()),
+        fetch('species-uses.csv', { cache:'no-cache' }).then(r => r.text()).then(parseRulesCsv),
         fetch('species-list.txt', { cache:'no-cache' }).then(r => r.ok ? r.text() : '').catch(() => '')
       ]);
       const latin = {};
@@ -471,7 +504,7 @@ async function loadTrees(){
         const [n, l] = line.split('\t');
         if(n && l && !n.startsWith('#')) latin[n] = l;
       }
-      speciesUses = matchUses(guide.rules, lookup.species, latin);
+      speciesUses = matchUses(guide, lookup.species, latin);
     }catch(e){
       console.error('species uses guide failed to load', e);
       speciesUses = lookup.species.map(() => null);
@@ -532,6 +565,22 @@ document.addEventListener('visibilitychange', () => {
 initUserLocation();
 document.getElementById('statusPill').textContent = 'For subscribers';
 DCLock.gate(document.getElementById('treeGate'), loadTrees);
+
+// Disclaimer: shown on a first visit until the reader taps "I understand" (remembered in this browser)
+const DISCLAIMER_KEY = 'dc-trees-disclaimer-v1';
+function showDisclaimer(){
+  const d = document.getElementById('disclaimer');
+  d.hidden = false;
+  document.getElementById('disclaimerOk').focus();
+}
+document.getElementById('disclaimerOk').addEventListener('click', () => {
+  document.getElementById('disclaimer').hidden = true;
+  try{ localStorage.setItem(DISCLAIMER_KEY, '1'); }catch(e){}
+});
+document.getElementById('showDisclaimer').addEventListener('click', e => { e.preventDefault(); showDisclaimer(); });
+let seenDisclaimer = false;
+try{ seenDisclaimer = localStorage.getItem(DISCLAIMER_KEY) === '1'; }catch(e){}
+if(!seenDisclaimer) showDisclaimer();
 
 document.getElementById('aboutBtn').addEventListener('click', () => {
   const box = document.getElementById('about'); box.hidden = !box.hidden;
