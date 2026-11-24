@@ -9,3 +9,6 @@ books/*/*.epub
 books/*/*.pdf
 trees/trees-data.txt
 trees/trees-lookup.json
+
+# The tree map species notes are a spreadsheet that must be published
+!trees/species-uses.csv

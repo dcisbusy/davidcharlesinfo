@@ -496,7 +496,7 @@ async function loadTrees(){
     try{
       // species-list.txt gives each name's Latin name too, which catches vague names like 'A Flowering Plant'
       const [guide, list] = await Promise.all([
-        fetch('species-uses.csv', { cache:'no-cache' }).then(r => r.text()).then(parseRulesCsv),
+        fetch('species-uses.csv', { cache:'no-cache' }).then(r => { if(!r.ok) throw new Error('species-uses.csv: ' + r.status); return r.text(); }).then(parseRulesCsv),
         fetch('species-list.txt', { cache:'no-cache' }).then(r => r.ok ? r.text() : '').catch(() => '')
       ]);
       const latin = {};
