@@ -108,6 +108,7 @@ def main():
     s, w, n, e = AREA
     species, boroughs, places = {}, {}, ["Highways", "Housing", "Other", "Parks"]
     out, total, by_borough, raw_places = [], 0, collections.Counter(), collections.Counter()
+    species_count, latin_of = collections.Counter(), collections.defaultdict(collections.Counter)
 
     def idx(table, v):
         if v not in table:
@@ -128,6 +129,9 @@ def main():
             continue
         name = cell(r, "species") or cell(r, "latin") or "Unknown tree"
         name = name[:1].upper() + name[1:]
+        species_count[name] += 1
+        if cell(r, "latin"):
+            latin_of[name][cell(r, "latin")] += 1
         borough = cell(r, "borough") or "Unknown"
         raw_places[cell(r, "place")] += 1
         by_borough[borough] += 1
@@ -151,6 +155,12 @@ def main():
     for name, data in (("trees-data.txt.locked", "\n".join(out) + "\n"), ("trees-lookup.json.locked", lookup)):
         with open(f"trees/{name}", "wb") as f:
             f.write(lock.lock_bytes(data.encode("utf-8")))
+    # The species names on their own (no locations), so the edible/medicinal/poisonous guide
+    # (trees/species-uses.json) can be checked against them: name, commonest Latin name, number of trees
+    with open("trees/species-list.txt", "w", encoding="utf-8") as f:
+        f.write("# species\tlatin\ttrees (made by scripts/trees.py)\n")
+        for name, n in species_count.most_common():
+            f.write(f"{name}\t{latin_of[name].most_common(1)[0][0] if latin_of[name] else ''}\t{n}\n")
 
 
 if __name__ == "__main__":

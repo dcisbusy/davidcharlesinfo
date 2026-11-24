@@ -1,8 +1,12 @@
 name: Update tree data
 
 # Downloads the London Public Realm Trees dataset and rebuilds the local tree map's data
-# (trees/trees-data.txt.locked and trees/trees-lookup.json.locked, locked for subscribers). Run by hand when the GLA publishes new data.
+# (trees/trees-data.txt.locked and trees/trees-lookup.json.locked, locked for subscribers). Run by hand when the GLA publishes new data;
+# also runs when scripts/trees.py changes.
 on:
+  push:
+    branches: [main]
+    paths: [scripts/trees.py]
   workflow_dispatch:
     inputs:
       csv_url:
@@ -32,7 +36,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add trees/trees-data.txt.locked trees/trees-lookup.json.locked
+          git add trees/trees-data.txt.locked trees/trees-lookup.json.locked trees/species-list.txt
           if git diff --cached --quiet; then echo "No changes"; exit 0; fi
           git commit -m "Update tree data"
           git pull --rebase -X theirs origin main && git push
