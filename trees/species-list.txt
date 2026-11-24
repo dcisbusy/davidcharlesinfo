@@ -17,7 +17,7 @@ Cherry Plum	Prunus cerasifera var. pissardii	1708
 Japanese Cherry	Prunus serrulata	1646
 Hornbeam	Carpinus betulus	1629
 Apple	Malus	1388
-Pyrus Species	Pyrus	1263
+Pyrus	Pyrus	1263
 Maple	Acer	1195
 Oak	Quercus	1183
 Yew	Taxus baccata	1136
@@ -30,13 +30,12 @@ Rowan	Sorbus aucuparia	901
 Whitebeam	Sorbus	750
 Common Whitebeam	Sorbus aria	727
 Birch	Betula	716
-A Conifer	X Cupressocyparis	670
 Sweet Gum	Liquidambar styraciflua	551
 Small-leaved Lime	Tilia cordata	538
 Beech	Fagus sylvatica	502
 Swedish Whitebeam	Sorbus intermedia	489
 Female Lombardy Poplar	Populus nigra 'Italica'	483
-Plant	Unknown Tree Species	453
+Unknown tree	Unknown Tree Species	453
 Elder	Sambucus nigra	448
 Italian Alder	Alnus cordata	422
 Alder	Alnus glutinosa	417
@@ -60,11 +59,11 @@ Leyland Cypress	Cuprocyparis leylandii	220
 Turkish Hazel	Corylus colurna	219
 Red Oak	Quercus rubra	216
 Grey Poplar	Populus canescens	209
+X Cupressocyparis	X Cupressocyparis	209
 Scots Pine	Pinus sylvestris	205
 Sweet Chestnut	Castanea sativa	203
 Pear	Pyrus communis	202
 Tree-of-heaven	Ailanthus altissima	199
-A Flowering Plant	Photinia	196
 Hybrid Cockspurthorn	Crataegus lavallei	191
 Goat Willow	Salix caprea	189
 Black-poplar	Populus nigra	176
@@ -74,6 +73,7 @@ Hazel	Corylus avellana	160
 Grey Alder	Alnus incana	158
 Tulip-tree	Liriodendron tulipifera	153
 Broad-leaved Cockspurthorn	Crataegus persimilis	152
+Cupressus	Cupressus	147
 Ashleaf Maple	Acer negundo	145
 Crab Apple	Malus sylvestris	145
 Bay	Laurus nobilis	132
@@ -82,6 +82,7 @@ White Willow	Salix alba	129
 Wild Cherry Double Gean	Prunus avium 'Plena'	126
 Atlas Cedar	Cedrus atlantica	118
 Crack-willow	Salix fragilis	115
+Chamaecyparis	Chamaecyparis	115
 Indian-bean-tree	Catalpa bignonioides	113
 Aspen	Populus tremula	110
 Sugar Maple	Acer saccharum	109
@@ -91,6 +92,7 @@ Indian Horse-chestnut	Aesculus indica	103
 Walnut	Juglans regia	99
 Western Red-cedar	Thuja plicata	94
 Monterey Cypress	Cupressus macrocarpa	92
+Taxus	Taxus	91
 Deodar	Cedrus deodara	87
 Narrow-leaved Ash	Fraxinus angustifolia	84
 White Poplar	Populus alba	83
@@ -105,6 +107,7 @@ Pine	Pinus	71
 Midland Hawthorn	Crataegus laevigata	69
 Dawyck Beech	Fagus sylvatica 'Dawyck'	69
 Golden Rain	Laburnum anagyroides	69
+Pinaceae	Pinaceae	69
 Downy Birch	Betula pubescens	67
 Sessile Oak	Quercus petraea	67
 Cappadocian Maple	Acer cappadocicum	61
@@ -140,10 +143,13 @@ Cider Gum	Eucalyptus gunnii	33
 White Birch	Betula albosinensis	32
 European Larch	Larix decidua	32
 Black Mulberry	Morus nigra	31
+Photinia	Photinia	30
 Hop Hornbeam	Ostrya carpinifolia	29
 Norway Spruce	Picea abies	29
 Wild Service-tree	Sorbus torminalis	29
 Dutch Elm	Ulmus glabra minor plotii = U. hollandica	28
+Lythraceae	Lythraceae	28
+Eucalyptus	Eucalyptus	26
 Fir	Abies	26
 Cornelian-cherry	Cornus mas	26
 Cypress Oak	Quercus robur forma fastigiata	26
@@ -163,10 +169,12 @@ Olive	Olea europaea	22
 Siberian Crab	Malus baccata	21
 Fig	Ficus carica	20
 Monkey-puzzle	Araucaria araucana	19
+Hibiscus	Hibiscus	19
 Willow-leaved Pear	Pyrus salicifolia	18
 Scarlet Oak	Quercus coccinea	18
 Salix alba var. vitellina x babylonica = Salix x sepulcralis	Salix sepulcralis 'Chrysocoma'	18
 Desert Willow	Chitalpa taschkentensis	18
+Juniperus	Juniperus	18
 Tree Privet	Ligustrum lucidum	17
 Dove-tree	Davidia involucrata	17
 Spruce	Picea	17
@@ -177,7 +185,9 @@ Downy Japanese-maple	Acer japonicum	14
 Katsura Tree	Cercidiphyllum japonicum	14
 Manchurian cherry	Prunus maackii	14
 Service-tree	Sorbus domestica	14
+Laburnum	Laburnum	13
 Japanese Red-cedar	Cryptomeria japonica	13
+Taxus baccata 'Fastigiata'	Taxus baccata 'Fastigiata'	13
 Cedar	Cedrus	13
 Juniper	Juniperus communis	12
 White Mulberry	Morus alba	12
@@ -198,24 +208,31 @@ Paperbark Maple	Acer griseum	10
 Dwarf Cherry	Prunus cerasus	10
 Rum Cherry	Prunus serotina	10
 Rhododendron	Rhododendron ponticum	10
+Pyracantha	Pyracantha	10
 Medlar	Mespilus germanica	10
+Acacia	Acacia	9
 Quince	Cydonia oblonga	9
+Cornus	Cornus	9
 Japanese Elm	Zelkova serrata	9
 Californian Incense-cedar	Calocedrus decurrens	8
 Maritime Pine	Pinus pinaster	8
+Tamarix	Tamarix	8
 Golden Chain Tree	Laburnum anagyroides alpinum = L. watereri	8
 Japanese rowan	Sorbus commixta	8
 Red Alder	Alnus rubra	8
 Nootka Cypress	Xanthocyparis nootkatensis	7
 Red Buckeye	Aesculus pavia	6
 Hinoki Cypress	Chamaecyparis obtusa	6
+Nothofagus	Nothofagus	6
 Garden Privet	Ligustrum ovalifolium	6
 European Violet-willow	Salix daphnoides	6
 Small-leaved Elm	Ulmus minor subsp. minor	6
 Giant Fir	Abies grandis	5
 Highclere Holly	Ilex aquifolium altaclerensis	5
 Cucumber-tree	Magnolia acuminata	5
+Ericales	Ericales	5
 Wild Privet	Ligustrum vulgare	5
+Pinales	Pinales	5
 Gigg's Firethorn	Pyracantha atalantoides	5
 Caucasian Elm	Zelkova carpinifolia	5
 White Spruce	Picea glauca	4
@@ -232,17 +249,28 @@ Douglas Fir	Pseudotsuga menziesii	3
 Pendent Silver-Lime	Tilia 'Petiolaris'	3
 Chusan Palm	Trachycarpus fortunei	3
 Black Locust	Robinia	3
+Clerodendrum trichotomum	Clerodendrum trichotomum	3
+Tamarix tetrandra	Tamarix tetrandra	3
+Ulmaceae	Ulmaceae	3
 Green Alder	Alnus viridis	3
 Fuji Cherry	Prunus incisa	3
 Laurustinus	Viburnum tinus	3
 Spindle	Euonymus europaeus	3
-Bean	Fabaceae	3
+Fabaceae	Fabaceae	3
 Broad-leaved Whitebeam	Sorbus latifolia	3
 Corsican Pine	Pinus nigra subsp. laricio	3
 Chinese Wisteria	Wisteria sinensis	3
+Catalpa	Catalpa	2
+Pterocarya	Pterocarya	2
 Southern Blue-gum	Eucalyptus globulus	2
 Arolla Pine	Pinus cembra	2
 Weymouth Pine	Pinus strobus	2
+Arecales	Arecales	2
+Cannabaceae	Cannabaceae	2
+Carpinus	Carpinus	2
+Celastraceae	Celastraceae	2
+Bignoniaceae	Bignoniaceae	2
+Syringa	Syringa	2
 White Dogwood	Cornus alba	2
 Japanese Knotweed	Fallopia japonica	2
 Pagoda tree	Styphnolobium japonicum	2
@@ -259,15 +287,25 @@ Japanese Dogwood	Cornus kousa	2
 Willow-leaved Cotoneaster	Cotoneaster salicifolius	2
 Antarctic Beech	Nothofagus antarctica	2
 Colorado Spruce	Picea pungens	2
+Thuja	Thuja	2
+Liquidambar	Liquidambar	1
+Liriodendron	Liriodendron	1
 Korean Fir	Abies koreana	1
 Brilliant Sycamore	Acer pseudoplatanus 'Brilliantissimum'	1
 Hybrid Strawberry-tree	Arbutus unedo andrachne	1
+Cephalotaxus	Cephalotaxus	1
 Filbert	Corylus maxima	1
 Arizona Ash	Fraxinus velutina	1
 Chinese Juniper	Juniperus chinensis	1
 Roble	Nothofagus obliqua	1
+Carya	Carya	1
+Ceanothus	Ceanothus	1
+Cercis	Cercis	1
+Saxifragales	Saxifragales	1
+Osmanthus	Osmanthus	1
+Ostrya	Ostrya	1
 Northern White-cedar	Thuja occidentalis	1
-Conifer	Pinophyta	1
+Pinophyta	Pinophyta	1
 Japanese Angelica-tree	Aralia elata	1
 Fern-leaved Beech	Fagus sylvatica 'Asplenifolia'	1
 Syrian Ketmia	Hibiscus syriacus	1
