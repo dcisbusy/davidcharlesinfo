@@ -100,6 +100,20 @@ html,body{ margin:0; padding:0; height:100%; background:var(--ink); font-family:
 }
 .legend div{ display:flex; align-items:center; gap:0.4rem; margin:0.2rem 0; }
 .legend .dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+/* Edible / medicinal / poisonous layers */
+.legend{ max-width:13rem; }
+.layers{ display:flex; flex-direction:column; align-items:flex-start !important; gap:0.25rem; margin-bottom:0.5rem; padding-bottom:0.5rem; border-bottom:1px solid var(--line); }
+.layers label{ display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-size:0.78rem; }
+.layers input{ accent-color:var(--amber); margin:0; }
+#keyPlaces, #keyUses{ display:block; }
+.legend [hidden]{ display:none !important; }
+.legend .note{ display:block; font-size:0.65rem; opacity:0.75; margin-top:0.35rem; line-height:1.35; }
+.tree-popup .use{ font-size:0.78rem; line-height:1.4; margin:0.4rem 0 0; }
+.tree-popup .use b{ display:block; font-size:0.68rem; letter-spacing:0.04em; text-transform:uppercase; }
+.tree-popup .use.edible b{ color:#a5d66f; }
+.tree-popup .use.medicinal b{ color:#b9a2ea; }
+.tree-popup .use.poisonous b{ color:#f07a6a; }
+.tree-popup .warn{ font-size:0.68rem; opacity:0.7; margin-top:0.45rem; }
 
 button.back-link{ font:inherit; font-size:0.85rem; cursor:pointer; margin-left:0.4rem; }
 .topbar .left{ display:flex; align-items:center; }
@@ -155,16 +169,30 @@ button.back-link{ font:inherit; font-size:0.85rem; cursor:pointer; margin-left:0
 </div>
 
 <div class="legend">
-  <div><span class="dot" style="background:#e2a13d;"></span>Highways</div>
-  <div><span class="dot" style="background:#42604a;"></span>Parks</div>
-  <div><span class="dot" style="background:#9ab596;"></span>Housing</div>
-  <div><span class="dot" style="background:#8a8478;"></span>Other</div>
+  <div class="layers" id="layers">
+    <label><input type="checkbox" value="edible"> Edible</label>
+    <label><input type="checkbox" value="medicinal"> Medicinal</label>
+    <label><input type="checkbox" value="poisonous"> Poisonous</label>
+  </div>
+  <div id="keyPlaces">
+    <div><span class="dot" style="background:#e2a13d;"></span>Highways</div>
+    <div><span class="dot" style="background:#42604a;"></span>Parks</div>
+    <div><span class="dot" style="background:#9ab596;"></span>Housing</div>
+    <div><span class="dot" style="background:#8a8478;"></span>Other</div>
+  </div>
+  <div id="keyUses" hidden>
+    <div data-use="edible"><span class="dot" style="background:#a5d66f;"></span>Edible</div>
+    <div data-use="medicinal"><span class="dot" style="background:#9b7fe0;"></span>Medicinal</div>
+    <div data-use="poisonous"><span class="dot" style="background:#e5533f;"></span>Poisonous</div>
+    <span class="note">Never eat anything you can't identify for certain. Tap a tree for details.</span>
+  </div>
 </div>
 
 <div class="about" id="about" hidden>
   <h1>Tree map</h1>
   <div data-edit-file="trees/index.html"><!--content:start-->
   <p>Every tree the councils have mapped around Crystal Palace, Upper and South Norwood, Penge, Beckenham, Sydenham, Forest Hill and Dulwich: street trees, park trees and trees on estates. Tap a dot to find out what it is. Allow location and the map follows you on your walk.</p>
+  <p>Tick <b>Edible</b>, <b>Medicinal</b> or <b>Poisonous</b> to see only those trees, and tap one for what it's used for and what it can do to you. These are general notes about the species, not about the tree in front of you: never eat anything you can't identify for certain, ask a doctor before using any plant as medicine, and think twice about street trees beside busy roads or at dog height. More in <a href="https://davidcharles.substack.com/p/trees-that-could-kill-you">Trees that could kill you</a>.</p>
   <p>Some places have far fewer trees than you'd expect: the councils only record trees they look after, and some (Croydon especially) have mapped very few.</p>
   <p class="small">Data: <a href="https://data.london.gov.uk/dataset/local-authority-maintained-trees">London Public Realm Trees</a>, Greater London Authority and the borough councils. Contains public sector information licensed under the <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence v3.0</a>. Map &copy; OpenStreetMap contributors.</p>
   <!--content:end--></div>
@@ -233,6 +261,72 @@ function clusterIcon(count){
 }
 
 function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+// Edible / medicinal / poisonous notes (trees/species-uses.json), matched to the councils' species names
+const USE_COLORS = { poisonous:'#e5533f', medicinal:'#9b7fe0', edible:'#a5d66f' };
+const USE_ORDER = ['poisonous', 'medicinal', 'edible'];   // a tree in several layers takes the first colour
+const RISK = { high:'can kill or seriously harm', moderate:'likely to make you ill', low:'mild, or mainly a risk to animals' };
+let speciesUses = [];          // per species index: the matching rule, or null
+let allPoints = null;
+const indexCache = {};
+function matchUses(rules, names, latin){
+  const compiled = rules.map(r => ({ rule:r, re:new RegExp(r.match, 'i') }));
+  return names.map(name => {
+    // 'Cherry - Wild' or 'Cherry, Wild' is also tried as 'Wild Cherry'
+    const parts = name.split(/\s+-\s+|,\s*/);
+    const variants = [name, latin[name], parts.length > 1 ? parts.slice(1).concat(parts[0]).join(' ') : null].filter(Boolean);
+    for(const c of compiled){
+      if(variants.some(v => c.re.test(v))){
+        return (c.rule.edible || c.rule.medicinal || c.rule.poisonous) ? c.rule : null;
+      }
+    }
+    return null;
+  });
+}
+function activeUses(){
+  return [...document.querySelectorAll('#layers input:checked')].map(i => i.value);
+}
+function treeColor(row){
+  const uses = activeUses();
+  if(!uses.length) return LOCATION_COLORS[row.cat] || LOCATION_COLORS['Other'];
+  const rule = speciesUses[row.speciesIdx];
+  for(const u of USE_ORDER) if(uses.includes(u) && rule && rule[u]) return USE_COLORS[u];
+  return LOCATION_COLORS['Other'];
+}
+function indexFor(uses){
+  const key = uses.slice().sort().join(',') || 'all';
+  if(!indexCache[key]){
+    const pts = key === 'all' ? allPoints : allPoints.filter(p => {
+      const rule = speciesUses[treeRows[p.properties.i].speciesIdx];
+      return rule && uses.some(u => rule[u]);
+    });
+    indexCache[key] = { index: new Supercluster({ radius: 60, maxZoom: 17 }).load(pts), count: pts.length };
+  }
+  return indexCache[key];
+}
+function applyLayers(){
+  if(!allPoints) return;
+  const uses = activeUses();
+  const { index, count } = indexFor(uses);
+  superIndex = index;
+  document.getElementById('keyPlaces').hidden = uses.length > 0;
+  document.getElementById('keyUses').hidden = uses.length === 0;
+  document.querySelectorAll('#keyUses [data-use]').forEach(d => { d.hidden = !uses.includes(d.dataset.use); });
+  const label = uses.length ? uses.join(' + ') : 'trees';
+  document.getElementById('statusPill').textContent = `${count.toLocaleString()} ${label}`;
+  const url = new URL(window.location);
+  if(uses.length) url.searchParams.set('layer', uses.join(',')); else url.searchParams.delete('layer');
+  history.replaceState(null, '', url);
+  updateClusters();
+}
+function usesHtml(rule){
+  if(!rule) return '';
+  let h = '';
+  if(rule.edible) h += `<div class="use edible"><b>Edible</b>${esc(rule.edible)}</div>`;
+  if(rule.medicinal) h += `<div class="use medicinal"><b>Medicinal</b>${esc(rule.medicinal)}</div>`;
+  if(rule.poisonous) h += `<div class="use poisonous"><b>Poisonous${rule.risk ? ' · ' + esc(RISK[rule.risk] || rule.risk) : ''}</b>${esc(rule.poisonous)}</div>`;
+  if(rule.edible || rule.medicinal) h += `<div class="warn">General notes on the species. Only eat or use what you've identified for certain.</div>`;
+  return h;
+}
 function buildPopupHtml(row){
   const species = lookupData.species[row.speciesIdx];
   const borough = lookupData.boroughs[row.boroughIdx];
@@ -245,6 +339,7 @@ function buildPopupHtml(row){
     <div class="row">${esc(row.cat)} · ${esc(borough)}</div>
     ${details.length ? `<div class="row">${esc(details.join(', '))}</div>` : ''}
     ${row.climate ? `<div class="row">2090 climate suitability: ${esc(row.climate)}</div>` : ''}
+    ${usesHtml(speciesUses[row.speciesIdx])}
     <div class="id">Tree ID ${esc(row.id)} (GLA London Datastore)</div>
   </div>`;
 }
@@ -271,7 +366,7 @@ function updateClusters(){
       clusterLayer.addLayer(marker);
     } else {
       const row = treeRows[c.properties.i];
-      const marker = L.marker([lat, lon], { icon: treeIcon(LOCATION_COLORS[row.cat] || LOCATION_COLORS['Other']) });
+      const marker = L.marker([lat, lon], { icon: treeIcon(treeColor(row)) });
       marker.bindPopup(() => buildPopupHtml(row));
       clusterLayer.addLayer(marker);
     }
@@ -364,6 +459,23 @@ async function loadTrees(){
       DCLock.open('trees-lookup.json.locked').then(b => JSON.parse(new TextDecoder().decode(b)))
     ]);
     lookupData = lookup;
+    // the uses guide is optional: the map still works without it
+    try{
+      // species-list.txt gives each name's Latin name too, which catches vague names like 'A Flowering Plant'
+      const [guide, list] = await Promise.all([
+        fetch('species-uses.json', { cache:'no-cache' }).then(r => r.json()),
+        fetch('species-list.txt', { cache:'no-cache' }).then(r => r.ok ? r.text() : '').catch(() => '')
+      ]);
+      const latin = {};
+      for(const line of list.split('\n')){
+        const [n, l] = line.split('\t');
+        if(n && l && !n.startsWith('#')) latin[n] = l;
+      }
+      speciesUses = matchUses(guide.rules, lookup.species, latin);
+    }catch(e){
+      console.error('species uses guide failed to load', e);
+      speciesUses = lookup.species.map(() => null);
+    }
     const lines = dataText.split('\n').filter(l => l.length);
     statusEl.textContent = `${lines.length.toLocaleString()} trees`;
 
@@ -373,16 +485,19 @@ async function loadTrees(){
       loadText.textContent = `Reading trees… ${done.toLocaleString()} / ${total.toLocaleString()}`;
     });
     treeRows = rows;
+    allPoints = points;
 
     loadText.textContent = 'Indexing trees…';
     loadBarFill.style.width = '92%';
     // maxZoom:17 matches the old disableClusteringAtZoom:17 -- points stop
     // clustering and render individually beyond that zoom.
-    superIndex = new Supercluster({ radius: 60, maxZoom: 17 }).load(points);
+    const wanted = (params.get('layer') || '').split(',');
+    document.querySelectorAll('#layers input').forEach(i => { i.checked = wanted.includes(i.value); });
+    indexCache.all = { index: new Supercluster({ radius: 60, maxZoom: 17 }).load(points), count: points.length };
 
     loadBarFill.style.width = '100%';
     map.addLayer(clusterLayer);
-    updateClusters();
+    applyLayers();
     setTimeout(() => document.getElementById('loadOverlay').classList.remove('visible'), 300);
   }catch(e){
     statusEl.textContent = 'Failed to load tree data';
@@ -392,6 +507,7 @@ async function loadTrees(){
 }
 
 map.on('moveend', updateClusters);
+document.getElementById('layers').addEventListener('change', applyLayers);
 
 // If the dashboard passed coordinates via URL, centre there immediately
 // rather than waiting for this page's own (possibly slower) GPS fix.

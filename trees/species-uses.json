@@ -1,0 +1,478 @@
+{
+ "about": "Edible, medicinal and poisonous notes for the tree map (/trees/). Each rule's 'match' is a regular expression tested, case-insensitively, against the species name and against it turned round ('Cherry - Wild' is also tried as 'Wild Cherry') the councils use (see species-list.txt). The first rule that matches wins, so specific names come before general ones. A rule with no notes just stops a name matching a later rule. 'risk' is for poisonous trees: high (can kill or seriously harm), moderate (likely to make someone ill), low (mild, or a risk mainly to animals). Medicinal notes describe traditional and pharmaceutical uses, not advice.",
+ "rules": [
+  {
+   "match": "\\byew\\b|taxus",
+   "name": "Yew",
+   "poisonous": "Every part except the red flesh around the seed contains taxine alkaloids, which stop the heart. The seed inside the berry and the leaves are the danger: a handful of leaves can kill a person, and clippings kill horses and cattle.",
+   "risk": "high",
+   "medicinal": "Paclitaxel (Taxol), first found in Pacific yew bark, and docetaxel, made from European yew needles, are front-line cancer drugs. Not something to try at home in any form."
+  },
+  {
+   "match": "laburnum|golden ?chain",
+   "name": "Laburnum",
+   "poisonous": "Seeds, pods and bark contain cytisine. The pea-like pods attract children and cause vomiting, drowsiness and sometimes fits; laburnum is one of the commonest causes of plant poisoning calls in the UK.",
+   "risk": "high"
+  },
+  {
+   "match": "viburnum|laurustinus",
+   "name": "Viburnum",
+   "poisonous": "The berries can cause vomiting and diarrhoea if eaten in quantity.",
+   "risk": "low"
+  },
+  {
+   "match": "\\bbay\\b|laurus nobilis|sweet bay|bay laurel",
+   "name": "Bay",
+   "edible": "The leaves are the bay leaves of cooking: add a couple to stews and stocks, then take them out. Be certain it's bay and not cherry laurel, which looks similar and is poisonous."
+  },
+  {
+   "match": "cherry ?laurel|laurel.*cherry|laurocerasus|portug.*laurel|laurel.*portug|lusitanica|common laurel|^laurel\\b",
+   "name": "Cherry laurel / Portugal laurel",
+   "poisonous": "Leaves and seeds release cyanide when crushed (they smell of almonds). Don't chew the leaves, eat the seeds or burn clippings indoors. The sweet flesh of ripe berries is low risk, but the stones are not.",
+   "risk": "high"
+  },
+  {
+   "match": "horse ?chestnut|chestnut.*horse|aesculus|buckeye",
+   "name": "Horse chestnut",
+   "poisonous": "Conkers, leaves and bark contain aescin and are not edible: they cause vomiting and stomach pain in people and are dangerous to dogs. Don't confuse with sweet chestnuts, whose cases are densely spiny with flat-sided nuts.",
+   "risk": "moderate",
+   "medicinal": "Purified seed extract (aescin) is sold as a licensed herbal medicine for varicose veins and swollen legs. Raw conkers are not a remedy."
+  },
+  {
+   "match": "sweet ?chestnut|chestnut.*sweet|spanish chestnut|castanea|^chestnut$",
+   "name": "Sweet chestnut",
+   "edible": "Roast the nuts in October: score the shell first so they don't burst. Best on older trees; London street trees often give small nuts. Raw nuts are high in tannin and best cooked."
+  },
+  {
+   "match": "walnut|juglans",
+   "name": "Walnut",
+   "edible": "Nuts ripen in early autumn; green walnuts picked in June are pickled. The husks stain hands dark brown for days.",
+   "medicinal": "Leaves and green husks were used traditionally as an astringent and for skin complaints."
+  },
+  {
+   "match": "pecan|hickory|\\bcarya",
+   "name": "Pecan / hickory",
+   "edible": "Pecans and hickory nuts are edible raw or roasted, though London trees rarely crop well."
+  },
+  {
+   "match": "witch ?hazel|hamamelis",
+   "name": "Witch hazel",
+   "medicinal": "Bark and leaf extract is witch hazel water, still sold as an astringent for bruises, spots and minor skin irritation."
+  },
+  {
+   "match": "hazel|corylus|cobnut|filbert",
+   "name": "Hazel",
+   "edible": "Hazelnuts ripen in September (Turkish hazel, a common street tree, gives small nuts in very spiky husks). Squirrels usually get there first."
+  },
+  {
+   "match": "monkey ?puzzle|araucaria|chile pine",
+   "name": "Monkey puzzle",
+   "edible": "Female trees drop large seeds that are eaten boiled or roasted in Chile. Most London trees don't produce them."
+  },
+  {
+   "match": "stone pine|umbrella pine|pinus pinea",
+   "name": "Stone pine",
+   "edible": "This is the pine nut tree: the nuts are in the big cones and ripen over three years."
+  },
+  {
+   "match": "\\bpine\\b|pinus",
+   "name": "Pine",
+   "edible": "Young needles make a citrussy tea rich in vitamin C. Only from a tree you're sure is a pine (needles in bundles of 2, 3 or 5): yew needles, which are single and flat, are deadly.",
+   "medicinal": "Resin and needle steam were traditional remedies for coughs and colds; pine oil is still used in inhalants."
+  },
+  {
+   "match": "spruce|picea|\\bfir\\b|abies|pseudotsuga|douglas",
+   "name": "Spruce / fir",
+   "edible": "Bright green spring tips are eaten raw, infused in syrup or used to flavour beer. Be sure it isn't yew.",
+   "medicinal": "Tips and resin were used traditionally for coughs and as a source of vitamin C against scurvy."
+  },
+  {
+   "match": "juniper|juniperus",
+   "name": "Juniper",
+   "edible": "Ripe blue-black berries of common juniper flavour gin, game and sauerkraut. Many ornamental junipers (savin especially) are toxic, so only use a tree you've identified as common juniper.",
+   "medicinal": "Traditionally a diuretic and digestive. Avoid in pregnancy and with kidney problems."
+  },
+  {
+   "match": "thuja|arbor ?vitae|western red cedar",
+   "name": "Thuja (red cedar)",
+   "poisonous": "Foliage contains thujone; chewing it can cause vomiting and, in quantity, fits. Sap can irritate skin.",
+   "risk": "moderate"
+  },
+  {
+   "match": "holly|ilex",
+   "name": "Holly",
+   "poisonous": "The red berries cause vomiting and diarrhoea, and children are drawn to them; a few berries usually just mean an upset stomach.",
+   "risk": "moderate"
+  },
+  {
+   "match": "\\bbox\\b(?!.*elder)|buxus",
+   "name": "Box",
+   "poisonous": "Leaves contain alkaloids that cause vomiting and diarrhoea; dangerous to grazing animals.",
+   "risk": "moderate"
+  },
+  {
+   "match": "privet|ligustrum",
+   "name": "Privet",
+   "poisonous": "The black berries and leaves cause vomiting and diarrhoea, especially in children.",
+   "risk": "moderate"
+  },
+  {
+   "match": "spindle|euonymus",
+   "name": "Spindle",
+   "poisonous": "The pink and orange fruits are poisonous, causing vomiting, diarrhoea and in large amounts heart problems.",
+   "risk": "high"
+  },
+  {
+   "match": "rhododendron",
+   "name": "Rhododendron",
+   "poisonous": "All parts contain grayanotoxins; even honey from the flowers can make people ill.",
+   "risk": "moderate"
+  },
+  {
+   "match": "photinia|christmas berry",
+   "name": "Photinia",
+   "poisonous": "Leaves and seeds contain cyanogenic compounds. Mainly a risk to grazing animals.",
+   "risk": "low"
+  },
+  {
+   "match": "cotoneaster",
+   "name": "Cotoneaster",
+   "poisonous": "The red berries can cause stomach upset if eaten in quantity.",
+   "risk": "low"
+  },
+  {
+   "match": "box ?elder|acer negundo|ash.leaved maple",
+   "name": "Box elder",
+   "edible": "Can be tapped for a sweet sap in late winter, like other maples.",
+   "poisonous": "Seeds contain hypoglycin A, which causes often fatal atypical myopathy in horses. Not a risk to people.",
+   "risk": "low"
+  },
+  {
+   "match": "sycamore|pseudoplatanus",
+   "name": "Sycamore",
+   "edible": "The sap can be tapped in late winter and boiled down to a syrup, though it's less sweet than sugar maple.",
+   "poisonous": "Seeds and seedlings contain hypoglycin A, which causes often fatal atypical myopathy in horses. Not a risk to people.",
+   "risk": "low"
+  },
+  {
+   "match": "maple|acer",
+   "name": "Maple",
+   "edible": "Maples can be tapped for sap in late winter (sugar maple gives the most sugar). Young winged seeds are eaten boiled in some traditions."
+  },
+  {
+   "match": "mountain ash|rowan|aucuparia",
+   "name": "Rowan",
+   "edible": "Berries make a sharp jelly with apples, but only cooked: raw they contain parasorbic acid, which upsets the stomach. Freezing or cooking breaks it down."
+  },
+  {
+   "match": "whitebeam|sorbus aria|intermedia|swedish",
+   "name": "Whitebeam",
+   "edible": "The orange-red berries are edible once bletted (left until soft and brown), or cooked into jelly."
+  },
+  {
+   "match": "service tree|wild service|torminalis|sorbus domestica|chequer",
+   "name": "Service tree",
+   "edible": "Fruits ('chequers') are eaten once bletted and taste like dates; they once flavoured beer.",
+   "medicinal": "Traditionally used for stomach upsets, hence the Latin 'torminalis' (good for colic)."
+  },
+  {
+   "match": "sorbus",
+   "name": "Rowan / whitebeam family",
+   "edible": "Berries of this family are edible cooked (jelly) or bletted. Don't eat them raw in quantity: they upset the stomach."
+  },
+  {
+   "match": "pear|pyrus",
+   "name": "Pear",
+   "edible": "Ornamental pears (such as Callery pear 'Chanticleer') give small, hard fruit that softens and sweetens once bletted; fruiting pears are as you'd expect. Pips contain a little amygdalin, harmless in normal amounts."
+  },
+  {
+   "match": "crab ?apple|apple|malus",
+   "name": "Apple / crab apple",
+   "edible": "Crab apples are sour raw but make a pink jelly and are rich in pectin for setting other jams. Pips contain a little amygdalin, harmless unless eaten by the cupful."
+  },
+  {
+   "match": "medlar|mespilus germanica",
+   "name": "Medlar",
+   "edible": "Pick in late autumn and leave until the flesh turns soft and brown (bletted), then scoop it out: it tastes of spiced apple purée. Makes a good jelly."
+  },
+  {
+   "match": "quince|cydonia",
+   "name": "Quince",
+   "edible": "Hard and astringent raw but fragrant cooked: membrillo, jelly, or baked with apples."
+  },
+  {
+   "match": "amelanchier|juneberry|serviceberry|snowy mespilus|shadbush",
+   "name": "Juneberry",
+   "edible": "One of the best street-tree fruits: purple berries in June taste like blueberry and almond. Eat raw or in jam; the seeds are fine in normal amounts."
+  },
+  {
+   "match": "strawberry tree|arbutus",
+   "name": "Strawberry tree",
+   "edible": "Red, knobbly fruits in autumn are edible raw but mealy and bland ('unedo' is said to mean 'I eat one'). Better in jam. Eat in moderation."
+  },
+  {
+   "match": "mulberry|morus",
+   "name": "Mulberry",
+   "edible": "Fruits in late summer are delicious raw; black mulberry is the best. Unripe fruit and the milky sap can upset the stomach.",
+   "medicinal": "White mulberry leaf is used in traditional Chinese medicine and studied for blood sugar control."
+  },
+  {
+   "match": "\\bfig\\b|ficus",
+   "name": "Fig",
+   "edible": "Ripe figs from London trees are edible in good summers.",
+   "poisonous": "The milky sap makes skin burn and blister in sunlight (phytophotodermatitis). Wash it off.",
+   "risk": "low"
+  },
+  {
+   "match": "persimmon|diospyros|date.plum",
+   "name": "Persimmon",
+   "edible": "Edible once very soft; unripe fruit is mouth-puckeringly astringent."
+  },
+  {
+   "match": "loquat|eriobotrya",
+   "name": "Loquat",
+   "edible": "Orange fruits in spring are sweet and tangy (rare to ripen in London). Don't eat the seeds, which contain cyanogenic compounds."
+  },
+  {
+   "match": "olive|olea",
+   "name": "Olive",
+   "edible": "Olives must be cured (in brine or lye) before eating; raw they are inedibly bitter. London trees rarely ripen fruit.",
+   "medicinal": "Olive leaf extract is sold as a supplement; evidence is limited."
+  },
+  {
+   "match": "cornelian|cornus mas",
+   "name": "Cornelian cherry",
+   "edible": "Glossy red fruits in late summer are sour-sweet when fully ripe and soft, good for jam."
+  },
+  {
+   "match": "cherry plum|myrobalan|cerasifera|purple.leaved plum|pissardii",
+   "name": "Cherry plum",
+   "edible": "Small red or yellow plums in July and August, good raw or in jam. Often the first wild fruit of summer. Don't crack the stones, which contain cyanogenic compounds."
+  },
+  {
+   "match": "blackthorn|sloe|prunus spinosa",
+   "name": "Blackthorn",
+   "edible": "Sloes after the first frost make sloe gin and jelly; very sour raw. Don't crack the stones.",
+   "medicinal": "Flowers and fruit were traditional mild laxatives and tonics."
+  },
+  {
+   "match": "bird cherry|prunus padus",
+   "name": "Bird cherry",
+   "edible": "Small black cherries are bitter raw but usable cooked in jams. Leaves, bark and stones contain cyanogenic compounds: never eat those.",
+   "poisonous": "Leaves, bark and stones contain cyanogenic glycosides.",
+   "risk": "low"
+  },
+  {
+   "match": "wild cherry|gean|prunus avium|sweet cherry",
+   "name": "Wild cherry",
+   "edible": "Small, often sour cherries in midsummer; birds get most. Don't crack the stones.",
+   "medicinal": "Wild cherry bark was a traditional cough remedy and still flavours some cough syrups."
+  },
+  {
+   "match": "almond|prunus dulcis|amygdalus",
+   "name": "Almond",
+   "edible": "Sweet almonds are edible. Ornamental and bitter almonds contain amygdalin, which releases cyanide: don't eat bitter-tasting kernels.",
+   "poisonous": "Bitter almond kernels release cyanide.",
+   "risk": "moderate"
+  },
+  {
+   "match": "\\bplum\\b|damson|greengage|bullace|prunus domestica|apricot|peach",
+   "name": "Plum, peach and apricot",
+   "edible": "Fruit in late summer, good raw or cooked. Don't crack the stones."
+  },
+  {
+   "match": "cherry|prunus|sakura|kanzan|tai haku|umineko",
+   "name": "Ornamental cherry",
+   "edible": "Most flowering cherries give few or tiny sour fruits. In Japan the blossom and young leaves are salted and pickled (sakura). Don't crack the stones, and never eat the leaves raw: they contain cyanogenic compounds."
+  },
+  {
+   "match": "sea ?buckthorn|hippophae",
+   "name": "Sea buckthorn",
+   "edible": "Orange berries are very sour, very high in vitamin C, and good juiced or in syrups."
+  },
+  {
+   "match": "alder buckthorn|frangula|buckthorn|rhamnus",
+   "name": "Buckthorn",
+   "poisonous": "The black berries are strongly purgative, causing vomiting and diarrhoea.",
+   "risk": "moderate",
+   "medicinal": "Dried bark (frangula) is a traditional laxative, now little used because of side effects."
+  },
+  {
+   "match": "hawthorn|\\bthorn\\b|crataegus|\\bmay\\b|midland thorn|glastonbury",
+   "name": "Hawthorn",
+   "edible": "Haws (red berries) make jelly and ketchup; young spring leaves ('bread and cheese') are eaten raw. Spit out the seeds, which contain cyanogenic compounds.",
+   "medicinal": "Hawthorn berry, leaf and flower are a traditional heart remedy and licensed herbal medicines are sold in the UK. It can interact with heart drugs, so check with a doctor."
+  },
+  {
+   "match": "\\belder\\b|sambucus|elderberry|elderflower",
+   "name": "Elder",
+   "edible": "Flowers in June make cordial and fritters; ripe berries are cooked into syrup, jam or wine.",
+   "medicinal": "Elderberry syrup is a traditional cold and flu remedy, with some evidence it shortens colds.",
+   "poisonous": "Leaves, stems, bark, unripe berries and raw ripe berries contain cyanogenic compounds and cause nausea and vomiting. Always cook the berries and strip the stalks.",
+   "risk": "moderate"
+  },
+  {
+   "match": "pagoda tree|styphnolobium|sophora",
+   "name": "Pagoda tree",
+   "poisonous": "Seeds and pods contain cytisine-like alkaloids and cause vomiting and diarrhoea.",
+   "risk": "moderate",
+   "medicinal": "Flower buds are used in traditional Chinese medicine and are a commercial source of rutin."
+  },
+  {
+   "match": "wisteria",
+   "name": "Wisteria",
+   "edible": "The flowers are edible raw or as fritters. Only the flowers.",
+   "poisonous": "Seeds and pods cause vomiting, stomach pain and diarrhoea; children are sometimes poisoned by the bean-like pods.",
+   "risk": "moderate"
+  },
+  {
+   "match": "knotweed|fallopia|reynoutria",
+   "name": "Japanese knotweed",
+   "edible": "Young spring shoots taste like rhubarb, but councils often spray knotweed with herbicide, so don't pick it here. It's illegal to spread it.",
+   "medicinal": "The root is a major commercial source of resveratrol and is used in traditional Chinese medicine."
+  },
+  {
+   "match": "kousa|japanese dogwood",
+   "name": "Kousa dogwood",
+   "edible": "The red, raspberry-like fruits are sweet, with a custardy flesh. Skip the bitter skin."
+  },
+  {
+   "match": "pyracantha|firethorn",
+   "name": "Firethorn",
+   "edible": "Berries are edible cooked in jelly; raw they can upset the stomach. Spit out the seeds."
+  },
+  {
+   "match": "lilac|syringa",
+   "name": "Lilac",
+   "edible": "The flowers are edible, floral and slightly bitter, and are used in syrups and sugars."
+  },
+  {
+   "match": "hibiscus",
+   "name": "Hibiscus",
+   "edible": "Flowers and young leaves of this hardy hibiscus are edible, in salads or as tea."
+  },
+  {
+   "match": "aralia|angelica.tree",
+   "name": "Japanese angelica tree",
+   "edible": "The spring buds (taranome) are a delicacy in Japan, fried as tempura. Spiny stems."
+  },
+  {
+   "match": "celtis|nettle tree|hackberry",
+   "name": "Nettle tree",
+   "edible": "The small dark fruits are sweet, mostly stone, and edible raw."
+  },
+  {
+   "match": "ginkgo|maidenhair",
+   "name": "Ginkgo",
+   "edible": "The nuts inside the smelly fruits of female trees are eaten roasted in East Asia, but only a few at a time.",
+   "medicinal": "Leaf extract is one of the best-selling herbal supplements, taken for memory and circulation; good trials have mostly found little benefit. It can increase bleeding with blood thinners.",
+   "poisonous": "Raw or too many cooked nuts contain ginkgotoxin, which can cause fits, especially in children. The fruit pulp irritates skin like poison ivy.",
+   "risk": "moderate"
+  },
+  {
+   "match": "robinia|false acacia|black locust|^locust",
+   "name": "False acacia (Robinia)",
+   "edible": "The white flowers in late spring are sweet and eaten as fritters. Only the flowers.",
+   "poisonous": "Bark, seeds, pods and leaves contain robin and robitin; eating bark or seeds causes vomiting and weakness. Horses are especially at risk.",
+   "risk": "moderate"
+  },
+  {
+   "match": "honey ?locust|gleditsia",
+   "name": "Honey locust",
+   "edible": "The pulp inside young pods is sweet. Not a major food, and the related bark and seeds aren't eaten."
+  },
+  {
+   "match": "sumac|sumach|rhus",
+   "name": "Stag's horn sumach",
+   "edible": "Red fuzzy fruit clusters soaked in cold water make a lemony drink; dried and ground, it's the spice sumac."
+  },
+  {
+   "match": "sweet ?gum|liquidambar",
+   "name": "Sweet gum",
+   "medicinal": "The resin (storax) was used traditionally for coughs and skin conditions, and is in friar's balsam."
+  },
+  {
+   "match": "black gum|tupelo|nyssa",
+   "name": "Tupelo"
+  },
+  {
+   "match": "eucalyptus|\\bgum\\b",
+   "name": "Eucalyptus",
+   "medicinal": "Eucalyptus oil from the leaves is used in steam inhalations and chest rubs for colds.",
+   "poisonous": "The oil is poisonous if swallowed, even in small amounts for children.",
+   "risk": "moderate"
+  },
+  {
+   "match": "judas|cercis|redbud",
+   "name": "Judas tree",
+   "edible": "The pink flowers are edible raw in salads, with a slightly sour, pea-like taste."
+  },
+  {
+   "match": "magnolia",
+   "name": "Magnolia",
+   "edible": "Petals are edible with a gingery taste; they're pickled in vinegar or used to flavour rice."
+  },
+  {
+   "match": "\\bash\\b|fraxinus",
+   "name": "Ash",
+   "edible": "Young green keys (seeds) were pickled in Britain as a substitute for capers.",
+   "medicinal": "Leaves were a traditional diuretic and remedy for gout and rheumatism."
+  },
+  {
+   "match": "southern beech|nothofagus",
+   "name": "Southern beech"
+  },
+  {
+   "match": "beech|fagus",
+   "name": "Beech",
+   "edible": "Very young leaves in spring are a salad leaf. Beechnuts are edible roasted in small amounts; eaten raw in quantity they can upset the stomach."
+  },
+  {
+   "match": "\\boak\\b|quercus",
+   "name": "Oak",
+   "edible": "Acorns are edible after soaking in changes of water to remove the bitter tannins, then ground into flour. Raw acorns upset the stomach and in quantity poison cattle and horses.",
+   "medicinal": "Oak bark is a strong astringent, used traditionally for diarrhoea and as a gargle and skin wash."
+  },
+  {
+   "match": "lime|linden|tilia",
+   "name": "Lime (linden)",
+   "edible": "Young heart-shaped leaves in spring are a soft salad leaf.",
+   "medicinal": "Lime-flower tea (tilleul) is a traditional remedy for colds, fevers and to calm anxiety. Drink in moderation."
+  },
+  {
+   "match": "birch|betula",
+   "name": "Birch",
+   "edible": "Sap tapped in March is a slightly sweet drink, and is boiled into syrup or made into wine. Take only a little from one tree and plug the hole.",
+   "medicinal": "Leaf tea was a traditional diuretic, and the bark contains betulin and salicylates. The chaga fungus grows on birch."
+  },
+  {
+   "match": "chitalpa|desert willow",
+   "name": "Chitalpa"
+  },
+  {
+   "match": "willow|salix|osier",
+   "name": "Willow",
+   "medicinal": "Willow bark contains salicin, which led to aspirin. Bark tea was the traditional painkiller and fever remedy. Avoid if you're allergic to aspirin."
+  },
+  {
+   "match": "poplar|aspen|populus|cottonwood",
+   "name": "Poplar",
+   "medicinal": "Sticky spring buds were made into 'balm of Gilead' ointment for skin and chest; the bark contains salicin, like willow."
+  },
+  {
+   "match": "zelkova",
+   "name": "Zelkova"
+  },
+  {
+   "match": "\\belm\\b|ulmus",
+   "name": "Elm",
+   "edible": "The flat green seeds in early spring are a nutty raw snack.",
+   "medicinal": "Inner bark of the American slippery elm is a traditional soothing remedy for sore throats and digestion."
+  },
+  {
+   "match": "\\balder\\b|alnus",
+   "name": "Alder",
+   "medicinal": "Bark and leaves are astringent and were used traditionally as a gargle and for inflammation."
+  }
+ ]
+}
