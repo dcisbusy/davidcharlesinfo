@@ -131,8 +131,8 @@ def main():
             continue
         name = cell(r, "species") or cell(r, "latin") or "Unknown tree"
         if VAGUE.search(name):   # 'A Flowering Plant', 'A Conifer', 'Pyrus Species': use the Latin name instead
-            lat = cell(r, "latin")
-            name = lat if lat and not re.search(r"unknown|not known|vacant", lat, re.I) else "Unknown tree"
+            latin = cell(r, "latin")
+            name = latin if latin and not re.search(r"unknown|not known|vacant", latin, re.I) else "Unknown tree"
         name = name[:1].upper() + name[1:]
         species_count[name] += 1
         if cell(r, "latin"):
