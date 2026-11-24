@@ -131,6 +131,7 @@ button.back-link{ font:inherit; font-size:0.85rem; cursor:pointer; margin-left:0
 .disclaimer{ position:fixed; inset:0; z-index:2000; background:rgba(10,14,18,0.78); display:flex; align-items:center; justify-content:center; padding:1rem; }
 .disclaimer-box{ background:var(--ink-soft); color:var(--bone); border:1px solid var(--line); border-radius:12px; max-width:32rem; max-height:100%; overflow:auto;
   padding:1.1rem 1.2rem; font-size:0.88rem; line-height:1.45; }
+.disclaimer-box:focus{ outline:none; }
 .disclaimer-box h2{ font-family:'Fraunces',Georgia,serif; font-weight:500; font-size:1.3rem; margin:0 0 0.6rem; color:var(--amber); }
 .disclaimer-box p{ margin:0 0 0.65rem; }
 .disclaimer-box .small{ font-size:0.75rem; opacity:0.8; }
@@ -171,7 +172,7 @@ button.back-link{ font:inherit; font-size:0.85rem; cursor:pointer; margin-left:0
 <div id="map"></div>
 <div id="treeGate" class="lock-gate"></div>
 <div class="disclaimer" id="disclaimer" role="dialog" aria-modal="true" aria-labelledby="disclaimerTitle" hidden>
-  <div class="disclaimer-box">
+  <div class="disclaimer-box" tabindex="-1">
     <h2 id="disclaimerTitle">Before you use this map</h2>
     <p><b>This map is for education and interest only.</b> It is not a field guide and must not be used to identify any plant, or to decide whether anything is safe to eat, touch or use as medicine.</p>
     <p><b>Do not pick, eat or use any part of any tree because of this map.</b> The councils' records can be out of date or wrong, a tree may have been replaced, and many edible plants have poisonous look-alikes. The notes describe a species in general, not the tree in front of you, and they may be incomplete or mistaken.</p>
@@ -260,6 +261,10 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 // at every zoom level (the index always covers all 160k trees) — panning
 // doesn't lose data, it's just computed on demand instead of all at once.
 let superIndex = null;
+// Closes on a tap on the map, but not on the stray second tap some phones send straight after opening it
+const treePopup = L.popup({ closeOnClick:false, offset:[0, -2] });
+let popupOpenedAt = 0;
+map.on('click', () => { if(Date.now() - popupOpenedAt > 500) map.closePopup(treePopup); });
 let treeRows = null;
 let lookupData = null;
 const clusterLayer = L.layerGroup();
@@ -400,7 +405,12 @@ function updateClusters(){
     } else {
       const row = treeRows[c.properties.i];
       const marker = L.marker([lat, lon], { icon: treeIcon(treeColor(row)) });
-      marker.bindPopup(() => buildPopupHtml(row));
+      // One shared popup on the map, not on the marker: opening it pans the map, which rebuilds
+      // the markers, and a marker's own popup would close as its marker was removed
+      marker.on('click', () => {
+        popupOpenedAt = Date.now();
+        treePopup.setLatLng([lat, lon]).setContent(buildPopupHtml(row)).openOn(map);
+      });
       clusterLayer.addLayer(marker);
     }
   }
@@ -566,21 +576,19 @@ initUserLocation();
 document.getElementById('statusPill').textContent = 'For subscribers';
 DCLock.gate(document.getElementById('treeGate'), loadTrees);
 
-// Disclaimer: shown on a first visit until the reader taps "I understand" (remembered in this browser)
-const DISCLAIMER_KEY = 'dc-trees-disclaimer-v1';
+// Disclaimer: shown every time the page loads, until the reader taps "I understand"
 function showDisclaimer(){
   const d = document.getElementById('disclaimer');
   d.hidden = false;
-  document.getElementById('disclaimerOk').focus();
+  const box = d.querySelector('.disclaimer-box');
+  box.scrollTop = 0;
+  box.focus({ preventScroll:true });
 }
 document.getElementById('disclaimerOk').addEventListener('click', () => {
   document.getElementById('disclaimer').hidden = true;
-  try{ localStorage.setItem(DISCLAIMER_KEY, '1'); }catch(e){}
 });
 document.getElementById('showDisclaimer').addEventListener('click', e => { e.preventDefault(); showDisclaimer(); });
-let seenDisclaimer = false;
-try{ seenDisclaimer = localStorage.getItem(DISCLAIMER_KEY) === '1'; }catch(e){}
-if(!seenDisclaimer) showDisclaimer();
+showDisclaimer();
 
 document.getElementById('aboutBtn').addEventListener('click', () => {
   const box = document.getElementById('about'); box.hidden = !box.hidden;
