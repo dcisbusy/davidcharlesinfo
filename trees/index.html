@@ -114,6 +114,8 @@ html,body{ margin:0; padding:0; height:100%; background:var(--ink); font-family:
 .tree-popup .use.edible b{ color:#a5d66f; }
 .tree-popup .use.medicinal b{ color:#b9a2ea; }
 .tree-popup .use.poisonous b{ color:#f07a6a; }
+.tree-popup .use .src{ display:block; font-size:0.66rem; opacity:0.7; margin-top:0.15rem; }
+.tree-popup .use .src a{ color:inherit; }
 .tree-popup .warn{ font-size:0.68rem; opacity:0.7; margin-top:0.45rem; }
 
 button.back-link{ font:inherit; font-size:0.85rem; cursor:pointer; margin-left:0.4rem; }
@@ -263,7 +265,10 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 // doesn't lose data, it's just computed on demand instead of all at once.
 let superIndex = null;
 // Closes on a tap on the map, but not on the stray second tap some phones send straight after opening it
-const treePopup = L.popup({ closeOnClick:false, offset:[0, -2] });
+// Long notes scroll inside the popup rather than running off a phone screen; padding keeps it clear of the header
+const treePopup = L.popup({ closeOnClick:false, offset:[0, -2],
+  maxHeight: Math.max(220, Math.round(window.innerHeight * 0.55)),
+  autoPanPaddingTopLeft:[10, 70], autoPanPaddingBottomRight:[10, 20] });
 let popupOpenedAt = 0;
 map.on('click', () => { if(Date.now() - popupOpenedAt > 500) map.closePopup(treePopup); });
 let treeRows = null;
@@ -289,7 +294,7 @@ let speciesUses = [];          // per species index: the matching rule, or null
 const speciesLatin = {};       // species name -> its commonest Latin name (from species-list.txt)
 let allPoints = null;
 const indexCache = {};
-// The spreadsheet, one rule per row: name, match, latin, edible, medicinal, poisonous, risk, sources, checked
+// The spreadsheet, one rule per row: name, match, latin, edible(_sources), medicinal(_sources), poisonous(_sources), risk, research_notes
 function parseRulesCsv(text){
   const rows = []; let row = [], field = '', q = false;
   for(let i = 0; i < text.length; i++){
@@ -358,12 +363,23 @@ function applyLayers(){
   history.replaceState(null, '', url);
   updateClusters();
 }
+// Source links under each note: "<section>_sources" in the spreadsheet, space-separated URLs
+function sourcesHtml(list){
+  const urls = (list || '').split(/\s+/).filter(u => /^https?:\/\//.test(u));
+  if(!urls.length) return '';
+  const links = urls.map(u => {
+    let host = u;
+    try{ host = new URL(u).hostname.replace(/^www\./, ''); }catch(e){}
+    return `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(host)}</a>`;
+  });
+  return `<span class="src">Sources: ${links.join(', ')}</span>`;
+}
 function usesHtml(rule){
   if(!rule) return '';
   let h = '';
-  if(rule.edible) h += `<div class="use edible"><b>Edible</b>${esc(rule.edible)}</div>`;
-  if(rule.medicinal) h += `<div class="use medicinal"><b>Medicinal</b>${esc(rule.medicinal)}</div>`;
-  if(rule.poisonous) h += `<div class="use poisonous"><b>Poisonous${rule.risk ? ' · ' + esc(RISK[rule.risk] || rule.risk) : ''}</b>${esc(rule.poisonous)}</div>`;
+  if(rule.edible) h += `<div class="use edible"><b>Edible</b>${esc(rule.edible)}${sourcesHtml(rule.edible_sources)}</div>`;
+  if(rule.medicinal) h += `<div class="use medicinal"><b>Medicinal</b>${esc(rule.medicinal)}${sourcesHtml(rule.medicinal_sources)}</div>`;
+  if(rule.poisonous) h += `<div class="use poisonous"><b>Poisonous${rule.risk ? ' · ' + esc(RISK[rule.risk] || rule.risk) : ''}</b>${esc(rule.poisonous)}${sourcesHtml(rule.poisonous_sources)}</div>`;
   if(rule.edible || rule.medicinal) h += `<div class="warn">General notes on the species. Only eat or use what you've identified for certain.</div>`;
   return h;
 }
