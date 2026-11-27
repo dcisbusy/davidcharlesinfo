@@ -642,3 +642,18 @@ ul.book-strip { list-style: none; margin: 12px 0 28px; padding: 0 0 6px; display
 .more-issues { margin: 8px 0 28px; }
 h2.tw-part { margin: 36px 0 8px; font: 700 1.8em/1.2 var(--serif); letter-spacing: 0; text-transform: none; color: var(--ink); border: 0; }
 @media (max-width: 640px) { ul.home-doors { grid-template-columns: repeat(2, 1fr); } ul.book-strip { grid-auto-columns: 120px; } }
+
+/* /dashboard/: David's private stats page */
+.db-chart svg { width: 100%; height: auto; display: block; }
+.db-chart rect { fill: var(--accent); }
+.db-chart rect:hover { opacity: .75; }
+.db-chart line { stroke: var(--line); }
+.db-chart text { font: 11px var(--ui); fill: var(--muted); }
+.db-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; }
+table.db-table { width: 100%; border-collapse: collapse; font: 14px/1.35 var(--ui); }
+.db-table td { padding: 6px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.db-table td.n { width: 42%; text-align: right; white-space: nowrap; }
+.db-table .bar { display: inline-block; height: 8px; margin-right: 8px; border-radius: 0 4px 4px 0; background: var(--accent); opacity: .55;
+  vertical-align: middle; max-width: calc(100% - 3.5em); }
+.db-table a { color: var(--ink); }
+@media (max-width: 700px) { .db-grid { grid-template-columns: 1fr; } }

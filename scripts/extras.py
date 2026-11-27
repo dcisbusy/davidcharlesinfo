@@ -20,7 +20,7 @@ import sys
 from urllib.parse import quote
 
 import build  # noqa: E402
-from build import (MONTHS, PERK_TAG, PERSON, QUICK_PICK, SITE, SUBSTACK, TILE_COLOURS, TIP_LINE, chips, esc, file_for, nice, page, read, write_if_changed)
+from build import (GOATCOUNTER, MONTHS, PERK_TAG, PERSON, QUICK_PICK, SITE, SUBSTACK, TILE_COLOURS, TIP_LINE, chips, esc, file_for, nice, page, read, write_if_changed)
 
 STOP = set("""
 a about above after again against all am an and any are aren't as at be because been before being below between both
@@ -1590,6 +1590,153 @@ def build_timeline(stories, series_list):
                                                      if os.path.exists("cards/twenty-years.jpg") else None))
 
 
+def build_dashboard():
+    """/dashboard/: David's private stats page (noindex, unlinked). It reads GoatCounter's API in his own browser
+    with a read-only API key he pastes in once (kept in that browser only, never in this repository)."""
+    names = {b["slug"]: b["title"] for b in load_books()}
+    try:
+        names.update({b["slug"]: b["title"] for b in json.load(open("data/books.json", encoding="utf-8")).get("paid_books", [])})
+    except (OSError, ValueError):
+        pass
+    body = f"""<h1>Dashboard</h1>
+<p class="intro muted">How the site and the subscriber perks are doing, from GoatCounter. Only you can see the numbers:
+they're fetched in this browser with your own GoatCounter API key.</p>
+<div id="db-key" class="lock-gate" hidden>
+<form class="lock-form" id="db-key-form"><p class="lock-title">Connect GoatCounter</p>
+<p>In GoatCounter, open your name (top right) &rarr; <strong>API</strong> &rarr; <strong>New API key</strong>. Tick only
+<strong>Read statistics</strong>, save, and paste the key here. It stays in this browser.</p>
+<label class="lock-label">API key <input id="db-token" type="password" autocomplete="off" spellcheck="false" required></label>
+<button class="button primary" type="submit">Connect</button><p class="lock-msg" id="db-key-msg" role="status"></p></form></div>
+<div id="db" hidden>
+<nav class="archive-tabs db-range" aria-label="Period"><a href="#" data-days="7">7 days</a><a href="#" data-days="30">30 days</a>
+<a href="#" data-days="90">90 days</a><a href="#" data-days="365">A year</a></nav>
+<p class="muted small" id="db-status">Loading&hellip;</p>
+<ul class="sub-facts db-tiles" id="db-tiles"></ul>
+<h2 class="section">Visits per day</h2><div class="db-chart" id="db-daily"></div>
+<div class="db-grid">
+<section><h2 class="section">Subscriber unlocks</h2><div id="db-unlocks"></div></section>
+<section><h2 class="section">Ebook downloads</h2><div id="db-downloads"></div></section>
+<section><h2 class="section">Clicks to shops and tips</h2><div id="db-out"></div></section>
+<section><h2 class="section">Where visitors came from</h2><div id="db-refs"></div></section>
+<section><h2 class="section">Most read</h2><div id="db-top"></div></section>
+<section><h2 class="section">Broken links people followed</h2><div id="db-404"></div>
+<p class="muted small">Send the real old links to Claude to redirect; ignore bot junk like wp-login.</p></section>
+</div>
+<p class="muted small"><a href="https://{GOATCOUNTER}.goatcounter.com/">Open GoatCounter</a> &middot; <a href="#" id="db-forget">Disconnect this browser</a></p>
+</div>
+<script>window.goatcounter = {{no_onload: true}};</script>
+<script>
+(function(){{
+  var API = "https://{GOATCOUNTER}.goatcounter.com/api/v0", KEY = "dc-gc-token";
+  var BOOKS = {json.dumps(names, ensure_ascii=False)};
+  var SHOPS = {{"out-gumroad":"Gumroad","out-lulu":"Lulu","out-amazon":"Amazon","out-payhip":"Payhip","out-paypal":"PayPal (tips)"}};
+  var $ = function(id){{ return document.getElementById(id); }};
+  function tok(){{ try {{ return localStorage.getItem(KEY); }} catch(e) {{ return null; }} }}
+  function esc(s){{ return String(s).replace(/[&<>"]/g, function(c){{ return {{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}}[c]; }}); }}
+  function day(d){{ return d.toISOString().slice(0,10); }}
+  function get(path, params){{
+    var q = new URLSearchParams(params).toString();
+    return fetch(API + path + (q ? "?" + q : ""), {{headers: {{"Authorization": "Bearer " + tok(), "Content-Type": "application/json"}}}})
+      .then(function(r){{
+        if (r.status === 401 || r.status === 403) throw new Error("key");
+        if (!r.ok) throw new Error("GoatCounter said " + r.status);
+        return r.json();
+      }});
+  }}
+  // every path with its count, following GoatCounter's pages (each page leaves out the paths already seen)
+  function allHits(range){{
+    var out = [], seen = [];
+    function page(n){{
+      var p = Object.assign({{limit: 100}}, range); if (seen.length) p.exclude_paths = seen.join(",");
+      return get("/stats/hits", p).then(function(d){{
+        (d.hits || []).forEach(function(h){{ out.push(h); seen.push(h.path_id); }});
+        return (d.more && n < 15) ? page(n + 1) : out;
+      }});
+    }}
+    return page(1);
+  }}
+  function table(rows, empty, unit){{
+    if (!rows.length) return '<p class="muted small">' + empty + '</p>';
+    var max = Math.max.apply(null, rows.map(function(r){{ return r[1]; }}));
+    return '<table class="db-table">' + rows.map(function(r){{
+      return '<tr><td>' + r[0] + '</td><td class="n"><span class="bar" style="width:' + Math.max(2, 100 * r[1] / max) + '%"></span>'
+        + r[1].toLocaleString() + '</td></tr>';
+    }}).join("") + '</table>';
+  }}
+  function n(h){{ return h.count || 0; }}
+  function draw(days){{
+    document.querySelectorAll(".db-range a").forEach(function(a){{
+      if (+a.dataset.days === days) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); }});
+    var end = new Date(), start = new Date(Date.now() - (days - 1) * 864e5);
+    var range = {{start: day(start), end: day(end)}};
+    $("db-status").textContent = "Loading…";
+    Promise.all([allHits(range), get("/stats/total", range), get("/stats/toprefs", Object.assign({{limit: 12}}, range)).catch(function(){{ return {{}}; }})])
+    .then(function(res){{
+      var hits = res[0], total = res[1], refs = res[2];
+      var ev = hits.filter(function(h){{ return h.event; }}), pages = hits.filter(function(h){{ return !h.event; }});
+      var by = {{}}; ev.forEach(function(h){{ by[h.path.replace(/^\\//, "")] = (by[h.path.replace(/^\\//, "")] || 0) + n(h); }});
+      var free = by["subscriber-unlock"] || 0, paid = by["subscriber-unlock-paid"] || 0;
+      var dl = Object.keys(by).filter(function(k){{ return /^ebook-.+-(epub|pdf)$/.test(k); }});
+      var books = {{}}; dl.forEach(function(k){{ var m = k.match(/^ebook-(.+)-(epub|pdf)$/); books[m[1]] = books[m[1]] || [0, 0];
+        books[m[1]][m[2] === "epub" ? 0 : 1] += by[k]; }});
+      var dlTotal = dl.reduce(function(a, k){{ return a + by[k]; }}, 0);
+      var out = Object.keys(SHOPS).map(function(k){{ return [SHOPS[k], by[k] || 0]; }}).filter(function(r){{ return r[1]; }});
+      var broken = pages.filter(function(h){{ return /^\\/404\\//.test(h.path); }})
+        .map(function(h){{ return [esc(h.path.slice(4)), n(h)]; }});
+      var top = pages.filter(function(h){{ return !/^\\/404(\\/|\\.html)/.test(h.path) && h.path !== "/"; }}).slice(0, 15)
+        .map(function(h){{ return ['<a href="' + esc(h.path) + '">' + esc((h.title || h.path).replace(/ \\| David Charles$/, "")) + '</a>', n(h)]; }});
+      var tot = total.total || 0;
+      $("db-tiles").innerHTML = [[tot, "visits"], [free + paid, "unlocks"], [dlTotal, "ebook downloads"],
+        [out.reduce(function(a, r){{ return a + r[1]; }}, 0), "clicks to shops"]]
+        .map(function(t){{ return '<li><strong>' + t[0].toLocaleString() + '</strong><span>' + t[1] + '</span></li>'; }}).join("");
+      $("db-unlocks").innerHTML = table([["Free password", free], ["Paid password", paid]].filter(function(r){{ return r[1]; }}),
+        "No unlocks in this period.");
+      $("db-downloads").innerHTML = table(Object.keys(books).map(function(s){{
+        return [esc(BOOKS[s] || s) + ' <span class="muted">(' + books[s][0] + ' EPUB, ' + books[s][1] + ' PDF)</span>', books[s][0] + books[s][1]];
+      }}).sort(function(a, b){{ return b[1] - a[1]; }}), "No downloads in this period.");
+      $("db-out").innerHTML = table(out.sort(function(a, b){{ return b[1] - a[1]; }}), "No clicks out in this period.");
+      $("db-refs").innerHTML = table((refs.stats || []).map(function(r){{ return [esc(r.name || "Direct or unknown"), r.count || 0]; }}),
+        "No referrers in this period.");
+      $("db-top").innerHTML = table(top, "Nothing yet.");
+      $("db-404").innerHTML = table(broken.slice(0, 15), "No broken links followed in this period. ");
+      dailyChart(total.stats || [], days);
+      $("db-status").textContent = "From " + range.start + " to " + range.end + ". Counts are per browser, not per person.";
+    }}).catch(function(e){{
+      if (e.message === "key") {{ forget(); ask("GoatCounter didn't accept that key. Check it has Read statistics ticked."); return; }}
+      $("db-status").textContent = "Couldn't load the numbers: " + e.message + ". Try again in a minute.";
+    }});
+  }}
+  function dailyChart(stats, days){{
+    var pts = stats.map(function(s){{ return [s.day, s.daily || 0]; }});
+    if (!pts.length) {{ $("db-daily").innerHTML = '<p class="muted small">No visits in this period.</p>'; return; }}
+    var W = 720, H = 180, P = 28, max = Math.max(1, Math.max.apply(null, pts.map(function(p){{ return p[1]; }})));
+    var bw = (W - P) / pts.length;
+    var bars = pts.map(function(p, i){{
+      var h = (H - 24) * p[1] / max;
+      return '<rect x="' + (P + i * bw + bw * 0.15) + '" y="' + (H - 18 - h) + '" width="' + Math.max(1, bw * 0.7) + '" height="' + h
+        + '" rx="2"><title>' + p[0] + ': ' + p[1].toLocaleString() + ' visits</title></rect>';
+    }}).join("");
+    var lab = '<text x="' + P + '" y="' + (H - 2) + '">' + pts[0][0] + '</text><text x="' + W + '" y="' + (H - 2) + '" text-anchor="end">'
+      + pts[pts.length - 1][0] + '</text><text x="0" y="12">' + max.toLocaleString() + '</text>';
+    $("db-daily").innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Visits per day">'
+      + '<line x1="' + P + '" x2="' + W + '" y1="' + (H - 18) + '" y2="' + (H - 18) + '"/>' + bars + lab + '</svg>';
+  }}
+  function forget(){{ try {{ localStorage.removeItem(KEY); }} catch(e) {{}} }}
+  function ask(msg){{ $("db").hidden = true; $("db-key").hidden = false; $("db-key-msg").textContent = msg || ""; }}
+  $("db-key-form").addEventListener("submit", function(e){{
+    e.preventDefault(); try {{ localStorage.setItem(KEY, $("db-token").value.trim()); }} catch(err) {{}}
+    $("db-key").hidden = true; $("db").hidden = false; draw(30);
+  }});
+  document.querySelectorAll(".db-range a").forEach(function(a){{
+    a.addEventListener("click", function(e){{ e.preventDefault(); draw(+a.dataset.days); }}); }});
+  $("db-forget").addEventListener("click", function(e){{ e.preventDefault(); forget(); ask(); }});
+  if (tok()) {{ $("db").hidden = false; draw(30); }} else ask();
+}})();
+</script>"""
+    write_if_changed("dashboard/index.html", page("Dashboard | David Charles", "Site statistics.", "/dashboard/",
+                                                  body, noindex=True))
+
+
 def build_start_here(stories, entries, series_list):
     """The Start here page: a photo doorway, one tile per theme, then each theme's picks as photo cards.
     Words come from data/start-here.json; photos from each story (or an item's own "photo")."""
@@ -1757,6 +1904,7 @@ def build_pages(ctx, entries):
     build_timeline(stories, ctx["series"])
     build_work_with_me()
     build_editor_setup()
+    build_dashboard()
     build_start_here(stories, entries, ctx["series"])
     search_records(stories, entries)
     print(f"Map: {sum(1 for s in stories if s.get('place'))} stories placed; photo wall: {n} photos; "

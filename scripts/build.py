@@ -35,7 +35,7 @@ os.chdir(ROOT)
 SITE = "https://davidcharles.info"
 SUBSTACK = "https://davidcharles.substack.com"
 GOATCOUNTER = "davidcharles"    # GoatCounter site code (davidcharles.goatcounter.com). Set to "" to switch stats off.
-CSS_VERSION = "31"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
+CSS_VERSION = "32"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
 
 NEWSLETTER_DATA = "newsletter-archive/posts.json"
 BLOG_DATA = "blog-archive/index.json"
