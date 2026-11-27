@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Nature Evidence Library | David Charles</title>
+<meta name="description" content="What the research says about time in nature.">
+<link rel="canonical" href="https://davidcharles.info/evidence/">
+<link rel="stylesheet" href="/assets/site.css?v=35">
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="alternate" type="application/rss+xml" title="David Charles" href="https://davidcharles.info/feed.xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The Nature Evidence Library | David Charles">
+<meta property="og:description" content="What the research says about time in nature.">
+<meta property="og:url" content="https://davidcharles.info/evidence/">
+<meta property="og:site_name" content="David Charles">
+<meta name="robots" content="noindex">
+<script>try{if(!localStorage.getItem('dc-edit-token')){var g=document.createElement('script');g.async=true;g.src='//gc.zgo.at/count.js';g.dataset.goatcounter='https://davidcharles.goatcounter.com/count';document.head.appendChild(g);}}catch(e){}</script>
+</head>
+<body>
+<main>
+<nav class="top"><a class="name" href="/">David Charles</a><a href="/start-here/">Start here</a><a href="/newsletter-archive/">Archive</a><a href="/series/">Series</a><a href="/books/">Books</a><a href="/subscribers/">Subscribers</a><a href="/photos/">Photos</a><a href="/search/">Search</a><button class="theme-toggle" type="button">Dark</button></nav>
+<header class="sh-hero ev-hero"><img src="/wp-content/uploads/2018/02/Me-in-Cairngorms.jpg" alt="" fetchpriority="high">
+<div><h1>The Nature Evidence Library</h1><p>What the research says about time in nature, from a 40-second glance to a week
+in the wild. Every study rated, with how to use it and the catch.</p></div></header>
+<div id="ev-gate" class="lock-gate" data-tier="paid" data-no-join data-title="This page is just for you (for now)"
+ data-text="Type the paid subscribers&rsquo; password to open it. You only need to do it once on this device."></div>
+<div id="ev" hidden>
+<div class="ev-tools" role="search">
+<input id="ev-q" type="search" placeholder="Search studies, e.g. cortisol, awe, forest school" aria-label="Search the library">
+<div class="ev-filter" role="group" aria-label="Strength of evidence">
+<button type="button" data-min="0" aria-pressed="true">All</button><button type="button" data-min="2" aria-pressed="false">★★ and up</button>
+<button type="button" data-min="3" aria-pressed="false">★★★ and up</button><button type="button" data-min="4" aria-pressed="false">★★★★</button></div>
+<span class="ev-count" id="ev-count" aria-live="polite"></span></div>
+<div id="ev-body"></div>
+</div>
+<script src="/assets/lock.js?v=6"></script>
+<script>
+(function(){
+  var gate = document.getElementById('ev-gate');
+  DCLock.gate(gate, function(){
+    DCLock.open('/evidence/library.locked', 'paid').then(function(buf){
+      document.getElementById('ev-body').innerHTML = new TextDecoder().decode(buf);
+      document.getElementById('ev').hidden = false;
+      setup();
+      if (location.hash) { var t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
+    }).catch(function(){ gate.textContent = 'Sorry, the library wouldn’t open. Try reloading the page.'; });
+  }, 'paid');
+  function setup(){
+    var q = document.getElementById('ev-q'), min = 0, cards = [].slice.call(document.querySelectorAll('.ev-card'));
+    var secs = [].slice.call(document.querySelectorAll('.ev-sec'));
+    cards.forEach(function(c){ c._t = c.textContent.toLowerCase(); });
+    secs.forEach(function(s){ s._t = s.textContent.toLowerCase(); });
+    function run(){
+      var words = q.value.toLowerCase().split(/\s+/).filter(Boolean), shown = 0, filtering = words.length || min;
+      function hit(t){ return words.every(function(w){ return t.indexOf(w) >= 0; }); }
+      cards.forEach(function(c){
+        var ok = (+c.dataset.stars >= min || (!min)) && hit(c._t);
+        c.hidden = !ok; if (ok) shown++;
+      });
+      secs.forEach(function(s){
+        var any = s.querySelector('.ev-card:not([hidden])'), lead = s.querySelector('.ev-lead');
+        var leadHit = !min && words.length && hit(lead.textContent.toLowerCase());
+        s.hidden = filtering && !any && !leadHit;
+        s.classList.toggle('ev-filtered', !!filtering);
+      });
+      document.querySelectorAll('.ev-toc a').forEach(function(a){
+        var s = document.getElementById(a.getAttribute('href').slice(1)); a.parentNode.hidden = !!(s && s.hidden); });
+      document.getElementById('ev-count').textContent = filtering ? shown + ' of ' + cards.length + ' showing' : cards.length + ' entries';
+    }
+    q.addEventListener('input', run);
+    document.querySelectorAll('.ev-filter button').forEach(function(b){
+      b.addEventListener('click', function(){
+        min = +b.dataset.min;
+        document.querySelectorAll('.ev-filter button').forEach(function(x){ x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+        run();
+      });
+    });
+    document.getElementById('ev-body').addEventListener('click', function(e){
+      var b = e.target.closest('.ev-copy'); if (!b) return;
+      var t = b.parentNode.querySelector('.ev-text').textContent.trim();
+      (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){
+        b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500); }, function(){});
+    });
+    if ('IntersectionObserver' in window) {
+      var links = {}; document.querySelectorAll('.ev-toc a').forEach(function(a){ links[a.getAttribute('href').slice(1)] = a; });
+      var io = new IntersectionObserver(function(es){ es.forEach(function(e){
+        if (e.isIntersecting && links[e.target.id]) {
+          document.querySelectorAll('.ev-toc a.on').forEach(function(x){ x.classList.remove('on'); });
+          links[e.target.id].classList.add('on'); } }); }, {rootMargin: '-20% 0px -70% 0px'});
+      secs.forEach(function(s){ io.observe(s); });
+    }
+    run();
+  }
+})();
+</script>
+</main>
+<script src="/assets/site.js?v=35" defer></script>
+</body>
+</html>

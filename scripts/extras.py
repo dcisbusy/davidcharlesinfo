@@ -1620,6 +1620,91 @@ def build_timeline(stories, series_list):
                                                      if os.path.exists("cards/twenty-years.jpg") else None))
 
 
+def build_evidence():
+    """/evidence/: David's private Nature Evidence Library (noindex, unlinked). The library itself is made from the
+    Claude Doc by scripts/make_evidence.py and locked with the paid key (evidence/library.locked); this is the page
+    around it: the password card, search, strength filter, contents and copy buttons."""
+    if not os.path.exists("evidence/library.locked"):
+        return
+    body = """<header class="sh-hero ev-hero"><img src="/wp-content/uploads/2018/02/Me-in-Cairngorms.jpg" alt="" fetchpriority="high">
+<div><h1>The Nature Evidence Library</h1><p>What the research says about time in nature, from a 40-second glance to a week
+in the wild. Every study rated, with how to use it and the catch.</p></div></header>
+<div id="ev-gate" class="lock-gate" data-tier="paid" data-no-join data-title="This page is just for you (for now)"
+ data-text="Type the paid subscribers&rsquo; password to open it. You only need to do it once on this device."></div>
+<div id="ev" hidden>
+<div class="ev-tools" role="search">
+<input id="ev-q" type="search" placeholder="Search studies, e.g. cortisol, awe, forest school" aria-label="Search the library">
+<div class="ev-filter" role="group" aria-label="Strength of evidence">
+<button type="button" data-min="0" aria-pressed="true">All</button><button type="button" data-min="2" aria-pressed="false">★★ and up</button>
+<button type="button" data-min="3" aria-pressed="false">★★★ and up</button><button type="button" data-min="4" aria-pressed="false">★★★★</button></div>
+<span class="ev-count" id="ev-count" aria-live="polite"></span></div>
+<div id="ev-body"></div>
+</div>
+<script src="/assets/lock.js?v=6"></script>
+<script>
+(function(){
+  var gate = document.getElementById('ev-gate');
+  DCLock.gate(gate, function(){
+    DCLock.open('/evidence/library.locked', 'paid').then(function(buf){
+      document.getElementById('ev-body').innerHTML = new TextDecoder().decode(buf);
+      document.getElementById('ev').hidden = false;
+      setup();
+      if (location.hash) { var t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
+    }).catch(function(){ gate.textContent = 'Sorry, the library wouldn\u2019t open. Try reloading the page.'; });
+  }, 'paid');
+  function setup(){
+    var q = document.getElementById('ev-q'), min = 0, cards = [].slice.call(document.querySelectorAll('.ev-card'));
+    var secs = [].slice.call(document.querySelectorAll('.ev-sec'));
+    cards.forEach(function(c){ c._t = c.textContent.toLowerCase(); });
+    secs.forEach(function(s){ s._t = s.textContent.toLowerCase(); });
+    function run(){
+      var words = q.value.toLowerCase().split(/\\s+/).filter(Boolean), shown = 0, filtering = words.length || min;
+      function hit(t){ return words.every(function(w){ return t.indexOf(w) >= 0; }); }
+      cards.forEach(function(c){
+        var ok = (+c.dataset.stars >= min || (!min)) && hit(c._t);
+        c.hidden = !ok; if (ok) shown++;
+      });
+      secs.forEach(function(s){
+        var any = s.querySelector('.ev-card:not([hidden])'), lead = s.querySelector('.ev-lead');
+        var leadHit = !min && words.length && hit(lead.textContent.toLowerCase());
+        s.hidden = filtering && !any && !leadHit;
+        s.classList.toggle('ev-filtered', !!filtering);
+      });
+      document.querySelectorAll('.ev-toc a').forEach(function(a){
+        var s = document.getElementById(a.getAttribute('href').slice(1)); a.parentNode.hidden = !!(s && s.hidden); });
+      document.getElementById('ev-count').textContent = filtering ? shown + ' of ' + cards.length + ' showing' : cards.length + ' entries';
+    }
+    q.addEventListener('input', run);
+    document.querySelectorAll('.ev-filter button').forEach(function(b){
+      b.addEventListener('click', function(){
+        min = +b.dataset.min;
+        document.querySelectorAll('.ev-filter button').forEach(function(x){ x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+        run();
+      });
+    });
+    document.getElementById('ev-body').addEventListener('click', function(e){
+      var b = e.target.closest('.ev-copy'); if (!b) return;
+      var t = b.parentNode.querySelector('.ev-text').textContent.trim();
+      (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){
+        b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500); }, function(){});
+    });
+    if ('IntersectionObserver' in window) {
+      var links = {}; document.querySelectorAll('.ev-toc a').forEach(function(a){ links[a.getAttribute('href').slice(1)] = a; });
+      var io = new IntersectionObserver(function(es){ es.forEach(function(e){
+        if (e.isIntersecting && links[e.target.id]) {
+          document.querySelectorAll('.ev-toc a.on').forEach(function(x){ x.classList.remove('on'); });
+          links[e.target.id].classList.add('on'); } }); }, {rootMargin: '-20% 0px -70% 0px'});
+      secs.forEach(function(s){ io.observe(s); });
+    }
+    run();
+  }
+})();
+</script>"""
+    write_if_changed("evidence/index.html", page("The Nature Evidence Library | David Charles",
+                                                 "What the research says about time in nature.", "/evidence/",
+                                                 body, noindex=True))
+
+
 def build_dashboard():
     """/dashboard/: David's private stats page (noindex, unlinked). It reads GoatCounter's API in his own browser
     with a read-only API key he pastes in once (kept in that browser only, never in this repository)."""
@@ -1935,6 +2020,7 @@ def build_pages(ctx, entries):
     build_work_with_me()
     build_editor_setup()
     build_dashboard()
+    build_evidence()
     build_start_here(stories, entries, ctx["series"])
     search_records(stories, entries)
     print(f"Map: {sum(1 for s in stories if s.get('place'))} stories placed; photo wall: {n} photos; "
