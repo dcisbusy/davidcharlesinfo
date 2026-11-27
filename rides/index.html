@@ -6,7 +6,7 @@
 <title>Rides | David Charles</title>
 <meta name="description" content="Long bike rides by David Charles, drawn on a map.">
 <link rel="canonical" href="https://davidcharles.info/rides/">
-<link rel="stylesheet" href="/assets/site.css?v=33">
+<link rel="stylesheet" href="/assets/site.css?v=34">
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
 <link rel="alternate" type="application/rss+xml" title="David Charles" href="https://davidcharles.info/feed.xml">
 <meta property="og:type" content="website">
@@ -22,85 +22,8 @@
 <nav class="top"><a class="name" href="/">David Charles</a><a href="/start-here/">Start here</a><a href="/newsletter-archive/">Archive</a><a href="/series/">Series</a><a href="/books/">Books</a><a href="/subscribers/">Subscribers</a><a href="/photos/">Photos</a><a href="/search/">Search</a><button class="theme-toggle" type="button">Dark</button></nav>
 <h1>Rides</h1>
 <p class="intro muted" data-edit-json="data/page-text.json" data-edit-key="[&quot;rides&quot;]" data-edit-rich>Solid lines follow my route between the places I slept each night; dashed lines are ferries. Click on a day and it'll pop up with a couple of quotes from my book of the ride, <a href="https://davidcharles.info/life-to-the-lees-cycling-around-britain/">Life to the Lees</a>.</p>
-<div id="ride-gate" class="lock-gate"></div>
-<nav class="archive-tabs ride-pick ride-after" aria-label="Show one ride" hidden></nav>
-<div id="map" role="region" aria-label="Map of rides" hidden></div>
-<p class="muted small ride-after" hidden>Lines follow roads and paths between the places in my notes, so they show roughly the way I went, not every turn. Dotted lines are trains, louages and taxis.</p>
-<div id="ride-list"></div>
-<link rel="stylesheet" href="/assets/leaflet/leaflet.css">
-<script src="/assets/leaflet/leaflet.js"></script>
-<script src="/assets/lock.js?v=6"></script>
-<script>
-DCLock.gate(document.getElementById('ride-gate'), function(){
-  DCLock.open('/rides/rides-data.locked').then(function(buf){
-    var d=JSON.parse(new TextDecoder().decode(buf));
-    document.getElementById('ride-list').innerHTML=d.html;
-    document.getElementById('map').hidden=false;
-    document.querySelectorAll('.ride-after').forEach(function(x){x.hidden=false;});
-    drawRides(d.rides);
-  }).catch(function(){ document.getElementById('ride-gate').textContent='Sorry, the map wouldn’t open. Try reloading the page.'; });
-});
-function drawRides(RIDES){
-var MONTHS=["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-function nice(d){var p=d.split('-');return (+p[2])+' '+MONTHS[+p[1]-1]+' '+p[0];}
-function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-var map=L.map('map',{scrollWheelZoom:false});
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,
-  attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
-var css=getComputedStyle(document.documentElement);
-function col(v){return css.getPropertyValue(v).trim();}
-var marks={}, all=[], bounds={};
-RIDES.forEach(function(r){
-  var prev=[r.start.lat,r.start.lon], seg=[prev], mine=[prev];
-  function flush(mode){ if(seg.length>1) L.polyline(seg,{color:mode==='bike'?col('--s1'):mode==='ferry'?col('--s0'):col('--muted'),
-      weight:mode==='bike'?3:2,dashArray:mode==='ferry'?'6 6':mode==='bike'?null:'1 6',lineCap:'round',opacity:.9}).addTo(map);
-      seg=[seg[seg.length-1]]; }
-  var mode='bike';
-  function go(pt,m){ if(m!==mode){ flush(mode); mode=m; } seg.push(pt); all.push(pt); mine.push(pt); }
-  r.days.forEach(function(d){
-    var here=[d.lat,d.lon];
-    if(!d.offroute){
-      var parts=r.route&&r.route[String(d.day)];
-      if(parts){ parts.forEach(function(p){ p[1].forEach(function(pt){ go(pt,p[0]); }); }); }
-      else {
-        (d.legs||[]).forEach(function(l){ go([l[0],l[1]],l[2]); });
-        go(here,d.last||'bike');
-      }
-    }
-    var m=L.circleMarker(here,{radius:d.rest?7:5,weight:2,color:col('--bg'),fillColor:d.check?col('--muted'):col('--s1'),fillOpacity:1}).addTo(map);
-    m.bindPopup('<strong>Day '+d.day+': '+esc(d.stop)+'</strong><br><small>'+nice(d.date)+' &middot; '+
-      (d.rest?'rest day':(d.miles?d.miles+' miles':'travel day')+' ('+d.total.toLocaleString()+' so far)')+(d.night?'<br>Night: '+esc(d.night):'')+
-      (d.note?'<br>'+esc(d.note):'')+
-      ((d.quotes||[]).length?'<span class="pq">'+d.quotes.map(function(q){return '&ldquo;'+esc(q)+'&rdquo;';}).join(' ')+
-        (r.book?' <a href="'+r.book+'">From the book</a>':'')+'</span>':'')+(d.check?'<br><em>'+esc(d.checknote||'Place to check')+'</em>':'')+'</small>');
-    marks[r.slug+'-'+d.day]=m;
-  });
-  flush(mode);
-  L.circleMarker([r.start.lat,r.start.lon],{radius:8,weight:3,color:col('--s1'),fillColor:col('--bg'),fillOpacity:1})
-    .addTo(map).bindPopup('<strong>'+(r.finish?'Start':'Start and finish')+': '+esc(r.start.name)+'</strong><br><small>'+esc(r.title)+'</small>');
-  if(r.finish) L.circleMarker([r.finish.lat,r.finish.lon],{radius:8,weight:3,color:col('--s1'),fillColor:col('--bg'),fillOpacity:1})
-    .addTo(map).bindPopup('<strong>Finish: '+esc(r.finish.name)+'</strong><br><small>'+esc(r.title)+'</small>');
-  bounds[r.slug]=L.latLngBounds(mine);
-});
-map.fitBounds(L.latLngBounds(all),{padding:[20,20]});
-// a button per ride, to zoom the map to it (and back to all of them)
-var pick=document.querySelector('.ride-pick');
-pick.innerHTML='<a href="#" data-r="" aria-current="page">All rides</a>'+RIDES.map(function(r){
-  return '<a href="#'+esc(r.slug)+'" data-r="'+esc(r.slug)+'">'+esc(r.title)+'</a>';}).join('');
-pick.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(e){
-  e.preventDefault(); pick.querySelectorAll('a').forEach(function(x){x.removeAttribute('aria-current');}); a.setAttribute('aria-current','page');
-  map.fitBounds(a.dataset.r?bounds[a.dataset.r]:L.latLngBounds(all),{padding:[20,20]});
-});});
-document.querySelectorAll('.ride').forEach(function(sec){
-  sec.querySelectorAll('li[data-day]').forEach(function(li){li.addEventListener('click',function(){
-    var m=marks[sec.id+'-'+li.getAttribute('data-day')]; if(!m) return;
-    map.setView(m.getLatLng(),9); m.openPopup();
-    document.getElementById('map').scrollIntoView({behavior:'smooth',block:'center'});
-  });});
-});
-}
-</script>
+<ul class="ride-index"><li><a href="/rides/round-britain-2011/"><strong>Round Britain by bike, 2011</strong><span class="m">17 July 2011 to 12 September 2011 &middot; 58 days &middot; 4,110 miles cycled on 56 of them &middot; 23 nights in a bivvy bag</span></a></li><li><a href="/rides/cycling-to-the-sahara-2012/"><strong>Cycling to the Sahara, 2012</strong><span class="m">24 February 2012 to 21 April 2012 &middot; 58 days &middot; 1,729 miles cycled on 30 of them</span></a></li></ul>
 </main>
-<script src="/assets/site.js?v=33" defer></script>
+<script src="/assets/site.js?v=34" defer></script>
 </body>
 </html>

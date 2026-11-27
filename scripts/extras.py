@@ -917,40 +917,49 @@ def build_rides():
             + (f'<span class="m note">{esc(d["note"])}</span>' if d.get("note") else "")
             + "".join(f'<q class="m">{esc(qt)}</q>' for qt in d.get("quotes", [])) + '</li>'
             for d in days)
-        sections.append(
-            f'<section class="ride" id="{esc(r["slug"])}"><h2>{esc(r["title"])}</h2>'
-            f'<p class="intro muted">{len(days)} days &middot; {miles:,.0f} miles cycled on {bike_days} of them'
-            + (f' &middot; {outdoors} nights in a bivvy bag' if outdoors else "")
-            + (f' &middot; <a href="{esc(r["book"])}">The book</a>' if r.get("book") else "")
-            + f'</p><ol class="ride-days">{rows}</ol></section>')
+        r["summary"] = (f'{nice(days[0]["date"])} to {nice(days[-1]["date"])} &middot; {len(days)} days &middot; '
+                        f'{miles:,.0f} miles cycled on {bike_days} of them'
+                        + (f' &middot; {outdoors} nights in a bivvy bag' if outdoors else ""))
+        sections.append(f'<section class="ride" id="{esc(r["slug"])}"><ol class="ride-days">{rows}</ol></section>')
         data.append({"slug": r["slug"], "title": r["title"], "start": r["start"], "finish": r.get("finish"), "days": days,
                      "route": r["route"], "book": r.get("book")})
-    # Subscribers only: the ride data and day lists are locked (scripts/lock.py); the page unlocks them in the browser
-    private = json.dumps({"html": "".join(sections), "rides": data}, ensure_ascii=False).encode("utf-8")
-    try:
-        import lock
-        os.makedirs("rides", exist_ok=True)
-        out = lock.lock_bytes(private)
-        if not os.path.exists("rides/rides-data.locked") or open("rides/rides-data.locked", "rb").read() != out:
-            open("rides/rides-data.locked", "wb").write(out)
-    except Exception as e:   # no password here (a local build): keep the locked copy that's there
-        print("  rides: not re-locked:", e)
     r_intro, r_attrs = page_text("rides", "Long bike rides, drawn from my notes. Solid lines follow my route between "
                                           "the places I slept each night; dashed lines are ferries. A question mark is "
                                           "a place still to check.")
-    body = f"""<h1>Rides</h1>
-<p class="intro muted"{r_attrs}>{r_intro}</p>
+    try:
+        import lock
+    except Exception:
+        lock = None
+    cards = []
+    for r, section, d in zip(rides, sections, data):
+        slug = r["slug"]
+        os.makedirs(f"rides/{slug}", exist_ok=True)
+        # Subscribers only: each ride's data and day list are locked (scripts/lock.py) and opened in the browser
+        try:
+            out = lock.lock_bytes(json.dumps({"html": section, "rides": [d]}, ensure_ascii=False).encode("utf-8"))
+            f = f"rides/{slug}/ride-data.locked"
+            if not os.path.exists(f) or open(f, "rb").read() != out:
+                open(f, "wb").write(out)
+        except Exception as e:   # no password here (a local build): keep the locked copy that's there
+            print(f"  rides/{slug}: not re-locked:", e)
+        lines = ("Lines follow roads and paths between the places in my notes, so they show roughly the way I went, "
+                 "not every turn." if r.get("route") else "Lines are straight between stops, not the roads I rode.")
+        if any(l[2] in ("train", "road") for x in r["days"] for l in x.get("legs", [])) or \
+                any(x.get("last") in ("train", "road") for x in r["days"]):
+            lines += " Dotted lines are trains, louages and taxis."
+        body = f"""<p class="meta crumbs"><a href="/rides/">Rides</a></p>
+<h1>{esc(r["title"])}</h1>
+<p class="intro muted">{r["summary"]}""" + (f' &middot; <a href="{esc(r["book"])}">The book</a>' if r.get("book") else "") + f"""</p>
 <div id="ride-gate" class="lock-gate"></div>
-<nav class="archive-tabs ride-pick ride-after" aria-label="Show one ride" hidden></nav>
-<div id="map" role="region" aria-label="Map of rides" hidden></div>
-<p class="muted small ride-after" hidden>{"Lines follow roads and paths between the places in my notes, so they show roughly the way I went, not every turn." if any(r.get("route") for r in rides) else "Lines are straight between stops, not the roads I rode."} Dotted lines are trains, louages and taxis.</p>
+<div id="map" role="region" aria-label="Map of {esc(r["title"])}" hidden></div>
+<p class="muted small ride-after" hidden>{lines}</p>
 <div id="ride-list"></div>
 <link rel="stylesheet" href="/assets/leaflet/leaflet.css">
 <script src="/assets/leaflet/leaflet.js"></script>
 <script src="/assets/lock.js?v=6"></script>
 <script>
 DCLock.gate(document.getElementById('ride-gate'), function(){{
-  DCLock.open('/rides/rides-data.locked').then(function(buf){{
+  DCLock.open('/rides/{esc(r["slug"])}/ride-data.locked').then(function(buf){{
     var d=JSON.parse(new TextDecoder().decode(buf));
     document.getElementById('ride-list').innerHTML=d.html;
     document.getElementById('map').hidden=false;
@@ -962,7 +971,7 @@ function drawRides(RIDES){{
 var MONTHS={json.dumps(MONTHS)};
 function nice(d){{var p=d.split('-');return (+p[2])+' '+MONTHS[+p[1]-1]+' '+p[0];}}
 function esc(s){{return String(s).replace(/[&<>"]/g,function(c){{return {{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}}[c];}});}}
-var map=L.map('map',{{scrollWheelZoom:false}});
+var map=L.map('map',{{scrollWheelZoom:false,zoomSnap:0.25}});
 L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png',{{maxZoom:18,
   attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}}).addTo(map);
 var css=getComputedStyle(document.documentElement);
@@ -1000,15 +1009,8 @@ RIDES.forEach(function(r){{
     .addTo(map).bindPopup('<strong>Finish: '+esc(r.finish.name)+'</strong><br><small>'+esc(r.title)+'</small>');
   bounds[r.slug]=L.latLngBounds(mine);
 }});
-map.fitBounds(L.latLngBounds(all),{{padding:[20,20]}});
-// a button per ride, to zoom the map to it (and back to all of them)
-var pick=document.querySelector('.ride-pick');
-pick.innerHTML='<a href="#" data-r="" aria-current="page">All rides</a>'+RIDES.map(function(r){{
-  return '<a href="#'+esc(r.slug)+'" data-r="'+esc(r.slug)+'">'+esc(r.title)+'</a>';}}).join('');
-pick.querySelectorAll('a').forEach(function(a){{a.addEventListener('click',function(e){{
-  e.preventDefault(); pick.querySelectorAll('a').forEach(function(x){{x.removeAttribute('aria-current');}}); a.setAttribute('aria-current','page');
-  map.fitBounds(a.dataset.r?bounds[a.dataset.r]:L.latLngBounds(all),{{padding:[20,20]}});
-}});}});
+map.invalidateSize(); map.fitBounds(L.latLngBounds(all),{{padding:[20,20]}});
+setTimeout(function(){{ map.invalidateSize(); map.fitBounds(L.latLngBounds(all),{{padding:[20,20]}}); }},50);
 document.querySelectorAll('.ride').forEach(function(sec){{
   sec.querySelectorAll('li[data-day]').forEach(function(li){{li.addEventListener('click',function(){{
     var m=marks[sec.id+'-'+li.getAttribute('data-day')]; if(!m) return;
@@ -1018,6 +1020,16 @@ document.querySelectorAll('.ride').forEach(function(sec){{
 }});
 }}
 </script>"""
+        write_if_changed(f"rides/{slug}/index.html", page(f'{r["title"]} | David Charles',
+                                                          f'{r["title"]}: the ride on a map, day by day.',
+                                                          f"/rides/{slug}/", body, noindex=True))
+        cards.append(f'<li><a href="/rides/{esc(slug)}/"><strong>{esc(r["title"])}</strong>'
+                     f'<span class="m">{r["summary"]}</span></a></li>')
+    if os.path.exists("rides/rides-data.locked"):   # the old all-rides-on-one-map data
+        os.remove("rides/rides-data.locked")
+    body = f"""<h1>Rides</h1>
+<p class="intro muted"{r_attrs}>{r_intro}</p>
+<ul class="ride-index">{"".join(cards)}</ul>"""
     write_if_changed("rides/index.html", page("Rides | David Charles",
                                               "Long bike rides by David Charles, drawn on a map.",
                                               "/rides/", body, noindex=True))
@@ -1279,7 +1291,7 @@ def build_subscribers(books, paid_books=()):
     maps = "".join(
         f'<li><a href="{u}"><img src="{img}" alt="" loading="lazy" decoding="async"><span class="label">{esc(n)}'
         f'<small>{esc(line)}</small></span></a></li>'
-        for u, n, img, line in SUB_MAPS if u != "/rides/" or os.path.exists("rides/rides-data.locked"))
+        for u, n, img, line in SUB_MAPS if u != "/rides/" or os.path.exists("rides/index.html"))
     sub_url = "https://davidcharles.substack.com/subscribe?utm_source=davidcharles.info&amp;utm_medium=subscribers"
     body = f"""<header class="sh-hero sub-hero"><img src="{SUB_HERO}" alt="" fetchpriority="high"><div>
 <h1>For subscribers</h1><p{attrs}>{intro}</p></div></header>

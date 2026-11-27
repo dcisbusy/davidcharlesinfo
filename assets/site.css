@@ -658,3 +658,8 @@ table.db-table { width: 100%; border-collapse: collapse; font: 14px/1.35 var(--u
 .db-table a { color: var(--ink); }
 @media (max-width: 700px) { .db-grid { grid-template-columns: 1fr; } }
 .ride-pick { margin: 4px 0 12px; flex-wrap: wrap; }
+ul.ride-index { list-style: none; padding: 0; margin: 20px 0; display: grid; gap: 12px; font-family: var(--ui); }
+.ride-index a { display: block; padding: 16px 20px; border-radius: 8px; background: var(--soft); color: var(--ink); text-decoration: none; }
+.ride-index a:hover { outline: 2px solid var(--accent); }
+.ride-index strong { display: block; font: 600 19px/1.3 var(--ui); }
+.ride-index .m { display: block; margin-top: 4px; font-size: 14px; color: var(--muted); }
