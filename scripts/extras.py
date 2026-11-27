@@ -904,22 +904,26 @@ def build_rides():
     for r in rides:
         days = r["days"]
         miles = sum(d["miles"] for d in days)
-        nights = collections.Counter(d["night"] for d in days)
+        nights = collections.Counter(d.get("night") for d in days)
         outdoors = nights.get("Bivvy", 0)
+        bike_days = sum(1 for d in days if d["miles"])
         rows = "".join(
             f'<li data-day="{d["day"]}"><span class="d">Day {d["day"]}</span> <strong>{esc(d["stop"])}</strong>'
             + (f' <span class="chk" title="Place to check">?</span>' if d.get("check") else "")
             + f'<span class="m">{nice(d["date"])} &middot; '
-            + ("rest day" if d.get("rest") else f'{d["miles"]:g} miles') + f' &middot; {esc(d["night"])}</span>'
+            + ("rest day" if d.get("rest") else f'{d["miles"]:g} miles' if d["miles"] else "travel day")
+            + (f' &middot; {esc(d["night"])}' if d.get("night") else "") + '</span>'
             + (f'<span class="m note">{esc(d["note"])}</span>' if d.get("note") else "")
             + "".join(f'<q class="m">{esc(qt)}</q>' for qt in d.get("quotes", [])) + '</li>'
             for d in days)
         sections.append(
             f'<section class="ride" id="{esc(r["slug"])}"><h2>{esc(r["title"])}</h2>'
-            f'<p class="intro muted">{len(days)} days &middot; {miles:,.0f} miles &middot; {outdoors} nights in a bivvy bag'
+            f'<p class="intro muted">{len(days)} days &middot; {miles:,.0f} miles cycled on {bike_days} of them'
+            + (f' &middot; {outdoors} nights in a bivvy bag' if outdoors else "")
             + (f' &middot; <a href="{esc(r["book"])}">The book</a>' if r.get("book") else "")
             + f'</p><ol class="ride-days">{rows}</ol></section>')
-        data.append({"slug": r["slug"], "title": r["title"], "start": r["start"], "days": days, "route": r["route"], "book": r.get("book")})
+        data.append({"slug": r["slug"], "title": r["title"], "start": r["start"], "finish": r.get("finish"), "days": days,
+                     "route": r["route"], "book": r.get("book")})
     # Subscribers only: the ride data and day lists are locked (scripts/lock.py); the page unlocks them in the browser
     private = json.dumps({"html": "".join(sections), "rides": data}, ensure_ascii=False).encode("utf-8")
     try:
@@ -937,7 +941,7 @@ def build_rides():
 <p class="intro muted"{r_attrs}>{r_intro}</p>
 <div id="ride-gate" class="lock-gate"></div>
 <div id="map" role="region" aria-label="Map of rides" hidden></div>
-<p class="muted small ride-after" hidden>{"Lines follow roads and paths between the places in my notes, so they show roughly the way I went, not every turn." if any(r.get("route") for r in rides) else "Lines are straight between stops, not the roads I rode."}</p>
+<p class="muted small ride-after" hidden>{"Lines follow roads and paths between the places in my notes, so they show roughly the way I went, not every turn." if any(r.get("route") for r in rides) else "Lines are straight between stops, not the roads I rode."} Dotted lines are trains, louages and taxis.</p>
 <div id="ride-list"></div>
 <link rel="stylesheet" href="/assets/leaflet/leaflet.css">
 <script src="/assets/leaflet/leaflet.js"></script>
@@ -964,8 +968,9 @@ function col(v){{return css.getPropertyValue(v).trim();}}
 var marks={{}}, all=[];
 RIDES.forEach(function(r){{
   var prev=[r.start.lat,r.start.lon], seg=[prev];
-  function flush(mode){{ if(seg.length>1) L.polyline(seg,{{color:mode==='ferry'?col('--s0'):col('--s1'),weight:mode==='ferry'?2:3,
-      dashArray:mode==='ferry'?'6 6':null,opacity:.9}}).addTo(map); seg=[seg[seg.length-1]]; }}
+  function flush(mode){{ if(seg.length>1) L.polyline(seg,{{color:mode==='bike'?col('--s1'):mode==='ferry'?col('--s0'):col('--muted'),
+      weight:mode==='bike'?3:2,dashArray:mode==='ferry'?'6 6':mode==='bike'?null:'1 6',lineCap:'round',opacity:.9}}).addTo(map);
+      seg=[seg[seg.length-1]]; }}
   var mode='bike';
   function go(pt,m){{ if(m!==mode){{ flush(mode); mode=m; }} seg.push(pt); all.push(pt); }}
   r.days.forEach(function(d){{
@@ -980,7 +985,7 @@ RIDES.forEach(function(r){{
     }}
     var m=L.circleMarker(here,{{radius:d.rest?7:5,weight:2,color:col('--bg'),fillColor:d.check?col('--muted'):col('--s1'),fillOpacity:1}}).addTo(map);
     m.bindPopup('<strong>Day '+d.day+': '+esc(d.stop)+'</strong><br><small>'+nice(d.date)+' &middot; '+
-      (d.rest?'rest day':d.miles+' miles ('+d.total.toLocaleString()+' so far)')+'<br>Night: '+esc(d.night)+
+      (d.rest?'rest day':(d.miles?d.miles+' miles':'travel day')+' ('+d.total.toLocaleString()+' so far)')+(d.night?'<br>Night: '+esc(d.night):'')+
       (d.note?'<br>'+esc(d.note):'')+
       ((d.quotes||[]).length?'<span class="pq">'+d.quotes.map(function(q){{return '&ldquo;'+esc(q)+'&rdquo;';}}).join(' ')+
         (r.book?' <a href="'+r.book+'">From the book</a>':'')+'</span>':'')+(d.check?'<br><em>'+esc(d.checknote||'Place to check')+'</em>':'')+'</small>');
@@ -988,7 +993,9 @@ RIDES.forEach(function(r){{
   }});
   flush(mode);
   L.circleMarker([r.start.lat,r.start.lon],{{radius:8,weight:3,color:col('--s1'),fillColor:col('--bg'),fillOpacity:1}})
-    .addTo(map).bindPopup('<strong>Start and finish: '+esc(r.start.name)+'</strong>');
+    .addTo(map).bindPopup('<strong>'+(r.finish?'Start':'Start and finish')+': '+esc(r.start.name)+'</strong><br><small>'+esc(r.title)+'</small>');
+  if(r.finish) L.circleMarker([r.finish.lat,r.finish.lon],{{radius:8,weight:3,color:col('--s1'),fillColor:col('--bg'),fillOpacity:1}})
+    .addTo(map).bindPopup('<strong>Finish: '+esc(r.finish.name)+'</strong><br><small>'+esc(r.title)+'</small>');
 }});
 map.fitBounds(L.latLngBounds(all),{{padding:[20,20]}});
 document.querySelectorAll('.ride').forEach(function(sec){{

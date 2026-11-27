@@ -1,0 +1,1275 @@
+{
+ "_note": "Cycling to the Sahara, 2012, from David's travel log (one row per day: start, via, end, transport, miles). lat/lon are where he slept, placed from the stop names; 'check' marks a guess to confirm. 'legs' are points passed on the way with how he reached each (bike, train, ferry, or road for louages and taxis); 'last' is how he reached the night's stop. Rest days and day trips ('offroute') get a pin but no line. Quotes are from the ebook.",
+ "slug": "cycling-to-the-sahara-2012",
+ "title": "Cycling to the Sahara, 2012",
+ "book": "/books/cycling-to-the-sahara/",
+ "start": {
+  "name": "Cholsey",
+  "lat": 51.57,
+  "lon": -1.157
+ },
+ "finish": {
+  "name": "London",
+  "lat": 51.507,
+  "lon": -0.128
+ },
+ "days": [
+  {
+   "day": 1,
+   "date": "2012-02-24",
+   "miles": 43.6,
+   "total": 44,
+   "stop": "Dieppe",
+   "night": "",
+   "lat": 49.925,
+   "lon": 1.078,
+   "check": false,
+   "rest": false,
+   "legs": [
+    [
+     51.507,
+     -0.128,
+     "train",
+     "London"
+    ],
+    [
+     51.282,
+     -0.079,
+     "train",
+     "Caterham"
+    ],
+    [
+     50.792,
+     0.056,
+     "bike",
+     "Newhaven"
+    ]
+   ],
+   "last": "ferry",
+   "offroute": false,
+   "note": "Train to Caterham, cycle to Newhaven, then the overnight ferry to Dieppe.",
+   "quotes": [
+    "So I started my journey on a train, astonishing rail workers and elderly ladies alike by saying I was going to France.",
+    "Of course, the important thing to remember when doing a London-Paris cycle ride is that the pizza shop in Newhaven is awful."
+   ]
+  },
+  {
+   "day": 2,
+   "date": "2012-02-25",
+   "miles": 100.0,
+   "total": 144,
+   "stop": "Vernouillet",
+   "night": "",
+   "lat": 48.972,
+   "lon": 1.983,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "bike",
+   "offroute": false,
+   "note": "",
+   "quotes": [
+    "The same cannot be said of the D915. This is a main road from Dieppe to Paris. Don’t use it unless you want to die.",
+    "And that’s what I love about cycling: the feeling of hot water on skin and raclette in stomach."
+   ]
+  },
+  {
+   "day": 3,
+   "date": "2012-02-26",
+   "miles": 0.0,
+   "total": 144,
+   "stop": "Vernouillet",
+   "night": "",
+   "lat": 48.972,
+   "lon": 1.983,
+   "check": false,
+   "rest": true,
+   "legs": [],
+   "last": "bike",
+   "offroute": true,
+   "note": "Rest day.",
+   "quotes": []
+  },
+  {
+   "day": 4,
+   "date": "2012-02-27",
+   "miles": 0.0,
+   "total": 144,
+   "stop": "Paris",
+   "night": "",
+   "lat": 48.857,
+   "lon": 2.352,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "train",
+   "offroute": false,
+   "note": "Train to Paris for bike repairs.",
+   "quotes": [
+    "So I caught a train to Paris-Saint-Lazare and cycled to a superior Parisien cycle shop. It was closed on Mondays."
+   ]
+  },
+  {
+   "day": 5,
+   "date": "2012-02-28",
+   "miles": 19.0,
+   "total": 163,
+   "stop": "Paris",
+   "night": "",
+   "lat": 48.857,
+   "lon": 2.352,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "bike",
+   "offroute": true,
+   "note": "19 miles of riding around Paris.",
+   "quotes": [
+    "With a Gallic shrug of the shoulders, I decided to have lunch."
+   ]
+  },
+  {
+   "day": 6,
+   "date": "2012-02-29",
+   "miles": 0.0,
+   "total": 163,
+   "stop": "Paris",
+   "night": "",
+   "lat": 48.857,
+   "lon": 2.352,
+   "check": false,
+   "rest": true,
+   "legs": [],
+   "last": "bike",
+   "offroute": true,
+   "note": "Rest day.",
+   "quotes": [
+    "So that’s why I spent four days in Paris, à pied."
+   ]
+  },
+  {
+   "day": 7,
+   "date": "2012-03-01",
+   "miles": 0.0,
+   "total": 163,
+   "stop": "Hamburg",
+   "night": "",
+   "lat": 53.551,
+   "lon": 9.993,
+   "check": false,
+   "rest": false,
+   "legs": [
+    [
+     50.836,
+     4.336,
+     "train",
+     "Brussels"
+    ],
+    [
+     50.943,
+     6.959,
+     "train",
+     "Köln"
+    ]
+   ],
+   "last": "train",
+   "offroute": false,
+   "note": "Trains via Brussels and Köln to visit a friend.",
+   "quotes": [
+    "She winces: it will take over ten hours. I don’t care."
+   ]
+  },
+  {
+   "day": 8,
+   "date": "2012-03-02",
+   "miles": 0.0,
+   "total": 163,
+   "stop": "Hamburg",
+   "night": "",
+   "lat": 53.551,
+   "lon": 9.993,
+   "check": false,
+   "rest": true,
+   "legs": [],
+   "last": "bike",
+   "offroute": true,
+   "note": "",
+   "quotes": [
+    "Still, I was pleased to see that they do patisserie here and have duly invested heavily in baked goods."
+   ]
+  },
+  {
+   "day": 9,
+   "date": "2012-03-03",
+   "miles": 0.0,
+   "total": 163,
+   "stop": "Hamburg",
+   "night": "",
+   "lat": 53.551,
+   "lon": 9.993,
+   "check": false,
+   "rest": true,
+   "legs": [],
+   "last": "bike",
+   "offroute": true,
+   "note": "",
+   "quotes": []
+  },
+  {
+   "day": 10,
+   "date": "2012-03-04",
+   "miles": 0.0,
+   "total": 163,
+   "stop": "Hamburg",
+   "night": "",
+   "lat": 53.551,
+   "lon": 9.993,
+   "check": false,
+   "rest": true,
+   "legs": [],
+   "last": "bike",
+   "offroute": true,
+   "note": "",
+   "quotes": []
+  },
+  {
+   "day": 11,
+   "date": "2012-03-05",
+   "miles": 0.0,
+   "total": 163,
+   "stop": "Paris",
+   "night": "",
+   "lat": 48.857,
+   "lon": 2.352,
+   "check": false,
+   "rest": false,
+   "legs": [
+    [
+     50.943,
+     6.959,
+     "train",
+     "Köln"
+    ],
+    [
+     50.836,
+     4.336,
+     "train",
+     "Brussels"
+    ]
+   ],
+   "last": "train",
+   "offroute": false,
+   "note": "Trains back via Köln and Brussels.",
+   "quotes": [
+    "The atmosphere on board is electric. The only electricity in Northern Europe, apparently."
+   ]
+  },
+  {
+   "day": 12,
+   "date": "2012-03-06",
+   "miles": 0.0,
+   "total": 163,
+   "stop": "Marseille",
+   "night": "",
+   "lat": 43.296,
+   "lon": 5.37,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "train",
+   "offroute": false,
+   "note": "Train to Marseille, bike in a bag.",
+   "quotes": [
+    "So in Marseille I did finally arrive. It was a stunning entrance, all sun and sandstone.",
+    "Universe: let’s call it a draw, yeah?"
+   ]
+  },
+  {
+   "day": 13,
+   "date": "2012-03-07",
+   "miles": 0.0,
+   "total": 163,
+   "stop": "Marseille",
+   "night": "",
+   "lat": 43.296,
+   "lon": 5.37,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "bike",
+   "offroute": true,
+   "note": "Boat trip to the Frioul islands.",
+   "quotes": [
+    "Everything, from the great squares, to the ports, to the monuments, to the pavements are blocked with workmen."
+   ]
+  },
+  {
+   "day": 14,
+   "date": "2012-03-08",
+   "miles": 24.0,
+   "total": 187,
+   "stop": "Marseille",
+   "night": "",
+   "lat": 43.296,
+   "lon": 5.37,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "bike",
+   "offroute": true,
+   "note": "24 miles of riding around Marseille.",
+   "quotes": []
+  },
+  {
+   "day": 15,
+   "date": "2012-03-09",
+   "miles": 0.0,
+   "total": 187,
+   "stop": "Marseille",
+   "night": "",
+   "lat": 43.296,
+   "lon": 5.37,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "bike",
+   "offroute": true,
+   "note": "Boat trip to the Frioul islands.",
+   "quotes": [
+    "Then there was a power cut. The bar cheered. Welcome distraction."
+   ]
+  },
+  {
+   "day": 16,
+   "date": "2012-03-10",
+   "miles": 0.0,
+   "total": 187,
+   "stop": "At sea",
+   "night": "",
+   "lat": 40.1,
+   "lon": 7.9,
+   "check": true,
+   "rest": false,
+   "legs": [],
+   "last": "ferry",
+   "offroute": false,
+   "note": "Ferry from Marseille to Tunis, five hours late.",
+   "quotes": [
+    "This time the universe decided to detonate a WWII bomb in the port of Marseille, which is frankly ridiculous, even by the universe’s standards.",
+    "I climbed up to the top deck, unrolled my sleeping bag and slept under the stars."
+   ],
+   "checknote": "A guess from the travel log: check the place or the way I travelled."
+  },
+  {
+   "day": 17,
+   "date": "2012-03-11",
+   "miles": 0.0,
+   "total": 187,
+   "stop": "Tunis",
+   "night": "",
+   "lat": 36.806,
+   "lon": 10.181,
+   "check": false,
+   "rest": false,
+   "legs": [
+    [
+     36.818,
+     10.305,
+     "ferry",
+     "La Goulette"
+    ]
+   ],
+   "last": "bike",
+   "offroute": false,
+   "note": "",
+   "quotes": [
+    "There was a cat prowling along the customs tables. I assume he was in charge."
+   ]
+  },
+  {
+   "day": 18,
+   "date": "2012-03-12",
+   "miles": 0.0,
+   "total": 187,
+   "stop": "Tunis",
+   "night": "",
+   "lat": 36.806,
+   "lon": 10.181,
+   "check": false,
+   "rest": true,
+   "legs": [],
+   "last": "bike",
+   "offroute": true,
+   "note": "Rest day.",
+   "quotes": []
+  },
+  {
+   "day": 19,
+   "date": "2012-03-13",
+   "miles": 41.7,
+   "total": 229,
+   "stop": "Korbous",
+   "night": "",
+   "lat": 36.823,
+   "lon": 10.57,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "bike",
+   "offroute": false,
+   "note": "",
+   "quotes": [
+    "There are other cyclists in Tunisia. But in this country, bicycles are mostly used for going the wrong way up one-way streets."
+   ]
+  },
+  {
+   "day": 20,
+   "date": "2012-03-14",
+   "miles": 40.1,
+   "total": 269,
+   "stop": "El Haouaria",
+   "night": "",
+   "lat": 37.052,
+   "lon": 11.009,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "bike",
+   "offroute": false,
+   "note": "",
+   "quotes": [
+    "‘I’m just playing with you,’ he said with a cackle.",
+    "He just slapped his forehead and brought me a free plate of French fries."
+   ]
+  },
+  {
+   "day": 21,
+   "date": "2012-03-15",
+   "miles": 67.1,
+   "total": 336,
+   "stop": "Hammamet",
+   "night": "",
+   "lat": 36.4,
+   "lon": 10.616,
+   "check": false,
+   "rest": false,
+   "legs": [
+    [
+     36.946,
+     11.099,
+     "bike",
+     "Kerkouane"
+    ]
+   ],
+   "last": "bike",
+   "offroute": false,
+   "note": "Via Kerkouane.",
+   "quotes": [
+    "I arrived in Hammamet exactly the way I expect to arrive in every single town that I come to: sweaty, tired and slightly bewildered.",
+    "I took a photo to remind myself: never leave two empty coffee cups, leave three."
+   ]
+  },
+  {
+   "day": 22,
+   "date": "2012-03-16",
+   "miles": 58.2,
+   "total": 394,
+   "stop": "Sousse",
+   "night": "",
+   "lat": 35.826,
+   "lon": 10.636,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "bike",
+   "offroute": false,
+   "note": "",
+   "quotes": [
+    "It was startling to see the infamous black and white flags of hardline Islamism flying over the moderate Tunisian skyline."
+   ]
+  },
+  {
+   "day": 23,
+   "date": "2012-03-17",
+   "miles": 55.1,
+   "total": 449,
+   "stop": "Sfax",
+   "night": "",
+   "lat": 34.74,
+   "lon": 10.76,
+   "check": true,
+   "rest": false,
+   "legs": [
+    [
+     35.296,
+     10.707,
+     "bike",
+     "El Jem"
+    ]
+   ],
+   "last": "train",
+   "offroute": false,
+   "note": "Cycled to El Jem, then the train to Sfax.",
+   "quotes": [
+    "On the plus side, I did get a guided tour around a Tunisian farm, near Ghanada.",
+    "So I give up and have to cycle back past all the helpful people who tried to direct me to this damnedably mythical hotel."
+   ],
+   "checknote": "A guess from the travel log: check the place or the way I travelled."
+  },
+  {
+   "day": 24,
+   "date": "2012-03-18",
+   "miles": 0.0,
+   "total": 449,
+   "stop": "Sfax",
+   "night": "",
+   "lat": 34.74,
+   "lon": 10.76,
+   "check": false,
+   "rest": true,
+   "legs": [],
+   "last": "bike",
+   "offroute": true,
+   "note": "Rest day.",
+   "quotes": []
+  },
+  {
+   "day": 25,
+   "date": "2012-03-19",
+   "miles": 50.5,
+   "total": 500,
+   "stop": "Sfax",
+   "night": "",
+   "lat": 34.74,
+   "lon": 10.76,
+   "check": true,
+   "rest": false,
+   "legs": [
+    [
+     35.296,
+     10.707,
+     "road",
+     "El Jem"
+    ]
+   ],
+   "last": "bike",
+   "offroute": false,
+   "note": "Louage to El Jem, then a country track back to Sfax.",
+   "quotes": [
+    "Najjar faithfully leads me to the main road, where the trucks thunder and the lorries roar.",
+    "If this be courage, then I do indeed take courage."
+   ],
+   "checknote": "A guess from the travel log: check the place or the way I travelled."
+  },
+  {
+   "day": 26,
+   "date": "2012-03-20",
+   "miles": 86.5,
+   "total": 586,
+   "stop": "Gabes",
+   "night": "",
+   "lat": 33.881,
+   "lon": 10.098,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "bike",
+   "offroute": false,
+   "note": "",
+   "quotes": [
+    "I haven’t used my MP3 player the last two days – not even on the 136km main road from Sfax to Gabes."
+   ]
+  },
+  {
+   "day": 27,
+   "date": "2012-03-21",
+   "miles": 28.4,
+   "total": 615,
+   "stop": "Matmata",
+   "night": "",
+   "lat": 33.544,
+   "lon": 9.968,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "bike",
+   "offroute": false,
+   "note": "",
+   "quotes": [
+    "So I sat on a wall overlooking a green-coated wadi, watching the sun fall between two palm trees as the mosque gave the dusk call to prayer."
+   ]
+  },
+  {
+   "day": 28,
+   "date": "2012-03-22",
+   "miles": 54.0,
+   "total": 669,
+   "stop": "Ksar Ghilane",
+   "night": "",
+   "lat": 32.99,
+   "lon": 9.635,
+   "check": false,
+   "rest": false,
+   "legs": [
+    [
+     33.255,
+     9.735,
+     "bike",
+     "Bir Soltane"
+    ]
+   ],
+   "last": "bike",
+   "offroute": false,
+   "note": "Over the jebel by track to Bir Soltane.",
+   "quotes": [
+    "The next day, it takes me approximately ten minutes to recognise the truth of Tolkein’s aphorism that short cuts make long delays.",
+    "I’ve never been so glad to see a proper road in my life."
+   ]
+  },
+  {
+   "day": 29,
+   "date": "2012-03-23",
+   "miles": 0.0,
+   "total": 669,
+   "stop": "Ksar Ghilane",
+   "night": "",
+   "lat": 32.99,
+   "lon": 9.635,
+   "check": false,
+   "rest": true,
+   "legs": [],
+   "last": "bike",
+   "offroute": true,
+   "note": "Rest day in the oasis.",
+   "quotes": [
+    "I’M IN THE FREAKING SAHARA!",
+    "So I walked across the dunes to a ruined fort."
+   ]
+  },
+  {
+   "day": 30,
+   "date": "2012-03-24",
+   "miles": 54.8,
+   "total": 724,
+   "stop": "Ksar Hallouf",
+   "night": "",
+   "lat": 33.3,
+   "lon": 10.165,
+   "check": true,
+   "rest": false,
+   "legs": [
+    [
+     33.255,
+     9.735,
+     "bike",
+     "Bir Soltane"
+    ],
+    [
+     33.251,
+     10.197,
+     "bike",
+     "Beni Khedache"
+    ]
+   ],
+   "last": "bike",
+   "offroute": false,
+   "note": "Via Bir Soltane and Beni Khedache.",
+   "quotes": [
+    "But nothing can distract from the beauty of a good bike ride.",
+    "And so I made it in good time to Ksar Hallouf, a pretty little palmerie perched in a valley."
+   ],
+   "checknote": "A guess from the travel log: check the place or the way I travelled."
+  },
+  {
+   "day": 31,
+   "date": "2012-03-25",
+   "miles": 38.2,
+   "total": 762,
+   "stop": "Tataouine",
+   "night": "",
+   "lat": 32.929,
+   "lon": 10.451,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "bike",
+   "offroute": false,
+   "note": "",
+   "quotes": [
+    "If you’re ever cycling from Ksar Hallouf to Tataouine, look out for dinosaurs. They can really nip your ankles."
+   ]
+  },
+  {
+   "day": 32,
+   "date": "2012-03-26",
+   "miles": 0.0,
+   "total": 762,
+   "stop": "Tataouine",
+   "night": "",
+   "lat": 32.929,
+   "lon": 10.451,
+   "check": false,
+   "rest": true,
+   "legs": [],
+   "last": "bike",
+   "offroute": true,
+   "note": "Rest day.",
+   "quotes": []
+  },
+  {
+   "day": 33,
+   "date": "2012-03-27",
+   "miles": 74.7,
+   "total": 837,
+   "stop": "Houmt Souk",
+   "night": "",
+   "lat": 33.876,
+   "lon": 10.857,
+   "check": false,
+   "rest": false,
+   "legs": [
+    [
+     33.533,
+     10.673,
+     "bike",
+     "Gightis"
+    ],
+    [
+     33.698,
+     10.732,
+     "bike",
+     "Jorf"
+    ],
+    [
+     33.721,
+     10.751,
+     "ferry",
+     "Ajim"
+    ]
+   ],
+   "last": "bike",
+   "offroute": false,
+   "note": "Via the ruins of Gightis and the free ferry to Jerba.",
+   "quotes": [
+    "Seriously. I’m in the middle of a desert and it’s been raining. All day.",
+    "It was nice to get on a ferry to the island. Especially a FREE ferry."
+   ]
+  },
+  {
+   "day": 34,
+   "date": "2012-03-28",
+   "miles": 0.0,
+   "total": 837,
+   "stop": "Houmt Souk",
+   "night": "",
+   "lat": 33.876,
+   "lon": 10.857,
+   "check": false,
+   "rest": true,
+   "legs": [],
+   "last": "bike",
+   "offroute": true,
+   "note": "Rest day on Jerba.",
+   "quotes": [
+    "And if you’re ever on Jerba, look out for two clowns called Ali and Walid. They drink beer fast and they don’t like to pay for it."
+   ]
+  },
+  {
+   "day": 35,
+   "date": "2012-03-29",
+   "miles": 83.0,
+   "total": 920,
+   "stop": "Matmata",
+   "night": "",
+   "lat": 33.544,
+   "lon": 9.968,
+   "check": true,
+   "rest": false,
+   "legs": [
+    [
+     33.721,
+     10.751,
+     "bike",
+     "Ajim"
+    ],
+    [
+     33.698,
+     10.732,
+     "ferry",
+     "Jorf"
+    ],
+    [
+     33.622,
+     10.296,
+     "bike",
+     "Mareth"
+    ]
+   ],
+   "last": "bike",
+   "offroute": false,
+   "note": "Ferry back to the mainland.",
+   "quotes": [
+    "My legs were still vibrating from climbing the vertical cliff-face onto which Matmata apparently clings."
+   ],
+   "checknote": "A guess from the travel log: check the place or the way I travelled."
+  },
+  {
+   "day": 36,
+   "date": "2012-03-30",
+   "miles": 61.5,
+   "total": 981,
+   "stop": "Douz",
+   "night": "",
+   "lat": 33.457,
+   "lon": 9.02,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "bike",
+   "offroute": false,
+   "note": "",
+   "quotes": [
+    "The road was very straight, very long and rather dusty.",
+    "So there you have it: cycling to the Sahara."
+   ]
+  },
+  {
+   "day": 37,
+   "date": "2012-03-31",
+   "miles": 78.2,
+   "total": 1059,
+   "stop": "Tozeur",
+   "night": "",
+   "lat": 33.92,
+   "lon": 8.134,
+   "check": false,
+   "rest": false,
+   "legs": [
+    [
+     33.705,
+     8.973,
+     "bike",
+     "Kebili"
+    ]
+   ],
+   "last": "bike",
+   "offroute": false,
+   "note": "Via Kebili and across the Chott el-Jerid.",
+   "quotes": [
+    "Seriously: as far as the eye can see: salt."
+   ]
+  },
+  {
+   "day": 38,
+   "date": "2012-04-01",
+   "miles": 58.1,
+   "total": 1117,
+   "stop": "Gafsa",
+   "night": "",
+   "lat": 34.425,
+   "lon": 8.784,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "bike",
+   "offroute": false,
+   "note": "",
+   "quotes": [
+    "All I can do is put my ship out on the ocean and make sure the sail is up."
+   ]
+  },
+  {
+   "day": 39,
+   "date": "2012-04-02",
+   "miles": 70.4,
+   "total": 1188,
+   "stop": "Sbeitla",
+   "night": "",
+   "lat": 35.236,
+   "lon": 9.13,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "bike",
+   "offroute": false,
+   "note": "",
+   "quotes": [
+    "So speed isn’t earned; it is given.",
+    "An entire ruined city leaves behind a cemetery of civilisation."
+   ]
+  },
+  {
+   "day": 40,
+   "date": "2012-04-03",
+   "miles": 0.0,
+   "total": 1188,
+   "stop": "Sbeitla",
+   "night": "",
+   "lat": 35.236,
+   "lon": 9.13,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "bike",
+   "offroute": true,
+   "note": "Day trip by louage to Sidi Bouzid.",
+   "quotes": [
+    "The louage driver slaps my hand and gives me a toothy smile. “Ahh, 2011!” he says, then gives me directions to the giant hand-cart."
+   ]
+  },
+  {
+   "day": 41,
+   "date": "2012-04-04",
+   "miles": 77.5,
+   "total": 1265,
+   "stop": "Le Kef",
+   "night": "",
+   "lat": 36.182,
+   "lon": 8.715,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "bike",
+   "offroute": false,
+   "note": "",
+   "quotes": []
+  },
+  {
+   "day": 42,
+   "date": "2012-04-05",
+   "miles": 0.0,
+   "total": 1265,
+   "stop": "Le Kef",
+   "night": "",
+   "lat": 36.182,
+   "lon": 8.715,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "bike",
+   "offroute": true,
+   "note": "Day trip by louage to Jugurtha's Table.",
+   "quotes": []
+  },
+  {
+   "day": 43,
+   "date": "2012-04-06",
+   "miles": 0.0,
+   "total": 1265,
+   "stop": "Le Kef",
+   "night": "",
+   "lat": 36.182,
+   "lon": 8.715,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "bike",
+   "offroute": true,
+   "note": "Day trip by taxi to Hammam Mellègue.",
+   "quotes": []
+  },
+  {
+   "day": 44,
+   "date": "2012-04-07",
+   "miles": 48.3,
+   "total": 1314,
+   "stop": "Teboursouk",
+   "night": "",
+   "lat": 36.457,
+   "lon": 9.249,
+   "check": false,
+   "rest": false,
+   "legs": [
+    [
+     36.423,
+     9.22,
+     "bike",
+     "Dougga"
+    ]
+   ],
+   "last": "bike",
+   "offroute": false,
+   "note": "Via the ruins of Dougga.",
+   "quotes": []
+  },
+  {
+   "day": 45,
+   "date": "2012-04-08",
+   "miles": 62.2,
+   "total": 1376,
+   "stop": "Tunis",
+   "night": "",
+   "lat": 36.806,
+   "lon": 10.181,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "bike",
+   "offroute": false,
+   "note": "",
+   "quotes": []
+  },
+  {
+   "day": 46,
+   "date": "2012-04-09",
+   "miles": 0.0,
+   "total": 1376,
+   "stop": "Tunis",
+   "night": "",
+   "lat": 36.806,
+   "lon": 10.181,
+   "check": false,
+   "rest": true,
+   "legs": [],
+   "last": "bike",
+   "offroute": true,
+   "note": "Martyrs' Day in Tunis.",
+   "quotes": [
+    "So, being in full support of marches in general and this sort of march in particular, I joined them.",
+    "Or at least, we broke through until the tear gas was fired and the batons were beaten. Then we ran."
+   ]
+  },
+  {
+   "day": 47,
+   "date": "2012-04-10",
+   "miles": 7.0,
+   "total": 1383,
+   "stop": "At sea",
+   "night": "",
+   "lat": 40.1,
+   "lon": 7.4,
+   "check": true,
+   "rest": false,
+   "legs": [
+    [
+     36.818,
+     10.305,
+     "bike",
+     "La Goulette"
+    ]
+   ],
+   "last": "ferry",
+   "offroute": false,
+   "note": "Ferry from Tunis to Marseille.",
+   "quotes": [],
+   "checknote": "A guess from the travel log: check the place or the way I travelled."
+  },
+  {
+   "day": 48,
+   "date": "2012-04-11",
+   "miles": 0.0,
+   "total": 1383,
+   "stop": "Marseille",
+   "night": "",
+   "lat": 43.296,
+   "lon": 5.37,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "ferry",
+   "offroute": false,
+   "note": "",
+   "quotes": []
+  },
+  {
+   "day": 49,
+   "date": "2012-04-12",
+   "miles": 62.7,
+   "total": 1446,
+   "stop": "Avignon",
+   "night": "",
+   "lat": 43.949,
+   "lon": 4.806,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "bike",
+   "offroute": false,
+   "note": "",
+   "quotes": []
+  },
+  {
+   "day": 50,
+   "date": "2012-04-13",
+   "miles": 56.1,
+   "total": 1502,
+   "stop": "Lyon",
+   "night": "",
+   "lat": 45.764,
+   "lon": 4.836,
+   "check": true,
+   "rest": false,
+   "legs": [
+    [
+     44.558,
+     4.751,
+     "bike",
+     "Montelimar"
+    ]
+   ],
+   "last": "train",
+   "offroute": false,
+   "note": "Cycled to Montélimar, then the train to Lyon.",
+   "quotes": [],
+   "checknote": "A guess from the travel log: check the place or the way I travelled."
+  },
+  {
+   "day": 51,
+   "date": "2012-04-14",
+   "miles": 79.4,
+   "total": 1582,
+   "stop": "Lyon",
+   "night": "",
+   "lat": 45.764,
+   "lon": 4.836,
+   "check": true,
+   "rest": false,
+   "legs": [
+    [
+     44.933,
+     4.892,
+     "train",
+     "Valence"
+    ]
+   ],
+   "last": "bike",
+   "offroute": false,
+   "note": "Train to Valence, then cycled back to Lyon.",
+   "quotes": [],
+   "checknote": "A guess from the travel log: check the place or the way I travelled."
+  },
+  {
+   "day": 52,
+   "date": "2012-04-15",
+   "miles": 0.0,
+   "total": 1582,
+   "stop": "Paris",
+   "night": "",
+   "lat": 48.857,
+   "lon": 2.352,
+   "check": false,
+   "rest": false,
+   "legs": [],
+   "last": "train",
+   "offroute": false,
+   "note": "Train to Paris.",
+   "quotes": []
+  },
+  {
+   "day": 53,
+   "date": "2012-04-16",
+   "miles": 0.0,
+   "total": 1582,
+   "stop": "Paris",
+   "night": "",
+   "lat": 48.857,
+   "lon": 2.352,
+   "check": false,
+   "rest": true,
+   "legs": [],
+   "last": "bike",
+   "offroute": true,
+   "note": "",
+   "quotes": []
+  },
+  {
+   "day": 54,
+   "date": "2012-04-17",
+   "miles": 0.0,
+   "total": 1582,
+   "stop": "Paris",
+   "night": "",
+   "lat": 48.857,
+   "lon": 2.352,
+   "check": false,
+   "rest": true,
+   "legs": [],
+   "last": "bike",
+   "offroute": true,
+   "note": "",
+   "quotes": []
+  },
+  {
+   "day": 55,
+   "date": "2012-04-18",
+   "miles": 0.0,
+   "total": 1582,
+   "stop": "Paris",
+   "night": "",
+   "lat": 48.857,
+   "lon": 2.352,
+   "check": false,
+   "rest": true,
+   "legs": [],
+   "last": "bike",
+   "offroute": true,
+   "note": "",
+   "quotes": []
+  },
+  {
+   "day": 56,
+   "date": "2012-04-19",
+   "miles": 0.0,
+   "total": 1582,
+   "stop": "Paris",
+   "night": "",
+   "lat": 48.857,
+   "lon": 2.352,
+   "check": false,
+   "rest": true,
+   "legs": [],
+   "last": "bike",
+   "offroute": true,
+   "note": "",
+   "quotes": []
+  },
+  {
+   "day": 57,
+   "date": "2012-04-20",
+   "miles": 118.8,
+   "total": 1700,
+   "stop": "Newhaven",
+   "night": "",
+   "lat": 50.792,
+   "lon": 0.056,
+   "check": false,
+   "rest": false,
+   "legs": [
+    [
+     49.925,
+     1.078,
+     "bike",
+     "Dieppe"
+    ]
+   ],
+   "last": "ferry",
+   "offroute": false,
+   "note": "Cycled to Dieppe, then the overnight ferry to Newhaven.",
+   "quotes": []
+  },
+  {
+   "day": 58,
+   "date": "2012-04-21",
+   "miles": 29.6,
+   "total": 1730,
+   "stop": "London",
+   "night": "",
+   "lat": 51.507,
+   "lon": -0.128,
+   "check": false,
+   "rest": false,
+   "legs": [
+    [
+     50.822,
+     -0.137,
+     "bike",
+     "Brighton"
+    ]
+   ],
+   "last": "train",
+   "offroute": false,
+   "note": "Cycled to Brighton, then the train to London.",
+   "quotes": []
+  }
+ ]
+}

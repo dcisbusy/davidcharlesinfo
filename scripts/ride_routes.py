@@ -90,8 +90,8 @@ for f in sorted(glob.glob("data/rides/*.json")):
             nxt = [p[0], p[1]]
             if nxt == here:
                 continue
-            if p[2] == "ferry":
-                parts.append(["ferry", [here, nxt]])
+            if p[2] != "bike":   # ferries, trains, louages and taxis: a straight line, drawn in its own style
+                parts.append([p[2], [here, nxt]])
             else:
                 geo, m = route(here, nxt, f"day {d['day']} to {p[3]}")
                 miles += m
