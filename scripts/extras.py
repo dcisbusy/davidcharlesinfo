@@ -900,6 +900,7 @@ def build_rides():
         rides.append(ride)
     if not rides:
         return
+    rides.sort(key=lambda r: r["days"][0]["date"])   # oldest first
     sections, data = [], []
     for r in rides:
         days = r["days"]
@@ -940,6 +941,7 @@ def build_rides():
     body = f"""<h1>Rides</h1>
 <p class="intro muted"{r_attrs}>{r_intro}</p>
 <div id="ride-gate" class="lock-gate"></div>
+<nav class="archive-tabs ride-pick ride-after" aria-label="Show one ride" hidden></nav>
 <div id="map" role="region" aria-label="Map of rides" hidden></div>
 <p class="muted small ride-after" hidden>{"Lines follow roads and paths between the places in my notes, so they show roughly the way I went, not every turn." if any(r.get("route") for r in rides) else "Lines are straight between stops, not the roads I rode."} Dotted lines are trains, louages and taxis.</p>
 <div id="ride-list"></div>
@@ -965,14 +967,14 @@ L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png',{{maxZo
   attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}}).addTo(map);
 var css=getComputedStyle(document.documentElement);
 function col(v){{return css.getPropertyValue(v).trim();}}
-var marks={{}}, all=[];
+var marks={{}}, all=[], bounds={{}};
 RIDES.forEach(function(r){{
-  var prev=[r.start.lat,r.start.lon], seg=[prev];
+  var prev=[r.start.lat,r.start.lon], seg=[prev], mine=[prev];
   function flush(mode){{ if(seg.length>1) L.polyline(seg,{{color:mode==='bike'?col('--s1'):mode==='ferry'?col('--s0'):col('--muted'),
       weight:mode==='bike'?3:2,dashArray:mode==='ferry'?'6 6':mode==='bike'?null:'1 6',lineCap:'round',opacity:.9}}).addTo(map);
       seg=[seg[seg.length-1]]; }}
   var mode='bike';
-  function go(pt,m){{ if(m!==mode){{ flush(mode); mode=m; }} seg.push(pt); all.push(pt); }}
+  function go(pt,m){{ if(m!==mode){{ flush(mode); mode=m; }} seg.push(pt); all.push(pt); mine.push(pt); }}
   r.days.forEach(function(d){{
     var here=[d.lat,d.lon];
     if(!d.offroute){{
@@ -996,8 +998,17 @@ RIDES.forEach(function(r){{
     .addTo(map).bindPopup('<strong>'+(r.finish?'Start':'Start and finish')+': '+esc(r.start.name)+'</strong><br><small>'+esc(r.title)+'</small>');
   if(r.finish) L.circleMarker([r.finish.lat,r.finish.lon],{{radius:8,weight:3,color:col('--s1'),fillColor:col('--bg'),fillOpacity:1}})
     .addTo(map).bindPopup('<strong>Finish: '+esc(r.finish.name)+'</strong><br><small>'+esc(r.title)+'</small>');
+  bounds[r.slug]=L.latLngBounds(mine);
 }});
 map.fitBounds(L.latLngBounds(all),{{padding:[20,20]}});
+// a button per ride, to zoom the map to it (and back to all of them)
+var pick=document.querySelector('.ride-pick');
+pick.innerHTML='<a href="#" data-r="" aria-current="page">All rides</a>'+RIDES.map(function(r){{
+  return '<a href="#'+esc(r.slug)+'" data-r="'+esc(r.slug)+'">'+esc(r.title)+'</a>';}}).join('');
+pick.querySelectorAll('a').forEach(function(a){{a.addEventListener('click',function(e){{
+  e.preventDefault(); pick.querySelectorAll('a').forEach(function(x){{x.removeAttribute('aria-current');}}); a.setAttribute('aria-current','page');
+  map.fitBounds(a.dataset.r?bounds[a.dataset.r]:L.latLngBounds(all),{{padding:[20,20]}});
+}});}});
 document.querySelectorAll('.ride').forEach(function(sec){{
   sec.querySelectorAll('li[data-day]').forEach(function(li){{li.addEventListener('click',function(){{
     var m=marks[sec.id+'-'+li.getAttribute('data-day')]; if(!m) return;

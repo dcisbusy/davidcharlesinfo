@@ -657,3 +657,4 @@ table.db-table { width: 100%; border-collapse: collapse; font: 14px/1.35 var(--u
   vertical-align: middle; max-width: calc(100% - 3.5em); }
 .db-table a { color: var(--ink); }
 @media (max-width: 700px) { .db-grid { grid-template-columns: 1fr; } }
+.ride-pick { margin: 4px 0 12px; flex-wrap: wrap; }
