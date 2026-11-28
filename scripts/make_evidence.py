@@ -73,6 +73,13 @@ PHRASE_LINKS = [
     ("The 2018 paper", "https://doi.org/10.1037/emo0000442"),
     ("US Senate Finance Committee investigation", "https://www.finance.senate.gov/imo/media/doc/sfc_report_warehouses_of_neglect.pdf"),
     ("UKHSA says", "https://ukhsa.blog.gov.uk/2024/03/21/what-is-lyme-disease-and-why-do-we-need-to-be-tick-aware/"),
+    # second papers by the same surname in the same year (see parse_refs)
+    ("Richardson, Hussain & Griffiths (2018)", "https://doi.org/10.1556/2006.7.2018.10"),
+    ("Richardson & McEwan (2018)", "https://doi.org/10.3389/fpsyg.2018.01500"),
+    ("Richardson & Hamlin (2021)", "https://doi.org/10.1108/JPMH-02-2021-0016"),
+    ("Richardson et al. (2021)", "https://doi.org/10.5502/ijw.v11i1.1267"),
+    ("Bratman, Daily, Levy & Gross (2015)", "https://doi.org/10.1016/j.landurbplan.2015.02.005"),
+    ("RSPB Scotland's nature prescriptions pilot in Edinburgh", "https://www.rspb.org.uk/globalassets/downloads/documents/nature-prescriptions/Edinburgh-pilot-final-report.pdf"),
     ("Natural England (2026)", "https://www.gov.uk/government/statistics/the-people-and-nature-survey-for-england-adult-data-y1q1-april-june-2020-experimental-statistics/the-people-and-nature-survey-for-england-adult-data-y1q1-april-june-2020-experimental-statistics"),
 ]
 REFS = {}          # surname -> {year: url}, filled from the references section by parse_refs()
@@ -88,8 +95,8 @@ def parse_refs(section):
         url = re.search(r"\]\(<?(https?://[^\s>]+?)>?\)(?:\s|$|\.)", line)
         doi = re.search(r"\bdoi:(10\.\S+?)\.?$", line)
         url = url[1] if url else ("https://doi.org/" + doi[1]) if doi else MISSING_URLS.get((name, year), "")
-        if url:
-            REFS.setdefault(name, {})[year] = url
+        if url:                                # two papers by one surname in one year: the first listed wins,
+            REFS.setdefault(name, {}).setdefault(year, url)      # and PHRASE_LINKS names the other
     for (name, year), url in MISSING_URLS.items():
         REFS.setdefault(name, {}).setdefault(year, url)
 
@@ -112,13 +119,13 @@ def cite(text):
             for m in re.finditer(pat, text):
                 url = years.get(m[1]) if m[1] else next(iter(years.values()))
                 if url:
-                    hits.append((m.start(), m.end(), url))
+                    hits.append((m.start(), m.end(), 1, url))
     for phrase, url in PHRASE_LINKS:
         i = text.find(phrase)
         if i >= 0:
-            hits.append((i, i + len(phrase), url))
+            hits.append((i, i + len(phrase), 0, url))          # a phrase beats a surname match on the same words
     out, last = [], 0
-    for s, e, url in sorted(hits, key=lambda h: (h[0], -h[1])):
+    for s, e, _, url in sorted(hits, key=lambda h: (h[0], -h[1], h[2])):
         if s < last or any(s < te and e > ts for ts, te in taken):
             continue
         out += [text[last:s], a(text[s:e], url)]
