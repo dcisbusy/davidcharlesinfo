@@ -22,7 +22,8 @@ MD = markdown.Markdown(extensions=["tables", "sane_lists"])
 def md(text):
     MD.reset()
     out = MD.convert(text.strip())
-    return out.replace('<a href="http', '<a target="_blank" rel="noopener" href="http')
+    out = out.replace('<a href="http', '<a target="_blank" rel="noopener" href="http')
+    return out.replace('<a class="ev-ref" href="http', '<a class="ev-ref" target="_blank" rel="noopener" href="http')
 
 
 def slug(t):
@@ -38,9 +39,113 @@ def stars(title):
     return title[:m.start()], min(counts), m.group(1)
 
 
+# Studies the references list gives without a link, or that the text cites without a references entry. Found by
+# searching; the journal's DOI where there is one, otherwise the report or an open repository copy.
+MISSING_URLS = {
+    ("Marselle", "2014"): "https://doi.org/10.1089/eco.2014.0027",
+    ("Bell", "2014"): "https://pureportal.coventry.ac.uk/en/publications/dark-nature-exploring-potential-benefits-of-nocturnal-nature-base-2/",
+    ("Rogerson", "2017"): "https://teesvalleynaturepartnership.org.uk/wp-content/uploads/2019/09/Health-wellbeing-volunteering-with-WTs.pdf",
+    ("Hattie", "1997"): "https://doi.org/10.3102/00346543067001043",
+    ("Naor", "2020"): "https://doi.org/10.3389/fpsyg.2020.547067",
+    ("Koo", "2008"): "https://doi.org/10.1037/a0013316",
+    ("Taylor", ""): "https://blogs.uoregon.edu/richardtaylor/?p=308",
+}
+# Phrases in the text that point at a source without "Surname (Year)": linked as written, first time in each card.
+PHRASE_LINKS = [
+    ("Nature Connectedness at Night (University of Derby with Buglife, ongoing)", "https://www.buglife.org.uk/blog/step-outside-after-dark/"),
+    ("Nature Connectedness at Night (Derby/Buglife)", "https://www.buglife.org.uk/blog/step-outside-after-dark/"),
+    ("North York Moors dark-sky research", "https://ray.yorksj.ac.uk/id/eprint/13954/"),
+    ("Leeds research with women in parks", "https://doi.org/10.48785/100/108"),
+    ("82% of women in Great Britain", "https://www.ons.gov.uk/peoplepopulationandcommunity/crimeandjustice/bulletins/perceptionsofpersonalsafetyandexperiencesofharassmentgreatbritain/latest"),
+    ("Richardson and colleagues (2017–2025)", "https://doi.org/10.1080/21711976.2016.1267136"),
+    ("Physicist Richard Taylor", "https://blogs.uoregon.edu/richardtaylor/?p=308"),
+    ("Fractal fluency (Taylor)", "https://blogs.uoregon.edu/richardtaylor/?p=308"),
+    ("Palmer et al., 2026", "https://doi.org/10.1002/pan3.70317"),
+    ("The Mother Nature Project", "https://bristolbrc.nihr.ac.uk/research/research-projects/developing-and-testing-a-nature-based-intervention-for-mothers-with-postnatal-depression"),
+    ("Barnes (2025)", "https://doi.org/10.48773/qzx15"),
+    ("A global meta-analysis in Conservation Letters (2021)", "https://doi.org/10.1111/conl.12852"),
+    ("Freeman et al. (UK)", "https://doi.org/10.1093/heapro/daw036"),
+    ("a week of camping moved sleep-hormone timing", "https://doi.org/10.1016/j.cub.2013.06.039"),
+    ("a single weekend did most of that", "https://doi.org/10.1016/j.cub.2016.12.041"),
+    ("most women in Britain feel unsafe in parks after dark", "https://www.ons.gov.uk/peoplepopulationandcommunity/crimeandjustice/bulletins/perceptionsofpersonalsafetyandexperiencesofharassmentgreatbritain/latest"),
+    ("The 2018 paper", "https://doi.org/10.1037/emo0000442"),
+    ("US Senate Finance Committee investigation", "https://www.finance.senate.gov/imo/media/doc/sfc_report_warehouses_of_neglect.pdf"),
+    ("UKHSA says", "https://ukhsa.blog.gov.uk/2024/03/21/what-is-lyme-disease-and-why-do-we-need-to-be-tick-aware/"),
+    ("Natural England (2026)", "https://www.gov.uk/government/statistics/the-people-and-nature-survey-for-england-adult-data-y1q1-april-june-2020-experimental-statistics/the-people-and-nature-survey-for-england-adult-data-y1q1-april-june-2020-experimental-statistics"),
+]
+REFS = {}          # surname -> {year: url}, filled from the references section by parse_refs()
+
+
+def parse_refs(section):
+    """Each '- Surname, A. et al. (2019). … [doi](url)' line -> REFS[surname][year] = url (MISSING_URLS fills gaps)."""
+    for line in section.splitlines():
+        if not re.match(r"[-*] ", line):
+            continue
+        name = re.split(r",| \(", line[2:], maxsplit=1)[0].strip()
+        year = (re.search(r"\((\d{4})", line) or [None, ""])[1]
+        url = re.search(r"\]\(<?(https?://[^\s>]+?)>?\)(?:\s|$|\.)", line)
+        doi = re.search(r"\bdoi:(10\.\S+?)\.?$", line)
+        url = url[1] if url else ("https://doi.org/" + doi[1]) if doi else MISSING_URLS.get((name, year), "")
+        if url:
+            REFS.setdefault(name, {})[year] = url
+    for (name, year), url in MISSING_URLS.items():
+        REFS.setdefault(name, {}).setdefault(year, url)
+
+
+def a(text, url):
+    return f'<a class="ev-ref" href="{html.escape(url)}">{text}</a>'
+
+
+def cite(text):
+    """Turn every 'Surname … (Year)', 'Surname et al., Year' and known phrase into a link to the study."""
+    taken = [m.span() for m in re.finditer(r"\[[^\]]*\]\([^)]*\)|<a .*?</a>", text)]
+    hits = []
+    for name, years in REFS.items():
+        n = re.escape(name)
+        pats = [rf"\b{n}\b(?:[^()\n\[\]*.;]|(?<=al)\.){{0,60}}?\([^()\n]*?(\d{{4}})[^()\n]*\)",     # Hunter et al. (2019)
+                rf"\b{n}\b(?: et al\.)?,? (\d{{4}})\b"]                              # (Nguyen et al., 2023)
+        if len(years) == 1:
+            pats.append(rf"\b{n}(?: et al\.)()")                                     # Sturm et al. found…
+        for pat in pats:
+            for m in re.finditer(pat, text):
+                url = years.get(m[1]) if m[1] else next(iter(years.values()))
+                if url:
+                    hits.append((m.start(), m.end(), url))
+    for phrase, url in PHRASE_LINKS:
+        i = text.find(phrase)
+        if i >= 0:
+            hits.append((i, i + len(phrase), url))
+    out, last = [], 0
+    for s, e, url in sorted(hits, key=lambda h: (h[0], -h[1])):
+        if s < last or any(s < te and e > ts for ts, te in taken):
+            continue
+        out += [text[last:s], a(text[s:e], url)]
+        last = e
+    return "".join(out) + text[last:]
+
+
+def link_refs(section):
+    """Give each reference that has no link one: '… 6(3), 134–147. [link](url)'."""
+    lines = []
+    for line in section.splitlines():
+        line = line.replace("*Curr*ent Biology", "*Current Biology*")
+        bare = re.search(r"\bdoi:(10\.\S+?)\.?$", line)
+        if bare and "](" not in line:
+            line = line[:bare.start()] + f"[doi:{bare[1]}](https://doi.org/{bare[1]})"
+        if re.match(r"[-*] ", line) and "](" not in line:
+            name = re.split(r",| \(", line[2:], maxsplit=1)[0].strip()
+            year = (re.search(r"\((\d{4})", line) or [None, ""])[1]
+            url = REFS.get(name, {}).get(year)
+            if url:
+                line += f" [{'doi' if 'doi.org' in url else 'online'}]({url})"
+        lines.append(line)
+    return "\n".join(lines)
+
+
 def entry(title, body, section):
     name, n, label = stars(title)
     # "**Study.** what it found **Use:** how to use it **Caveat:** the catch" -> labelled parts
+    body = cite(body)
     parts = re.split(r"\*\*(Use|Caveat):\*\*", body)
     main = md(parts[0])
     extra = ""
@@ -89,12 +194,17 @@ def build(src):
     text = re.sub(r"^# .*\n+(.*· @David\n+)?", "", text, count=1)          # the doc's title and byline
     intro, _, rest = text.partition("\n## ")
     sections = ("## " + rest).split("\n## ")
+    parse_refs(next(x for x in sections if x.lstrip("# ").startswith("References")))
     toc, out = [], []
     for raw in sections:
         raw = raw.lstrip("# ")
         head, _, body = raw.partition("\n")
         sid = slug(head)
+        if head.strip() == "References":
+            body = link_refs(body)
         lead, *entries = re.split(r"\n### ", "\n" + body)
+        if head.strip() != "References":
+            lead = cite(lead)
         cards = []
         for e in entries:
             t, _, b = e.partition("\n")
