@@ -35,7 +35,7 @@ os.chdir(ROOT)
 SITE = "https://davidcharles.info"
 SUBSTACK = "https://davidcharles.substack.com"
 GOATCOUNTER = "davidcharles"    # GoatCounter site code (davidcharles.goatcounter.com). Set to "" to switch stats off.
-CSS_VERSION = "35"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
+CSS_VERSION = "36"               # Bump when assets/site.css or site.js changes, so browsers fetch the new one.
 
 NEWSLETTER_DATA = "newsletter-archive/posts.json"
 BLOG_DATA = "blog-archive/index.json"
@@ -721,7 +721,7 @@ def build_home(issues, posts, extra="", minutes=None):
             + (extra or {}).get("otd", "") + '<div id="newsletter"></div>\n' + issue_list(issues[:HOME_ISSUES], minutes)
             + (f'<p class="more-issues"><a class="button secondary" href="/newsletter-archive/">Every issue ({len(issues)}) &rarr;</a></p>\n'
                if len(issues) > HOME_ISSUES else "")
-            + SUBSCRIBE_BOX + '<script src="/assets/lock.js?v=6" defer></script>')
+            + SUBSCRIBE_BOX + '<script src="/assets/lock.js?v=7" defer></script>')
     write_if_changed("index.html", page(
         "David Charles", "Writer and outdoor instructor. Read every issue of my newsletter, and the archive of my blog.",
         "/", body, "/"))

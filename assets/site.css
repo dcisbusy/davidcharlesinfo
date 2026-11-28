@@ -666,6 +666,22 @@ ul.ride-index { list-style: none; padding: 0; margin: 20px 0; display: grid; gap
 
 /* /evidence/: the Nature Evidence Library (private) */
 .ev-hero { min-height: 280px; }
+.ev-edit { font: 600 14px var(--ui); margin-left: auto; }
+.eve-head { margin: 24px 0 12px; }
+.eve-head h1 { margin: 0 0 4px; }
+.eve-bar { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 0; background: var(--bg); }
+.eve-bar select { padding: 9px 10px; font: 15px var(--ui); color: var(--ink); background: var(--soft); border: 1px solid var(--line, rgba(0,0,0,.15)); border-radius: 8px; max-width: 16em; }
+.eve-load { cursor: pointer; }
+.eve-msg { font: 14px var(--ui); color: var(--muted); }
+.eve-msg.ok { color: #2e7d32; }
+.eve-msg.bad { color: #c62828; }
+.eve-draft { font: 15px var(--ui); padding: 10px 12px; background: var(--soft); border-radius: 8px; }
+#eve-text { display: block; width: 100%; box-sizing: border-box; height: 72vh; min-height: 360px; padding: 14px; resize: vertical;
+  font: 15px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--ink); background: var(--soft);
+  border: 1px solid var(--line, rgba(0,0,0,.15)); border-radius: 8px; tab-size: 2; }
+.eve-help { margin: 16px 0 40px; font: 15px/1.6 var(--ui); }
+.eve-help summary { cursor: pointer; font-weight: 600; }
+.eve-help code { font-size: 13px; }
 .ev-hero p { max-width: 34em; }
 .ev-tools { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 -12px 20px;
   padding: 12px; background: var(--bg); border-bottom: 1px solid var(--line); font-family: var(--ui); }

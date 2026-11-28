@@ -1,10 +1,12 @@
-"""Turn the Nature Evidence Library (a Claude Doc, exported as Markdown) into David's private library page.
+"""Turn the Nature Evidence Library (Markdown) into David's private library page.
 
-    PAID_SUBSCRIBER_PASSWORD='…' python3 scripts/make_evidence.py "The Nature Evidence Library.md"
+    PAID_SUBSCRIBER_PASSWORD='…' python3 scripts/make_evidence.py                 # rebuild from the stored copy
+    PAID_SUBSCRIBER_PASSWORD='…' python3 scripts/make_evidence.py library.md      # replace the stored copy, then rebuild
 
-Writes evidence/library.locked: the library as HTML, locked with the paid subscribers' key (scripts/lock.py), so
-only David opens it while paid subscriptions are paused. The page around it (/evidence/) is build_evidence() in
-scripts/extras.py. The Markdown itself is never committed: the repository is public. Needs `pip install markdown`.
+The Markdown lives in the repository only locked (evidence/library.md.locked, paid key), because the repository is
+public. David edits it in his browser at /evidence/edit/, which locks and saves it; the "Evidence library" workflow
+then runs this script, which writes evidence/library.locked: the page's HTML, locked with the same key. The page
+around it (/evidence/) is build_evidence() in scripts/extras.py. Needs `pip install markdown cryptography`.
 """
 import html
 import os
@@ -223,12 +225,28 @@ def build(src):
             f'<div class="ev-main">{"".join(out)}</div></div>')
 
 
+SOURCE = "evidence/library.md.locked"
+
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) > 2:
         sys.exit(__doc__)
     lock.content_key(create=False, tier="paid")
-    page = build(sys.argv[1])
     os.makedirs("evidence", exist_ok=True)
+    if len(sys.argv) == 2:                     # a new copy of the Markdown: store it, locked
+        text = open(sys.argv[1], encoding="utf-8").read()
+        with open(SOURCE, "wb") as f:
+            f.write(lock.lock_bytes(text.encode("utf-8"), tier="paid"))
+        print(f"{SOURCE}: stored {len(text) // 1024} KB of Markdown, locked")
+    text = lock.unlock_bytes(open(SOURCE, "rb").read(), tier="paid").decode("utf-8")
+    tmp = os.path.join(os.environ.get("RUNNER_TEMP", "/tmp"), "evidence-library.md")
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(text)
+    try:
+        page = build(tmp)
+    finally:
+        os.remove(tmp)
     with open("evidence/library.locked", "wb") as f:
         f.write(lock.lock_bytes(page.encode("utf-8"), tier="paid"))
-    print(f"evidence/library.locked: {len(page) // 1024} KB of HTML, locked for the paid key")
+    n = page.count('class="ev-card"')
+    print(f"evidence/library.locked: {n} entries, {page.count('class=\"ev-ref\"')} study links, "
+          f"{len(page) // 1024} KB of HTML, locked for the paid key")

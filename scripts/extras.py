@@ -285,7 +285,7 @@ def build_map(stories):
 <link rel="stylesheet" href="/assets/leaflet/MarkerCluster.Default.css">
 <script src="/assets/leaflet/leaflet.js"></script>
 <script src="/assets/leaflet/leaflet.markercluster.js"></script>
-<script src="/assets/lock.js?v=6"></script>
+<script src="/assets/lock.js?v=7"></script>
 <script>
 DCLock.gate(document.getElementById('map-gate'), function(){{
   DCLock.open('/map/map-data.locked').then(function(buf){{
@@ -956,7 +956,7 @@ def build_rides():
 <div id="ride-list"></div>
 <link rel="stylesheet" href="/assets/leaflet/leaflet.css">
 <script src="/assets/leaflet/leaflet.js"></script>
-<script src="/assets/lock.js?v=6"></script>
+<script src="/assets/lock.js?v=7"></script>
 <script>
 DCLock.gate(document.getElementById('ride-gate'), function(){{
   DCLock.open('/rides/{esc(r["slug"])}/ride-data.locked').then(function(buf){{
@@ -1099,7 +1099,7 @@ def build_books(series_list):
                 + '</p></div></div>'
                 f'<aside class="newsletter-box"><h2>Liked it?</h2><p{st_attrs}>{st_text}</p><p><a class="button primary" '
                 'href="https://davidcharles.substack.com/subscribe">Subscribe free</a></p>' + TIP_LINE + '</aside>'
-                '<script src="/assets/lock.js?v=6" defer></script>')
+                '<script src="/assets/lock.js?v=7" defer></script>')
         book_schema = {"@context": "https://schema.org", "@type": "Book", "name": b["title"],
                        "alternativeHeadline": b["subtitle"], "description": b["description"],
                        "author": PERSON, "url": f"{SITE}/{d}/", "image": f"{SITE}/{d}/cover.jpg",
@@ -1138,7 +1138,7 @@ def build_books(series_list):
     write_if_changed("books/index.html", page("Books | David Charles",
                                               "Free ebooks by David Charles, made from his travel stories, "
                                               "plus his paperbacks and pay-what-you-like ebooks.",
-                                              "/books/", body + '<script src="/assets/lock.js?v=6" defer></script>'))
+                                              "/books/", body + '<script src="/assets/lock.js?v=7" defer></script>'))
     build_subscribers(books, load_paid_books())
 
 
@@ -1200,7 +1200,7 @@ def build_paid_books(st_text, st_attrs):
                 + (f' <a href="{esc(b["about"])}">More about the book</a>.' if b.get("about") else "") + '</p></div></div>'
                 f'<aside class="newsletter-box"><h2>Liked it?</h2><p{st_attrs}>{st_text}</p><p><a class="button primary" '
                 'href="https://davidcharles.substack.com/subscribe">Subscribe</a></p>' + TIP_LINE + '</aside>'
-                '<script src="/assets/lock.js?v=6" defer></script>')
+                '<script src="/assets/lock.js?v=7" defer></script>')
         write_if_changed(f"{d}/index.html", page(f'{b["title"]}: ebook for paid subscribers | David Charles', b["description"],
                                                  f"/{d}/", body, image=f"/{d}/cover.jpg"))
         cards.append(f'<li><a href="/{d}/"><img src="/{d}/cover-small.jpg" alt="" width="300" height="449" loading="lazy">'
@@ -1312,7 +1312,7 @@ def build_subscribers(books, paid_books=()):
 <ul class="sub-shelf">{paid_items}</ul>
 """ if paid_items else "") + f"""<h2 class="section">Maps</h2>
 <ul class="sh-doors sub-maps">{maps}</ul>
-<script src="/assets/lock.js?v=6"></script>
+<script src="/assets/lock.js?v=7"></script>
 <script>
 (function(){{
   var q = new URLSearchParams(location.search), next = q.get('next') || '';
@@ -1637,13 +1637,15 @@ in the wild. Every study rated, with how to use it and the catch.</p></div></hea
 <div class="ev-filter" role="group" aria-label="Strength of evidence">
 <button type="button" data-min="0" aria-pressed="true">All</button><button type="button" data-min="2" aria-pressed="false">★★ and up</button>
 <button type="button" data-min="3" aria-pressed="false">★★★ and up</button><button type="button" data-min="4" aria-pressed="false">★★★★</button></div>
-<span class="ev-count" id="ev-count" aria-live="polite"></span></div>
+<span class="ev-count" id="ev-count" aria-live="polite"></span>
+<a class="ev-edit" id="ev-edit" href="/evidence/edit/" hidden>Edit</a></div>
 <div id="ev-body"></div>
 </div>
-<script src="/assets/lock.js?v=6"></script>
+<script src="/assets/lock.js?v=7"></script>
 <script>
 (function(){
   var gate = document.getElementById('ev-gate');
+  try { if (localStorage.getItem('dc-edit-token')) document.getElementById('ev-edit').hidden = false; } catch (e) {}
   DCLock.gate(gate, function(){
     DCLock.open('/evidence/library.locked', 'paid').then(function(buf){
       document.getElementById('ev-body').innerHTML = new TextDecoder().decode(buf);
@@ -1703,6 +1705,44 @@ in the wild. Every study rated, with how to use it and the catch.</p></div></hea
     write_if_changed("evidence/index.html", page("The Nature Evidence Library | David Charles",
                                                  "What the research says about time in nature.", "/evidence/",
                                                  body, noindex=True))
+
+
+def build_evidence_edit():
+    """/evidence/edit/: David's editor for the evidence library (noindex, unlinked). Needs the paid password and his
+    site-editor GitHub token; assets/evidence-edit.js does the work. Saving starts the "Evidence library" workflow."""
+    if not os.path.exists("evidence/library.md.locked"):
+        return
+    body = """<header class="eve-head"><h1>Edit the Nature Evidence Library</h1>
+<p><a href="/evidence/">&larr; Back to the library</a></p></header>
+<div id="eve-gate" class="lock-gate" data-tier="paid" data-no-join data-title="Just for you"
+ data-text="Type the paid subscribers&rsquo; password to edit the library."></div>
+<div id="eve" hidden>
+<div class="eve-bar">
+<button type="button" class="button primary" id="eve-save" title="Save (Ctrl+S or &#8984;S)">Save</button>
+<select id="eve-jump" aria-label="Jump to a section"></select>
+<button type="button" class="button" id="eve-download">Download a copy</button>
+<label class="button eve-load">Load a Markdown file<input type="file" id="eve-file" accept=".md,.markdown,.txt,text/markdown,text/plain" hidden></label>
+<span id="eve-msg" class="eve-msg" role="status" aria-live="polite"></span>
+</div>
+<p id="eve-draft" class="eve-draft" hidden>You have unsaved changes from <span id="eve-draft-when"></span>.
+<button type="button" class="button" id="eve-draft-yes">Carry on with them</button> <button type="button" class="button" id="eve-draft-no">Throw them away</button></p>
+<textarea id="eve-text" spellcheck="true" lang="en-GB" aria-label="The library, in Markdown"></textarea>
+<details class="eve-help"><summary>How to lay it out</summary>
+<ul>
+<li><code>## Heading</code> starts a section. Text straight after it is the section&rsquo;s introduction.</li>
+<li><code>### Study name &mdash; &#9733;&#9733;&#9733;</code> starts a card. The stars set its strength rating (&#9733; to &#9733;&#9733;&#9733;&#9733;); leave them off for a card with no rating.</li>
+<li>In a card, <code>**Use:**</code> and <code>**Caveat:**</code> start the &ldquo;Use&rdquo; (with its Copy button) and &ldquo;Caveat&rdquo; boxes.</li>
+<li>Write citations as <code>Surname et al. (2019)</code> or <code>(Surname et al., 2019)</code>: they link to the matching entry under <code>## References</code>.</li>
+<li>A reference is one line: <code>- Surname, A. et al. (2019). Title. *Journal*. [doi](https://doi.org/&hellip;)</code></li>
+<li><code>**bold**</code>, <code>*italic*</code>, <code>[text](https://&hellip;)</code> and <code>- </code> lists work as usual.</li>
+<li>A source cited some other way (a report, a project) needs a link added by hand in <code>scripts/make_evidence.py</code> (<code>PHRASE_LINKS</code>), or just write the link in: <code>[Leeds research](https://&hellip;)</code>.</li>
+</ul></details>
+</div>
+<script src="/assets/lock.js?v=7"></script>
+<script src="/assets/evidence-edit.js?v=1"></script>"""
+    write_if_changed("evidence/edit/index.html", page("Edit the evidence library | David Charles",
+                                                      "Editor for the Nature Evidence Library.", "/evidence/edit/",
+                                                      body, noindex=True))
 
 
 def build_dashboard():
@@ -2021,6 +2061,7 @@ def build_pages(ctx, entries):
     build_editor_setup()
     build_dashboard()
     build_evidence()
+    build_evidence_edit()
     build_start_here(stories, entries, ctx["series"])
     search_records(stories, entries)
     print(f"Map: {sum(1 for s in stories if s.get('place'))} stories placed; photo wall: {n} photos; "

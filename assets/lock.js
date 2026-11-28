@@ -126,6 +126,23 @@
     });
   }
 
+  // Lock bytes with a tier's key, in the same format as scripts/lock.py (for David's editors). Rejects if this
+  // browser hasn't unlocked that tier.
+  function seal(bytes, tier) {
+    var t = TIERS[tier || "free"], raw = read(t.key);
+    return savedKey(tier || "free").then(function (have) {
+      if (!have || !raw) throw new Error("locked");
+      return crypto.subtle.importKey("raw", b64(raw), "AES-GCM", false, ["encrypt"]);
+    }).then(function (key) {
+      var iv = crypto.getRandomValues(new Uint8Array(12));
+      return crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, bytes).then(function (ct) {
+        var out = new Uint8Array(17 + ct.byteLength);
+        out.set(te.encode("DCLK1"), 0); out.set(iv, 5); out.set(new Uint8Array(ct), 17);
+        return out;
+      });
+    });
+  }
+
   function download(url, name, type, tier) {
     return open(url, tier).then(function (buf) {
       var a = document.createElement("a");
@@ -158,5 +175,5 @@
   });
 
   savedKey("free"); savedKey("paid");
-  window.DCLock = { gate: gate, open: open, download: download, forget: forget, unlock: unlock };
+  window.DCLock = { gate: gate, open: open, download: download, forget: forget, unlock: unlock, seal: seal };
 })();

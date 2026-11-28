@@ -6,7 +6,7 @@
 <title>The Nature Evidence Library | David Charles</title>
 <meta name="description" content="What the research says about time in nature.">
 <link rel="canonical" href="https://davidcharles.info/evidence/">
-<link rel="stylesheet" href="/assets/site.css?v=35">
+<link rel="stylesheet" href="/assets/site.css?v=36">
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
 <link rel="alternate" type="application/rss+xml" title="David Charles" href="https://davidcharles.info/feed.xml">
 <meta property="og:type" content="website">
@@ -31,13 +31,15 @@ in the wild. Every study rated, with how to use it and the catch.</p></div></hea
 <div class="ev-filter" role="group" aria-label="Strength of evidence">
 <button type="button" data-min="0" aria-pressed="true">All</button><button type="button" data-min="2" aria-pressed="false">★★ and up</button>
 <button type="button" data-min="3" aria-pressed="false">★★★ and up</button><button type="button" data-min="4" aria-pressed="false">★★★★</button></div>
-<span class="ev-count" id="ev-count" aria-live="polite"></span></div>
+<span class="ev-count" id="ev-count" aria-live="polite"></span>
+<a class="ev-edit" id="ev-edit" href="/evidence/edit/" hidden>Edit</a></div>
 <div id="ev-body"></div>
 </div>
-<script src="/assets/lock.js?v=6"></script>
+<script src="/assets/lock.js?v=7"></script>
 <script>
 (function(){
   var gate = document.getElementById('ev-gate');
+  try { if (localStorage.getItem('dc-edit-token')) document.getElementById('ev-edit').hidden = false; } catch (e) {}
   DCLock.gate(gate, function(){
     DCLock.open('/evidence/library.locked', 'paid').then(function(buf){
       document.getElementById('ev-body').innerHTML = new TextDecoder().decode(buf);
@@ -95,6 +97,6 @@ in the wild. Every study rated, with how to use it and the catch.</p></div></hea
 })();
 </script>
 </main>
-<script src="/assets/site.js?v=35" defer></script>
+<script src="/assets/site.js?v=36" defer></script>
 </body>
 </html>
